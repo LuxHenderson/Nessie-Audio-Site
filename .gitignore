@@ -1,0 +1,15 @@
+*.mp4
+*.mov
+*.wav
+*.zip
+*.psd
+*.ai
+*.blend
+*.avi
+*.mkv
+*.flac
+.DS_Store
+node_modules/
+dist/
+build/
+.next/

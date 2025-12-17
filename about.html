@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About — Nævermore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Nævermore - Ashes and Echoes - 003.jpg" type="image/jpeg">
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Three.js for atmospheric fog effect -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+</head>
+<body>
+  <!-- Three.js fog effect canvas container (background layer) -->
+  <div id="fog-canvas-container"></div>
+  
+  <!-- Shared header (copied from main file for simplicity) -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <div class="brand"><a href="Nævermore.html" class="logo">Nævermore</a></div>
+      <div class="search-wrap"><input id="site-search" class="site-search" type="search" placeholder="Search site..." aria-label="Search site"></div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul>
+          <li><a href="Nævermore.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="merch.html">Merch</a></li>
+          <li><a href="tour.html">Tour</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <ul>
+        <li><a href="Nævermore.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="merch.html">Merch</a></li>
+        <li><a href="tour.html">Tour</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="home-content container">
+      <div class="show-promo-row">
+        <!-- About content -->
+        <section class="about">
+          <h2>- About</h2>
+          <p class="lead">Nævermore is a modern Hard Rock/Metal band born in the heart of Central Illinois. 
+          Forged from diverse backgrounds but driven by the same relentless passion, we create music built for the stage—heavy, melodic, and unapologetically alive.
+          What started as a shared love for live performance has evolved into a powerful collaboration defined by raw energy, emotional intensity, and musicianship that refuses to sit still. 
+          Whether it's the studio or the stage, Nævermore is here to push harder, play louder, and connect deeper...<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...This is just the beginning.</br></p>
+          <div class="members-grid">
+            <article class="member">
+              <img src="https://via.placeholder.com/240x240?text=Member+1" alt="Member 1 photo">
+              <h3>Aria Night</h3>
+              <p class="role">Vocals / Lyrics</p>
+            </article>cle>
+            <article class="member">
+              <img src="https://via.placeholder.com/240x240?text=Member+2" alt="Member 2 photo">
+              <h3>Rex Stone</h3>
+              <p class="role">Guitar</p>
+            </article>cle>
+            <article class="member">
+              <img src="https://via.placeholder.com/240x240?text=Member+3" alt="Member 3 photo">
+              <h3>Milo Shade</h3>
+              <p class="role">Drums</p>
+            </article>
+          </div>
+          <div class="fun-facts mt-2">
+            <h2>- Fun facts & influences</h2>
+            <ul>
+              <li><strong>Influence: Classic alt-rock + synth textures</strong></li>
+              <li><strong>Started gigging in 2018</strong></li>
+              <li><strong>Favorite venue: The Old Theatre</strong></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <small>© <span id="year">2025</span> Nævermore. All rights reserved.</small>
+      <div class="footer-controls"><button id="theme-toggle" class="btn small" aria-pressed="false">Dark Mode</button></div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+  <script src="fogEffect.js" defer></script>
+</body>
+</html>

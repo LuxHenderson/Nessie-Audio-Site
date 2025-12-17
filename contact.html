@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact — Nævermore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Nævermore - Ashes and Echoes - 003.jpg" type="image/jpeg">
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Three.js for atmospheric fog effect -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+</head>
+<body>
+  <!-- Three.js fog effect canvas container (background layer) -->
+  <div id="fog-canvas-container"></div>
+  
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <div class="brand"><a href="Nævermore.html" class="logo">Nævermore</a></div>
+      <div class="search-wrap"><input id="site-search" class="site-search" type="search" placeholder="Search site..." aria-label="Search site"></div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul>
+          <li><a href="Nævermore.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="merch.html">Merch</a></li>
+          <li><a href="tour.html">Tour</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <ul>
+        <li><a href="Nævermore.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="merch.html">Merch</a></li>
+        <li><a href="tour.html">Tour</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="home-content container">
+      <div class="show-promo-row">
+        <!-- Contact content -->
+        <section class="contact">
+          <h1>Contact</h1>
+          <p class="lead">For bookings or press, use the form below or email <a href="mailto:booking@nevermore.example">booking@nevermore.example</a>.</p>
+          <form id="contact-form" class="contact-form" novalidate>
+            <label><span><strong>Name</strong></span><input type="text" name="name" required placeholder="Your name"></label>
+            <label><span><strong>Email</strong></span><input type="email" name="email" required placeholder="you@example.com"></label>
+            <label><span><strong>Message</strong></span><textarea name="message" rows="5" required placeholder="Message"></textarea></label>
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Send</button>
+              <button type="reset" class="btn outline">Reset</button>
+            </div>
+            <p id="form-msg" class="form-msg" aria-live="polite"></p>
+          </form>
+          <div class="socials mt-2">
+            <h2>- Follow Us</h2>
+            <a href="#" aria-label="Instagram"><strong>Instagram</strong></a>
+            <a href="#" aria-label="Facebook"><strong>Facebook</strong></a>
+            <a href="#" aria-label="YouTube"><strong>YouTube</strong></a>
+            <a href="#" aria-label="TikTok"><strong>TikTok</strong></a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <small>© <span id="year">2025</span> Nævermore. All rights reserved.</small>
+      <div class="footer-controls"><button id="theme-toggle" class="btn small" aria-pressed="false">Dark Mode</button></div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+  <script src="fogEffect.js" defer></script>
+</body>
+</html>

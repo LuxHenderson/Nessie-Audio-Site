@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tour — Nævermore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Nævermore - Ashes and Echoes - 003.jpg" type="image/jpeg">
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Three.js for atmospheric fog effect -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+</head>
+<body>
+  <!-- Three.js fog effect canvas container (background layer) -->
+  <div id="fog-canvas-container"></div>
+  
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <div class="brand"><a href="Nævermore.html" class="logo">Nævermore</a></div>
+      <div class="search-wrap"><input id="site-search" class="site-search" type="search" placeholder="Search site..." aria-label="Search site"></div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul>
+          <li><a href="Nævermore.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="merch.html">Merch</a></li>
+          <li><a href="tour.html">Tour</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <ul>
+        <li><a href="Nævermore.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="merch.html">Merch</a></li>
+        <li><a href="tour.html">Tour</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="home-content container">
+      <div class="show-promo-row">
+        <!-- Tour content -->
+        <section class="tour">
+          <h1>Tour</h1>
+          <p class="lead">Upcoming shows — replace these with real dates and ticket links.</p>
+          <ul class="events-list">
+            <li>
+              <time datetime="2025-12-12"><strong>Dec 12, 2025</strong></time>
+              <strong>— The Rusty Stage</strong> — Portland, OR
+              <a class="btn small" href="#">Tickets</a>
+            </li>
+            <li>
+              <time datetime="2026-01-08"><strong>Jan 8, 2026</strong></time>
+              <strong>— Ocean Hall</strong> — Seattle, WA
+              <a class="btn small" href="#">Tickets</a>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <small>© <span id="year">2025</span> Nævermore. All rights reserved.</small>
+      <div class="footer-controls"><button id="theme-toggle" class="btn small" aria-pressed="false">Dark Mode</button></div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+  <script src="fogEffect.js" defer></script>
+</body>
+</html>

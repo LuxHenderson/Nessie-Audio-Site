@@ -1,0 +1,238 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <!-- Meta data tag that allows all characters and symbols to be used on site. -->
+  <meta charset="utf-8">
+  
+  <!-- This tag controls how the website is displayed on mobile devices. -->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  
+  <!-- Browser tab name -->
+  <title>Nævermore — Official</title>
+
+  <!-- This line is the websites font -->
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for social media icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+ 
+  <!-- Link to external CSS stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Nævermore - Ashes and Echoes - 003.jpg" type="image/jpeg">
+ 
+  <!-- Helpful meta for theming and color-scheme -->
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Three.js for atmospheric fog effect -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+</head>
+
+<body class="page-home">
+  <!-- Three.js fog effect canvas container (background layer) -->
+  <div id="fog-canvas-container"></div>
+  
+  <!-- Main structure: header (sticky nav) -> sections -> footer.
+    Comments throughout show where to change content quickly. -->
+
+  <!-- Sticky header / navigation -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      
+      <!-- Band logo / name: change text or replace with an <img> -->
+      <div class="brand">
+        <!-- Link to home page file. This is the "Nævermore" at the top of the page. It'll take you to the home page when clicked.  -->
+        <a href="Nævermore.html" class="logo">Nævermore</a>
+      </div>
+
+      <!-- Search (sticky optional) -->
+      <div class="search-wrap">
+        <input id="site-search" class="site-search" type="search" placeholder="Search site..." aria-label="Search site">
+      </div>
+
+      <!-- Desktop nav links -->
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul>
+          <li><a href="Nævermore.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="merch.html">Merch</a></li>
+          <li><a href="tour.html">Tour</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+
+      
+
+      <!-- Mobile menu toggle -->
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
+
+    <!-- Mobile menu panel (kept simple to edit) -->
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <ul>
+        <li><a href="Nævermore.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="merch.html">Merch</a></li>
+        <li><a href="tour.html">Tour</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="mobile-socials">
+        <!-- Replace hrefs with real social links -->
+        <a href="https://www.instagram.com/naevermoreofficial/?igsh=amt4djV3aXJwa3I3&utm_source=qr" aria-label="Instagram">IG</a>
+        <a href="https://www.facebook.com/profile.php?id=61583164087020" aria-label="Facebook">FB</a>
+        <a href="https://www.youtube.com/@ortuslux" aria-label="YouTube">YT</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero / Banner section -->
+  <main>
+    <!-- The hero section has been removed in favor of a full-page background image.
+         Keep an empty anchor element with id="home" so internal links still work. -->
+    <section id="home" aria-hidden="true"></section>
+    <!-- Home simplified content: short intro, next-show teaser, promo image, social bar -->
+    <section class="home-content container">
+      <!-- Brief band intro: edit the text below for a 2-3 sentence hook -->
+      <div class="intro" id="home-intro">
+        <!-- Keep this short and engaging; easy to edit here -->
+        <p id="home-intro-text" class="lead">
+        </p>
+      </div>
+
+       <!-- Show + Promo Box: Upcoming shows, adjustable promo gallery, and News
+         Everything inside `.show-promo-row` sits in a styled container box
+         whose color/opacity/size are controlled via CSS variables. -->
+      <div class="show-promo-row">
+        <aside class="next-show" aria-label="Next show teaser">
+          <!-- Change these values to show the next scheduled date and venue -->
+          <h2>- Upcoming Shows</h2>
+          
+          <!-- Show 1: Chester Street Bar -->
+          <div class="show-item">
+            <div class="show-info">
+              <p><time datetime="2025-12-12"><strong>Dec 12, 2025</strong></time> — <strong>Chester Street Bar</strong>, Champaign, IL</p>
+            </div>
+            <div class="show-image">
+              <img src="C Street.jpg" alt="Chester Street Bar">
+            </div>
+          </div>
+          
+          <!-- Show 2: The Canopy Club -->
+          <div class="show-item">
+            <div class="show-info">
+              <p><time datetime="2025-12-15"><strong>Dec 15, 2025</strong></time> — <strong>The Canopy Club</strong>, Champaign, IL</p>
+            </div>
+            <div class="show-image">
+              <img src="The Canopy.jpg" alt="The Canopy Club">
+            </div>
+          </div>
+          
+          <!-- Show 3: Memphis on Main -->
+          <div class="show-item">
+            <div class="show-info">
+              <p><time datetime="2025-12-18"><strong>Dec 18, 2025</strong></time> — <strong>Memphis on Main</strong>, Champaign, IL</p>
+            </div>
+            <div class="show-image">
+              <img src="Memphis on Main.jpg" alt="Memphis on Main">
+            </div>
+          </div>
+        </aside>
+
+        <!-- News section: add important updates here.
+             This section sits below the promo gallery within the .show-promo-row box.
+             Gap can be adjusted via .news-section's margin-top in style.css. -->
+        <aside class="news-section" aria-label="Latest news">
+          <h2>- News</h2>
+          <!-- News list: add/edit <li> entries with <strong> date and text -->
+          <ul class="news-list">
+            <li><strong>Jan 1, 2026: New EP "Ashes and Echoes" drops on all streaming platforms!</strong></li>
+            <li><strong>Jan 15, 2026: Tour dates announced for Summer 2026.</strong></li><br><br><br><br>
+          </ul>
+        </aside>
+        
+          <!-- Box Socials: quick links to social profiles within the show/promo box -->
+          <aside class="box-socials" aria-label="Social media links">
+            <h2>- Follow Us</h2>
+            <ul class="social-list">
+              <li><a href="https://www.instagram.com/naevermoreofficial/?igsh=amt4djV3aXJwa3I3&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <i class="fab fa-instagram"></i>
+              </a></li>
+              <li><a href="https://www.facebook.com/profile.php?id=61583164087020" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <i class="fab fa-facebook"></i>
+              </a></li>
+              <li><a href="https://www.youtube.com/@ortuslux" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <i class="fab fa-youtube"></i>
+              </a></li>
+              <li><a href="#" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                <i class="fab fa-tiktok"></i>
+              </a></li><br><br><br><br>
+            </ul>
+          </aside>
+
+          <!-- Box Booking: functional booking inquiry form via Formspree -->
+          <aside class="box-booking" aria-label="Booking inquiries">
+            <h2>- Booking</h2>
+            <form class="booking-form" action="https://formspree.io/f/manggkab" method="POST">
+              <div class="form-row">
+                <label for="bk-name"><strong>Name</strong></label>
+                <input type="text" id="bk-name" name="name" placeholder="Your name" required>
+              </div>
+              <div class="form-row">
+                <label for="bk-email"><strong>Email</strong></label>
+                <input type="email" id="bk-email" name="_replyto" placeholder="you@example.com" required>
+              </div>
+              <div class="form-row">
+                <label for="bk-date"><strong>Event Date</strong></label>
+                <input type="date" id="bk-date" name="date" required>
+              </div>
+              <div class="form-row">
+                <label for="bk-venue"><strong>Venue</strong></label>
+                <input type="text" id="bk-venue" name="venue" placeholder="Venue / Location" required>
+              </div>
+              <div class="form-row">
+                <label for="bk-message"><strong>Message</strong></label>
+                <textarea id="bk-message" name="message" rows="4" placeholder="Tell us about your event..." required></textarea>
+              </div>
+              <input type="hidden" name="_subject" value="New Booking Request from Nævermore Website">
+              <div class="form-actions">
+                <button type="submit" class="btn">Send Booking Request</button>
+              </div>
+            </form>
+          </aside>
+      </div>
+      
+       <!-- Video title: edit the <strong> text below to set the video title shown above the player -->
+         <!-- Video moved to the Music page -->
+
+      
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <small>© <span id="year">2025</span> Nævermore. All rights reserved.</small>
+      <div class="footer-controls">
+        <!-- Dark mode toggle (JS handles state) -->
+        <button id="theme-toggle" class="btn small" aria-pressed="false">Dark Mode</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll hint arrow: encourages users to scroll down -->
+  <div class="scroll-down-arrow" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 16l-5-5h10l-5 5z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <!-- Link to external JS; put at end of body for performance -->
+  <script src="script.js" defer></script>
+  <script src="fogEffect.js" defer></script>
+</body>
+</html>

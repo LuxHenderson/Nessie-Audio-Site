@@ -9,7 +9,7 @@
 :root {
   /* Color system */
   --bg: #ffffff25; /* neutral light gray */
-  --page-backdrop: #000000; /* layer under background image to fill letterbox areas */
+  --page-backdrop: #020202; /* layer under background image to fill letterbox areas */
   --panel: #ffffff25; /* card / panel background */
   --text: #ffffff; /* primary text */
   --muted: #ffffff; /* secondary text */
@@ -143,11 +143,13 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('Nævermore - Ashes and Echoes - 003.jpg');
+  background-image: url('Nessie Audio 2026.jpg');
   background-color: var(--page-backdrop, #000);
   background-size: contain;
-  background-position: center center;
+  background-position: 48.5% center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
+  transform: translateY(75px);
   z-index: -2; /* Behind fog effect */
   pointer-events: none;
 }

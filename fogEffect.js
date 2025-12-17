@@ -13,13 +13,13 @@
 
   // Configuration
   const config = {
-    fogColor: 0x0a0a0f,
+    fogColor: 0x303040,
     fogNear: 1,
     fogFar: 15,
-    initialFogDensity: 0.05, // Start slightly visible instead of 0
-    targetFogDensity: 0.15,
+    initialFogDensity: 0.08, // Start slightly visible instead of 0
+    targetFogDensity: 0.2,
     fadeInDuration: 1500, // Slightly faster fade-in
-    lightIntensity: 0.8,
+    lightIntensity: 1.2,
     particleCount: 800, // More particles for fog-like appearance
     animationSpeed: 0.0003
   };

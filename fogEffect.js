@@ -16,9 +16,9 @@
     fogColor: 0x0a0a0f,
     fogNear: 1,
     fogFar: 15,
-    initialFogDensity: 0,
+    initialFogDensity: 0.05, // Start slightly visible instead of 0
     targetFogDensity: 0.15,
-    fadeInDuration: 2500, // ms
+    fadeInDuration: 1500, // Slightly faster fade-in
     lightIntensity: 0.8,
     particleCount: 800, // More particles for fog-like appearance
     animationSpeed: 0.0003
@@ -37,50 +37,54 @@
       return;
     }
 
-    // Scene setup
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(config.fogColor, fogDensity);
+    try {
+      // Scene setup
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(config.fogColor, fogDensity);
 
-    // Camera setup - wide FOV for immersive feel
-    camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    camera.position.z = 5;
+      // Camera setup - wide FOV for immersive feel
+      camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 5;
 
-    // Renderer setup
-    renderer = new THREE.WebGLRenderer({ 
-      alpha: true, 
-      antialias: false, // Disable for performance
-      powerPreference: 'low-power' // Prefer low GPU usage
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap pixel ratio for performance
-    container.appendChild(renderer.domElement);
+      // Renderer setup
+      renderer = new THREE.WebGLRenderer({ 
+        alpha: true, 
+        antialias: false, // Disable for performance
+        powerPreference: 'low-power' // Prefer low GPU usage
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap pixel ratio for performance
+      container.appendChild(renderer.domElement);
 
-    // Create atmospheric particles/fog elements
-    createFogParticles();
+      // Create atmospheric particles/fog elements
+      createFogParticles();
 
-    // Add subtle ambient light
-    const ambientLight = new THREE.AmbientLight(0x404050, 0);
-    scene.add(ambientLight);
-    
-    // Add directional light for depth
-    const directionalLight = new THREE.DirectionalLight(0x8888aa, 0);
-    directionalLight.position.set(0, 1, 0.5);
-    scene.add(directionalLight);
+      // Add subtle ambient light
+      const ambientLight = new THREE.AmbientLight(0x404050, 0);
+      scene.add(ambientLight);
+      
+      // Add directional light for depth
+      const directionalLight = new THREE.DirectionalLight(0x8888aa, 0);
+      directionalLight.position.set(0, 1, 0.5);
+      scene.add(directionalLight);
 
-    // Store lights for animation
-    scene.userData.ambientLight = ambientLight;
-    scene.userData.directionalLight = directionalLight;
+      // Store lights for animation
+      scene.userData.ambientLight = ambientLight;
+      scene.userData.directionalLight = directionalLight;
 
-    // Window resize handler
-    window.addEventListener('resize', onWindowResize, false);
+      // Window resize handler
+      window.addEventListener('resize', onWindowResize, false);
 
-    // Start animation loop
-    animate();
+      // Start animation loop
+      animate();
+    } catch (error) {
+      console.error('Error initializing fog effect:', error);
+    }
   }
 
   // Create fog particles for volumetric effect

@@ -21,9 +21,9 @@
   --gutter: 1rem;
   --radius: 8px;
 
-  /* Typography (Cinzel replaces paid Trajan) */
-  --font-sans: 'Cinzel', 'Georgia', serif;
-  --font-display: 'Cinzel', 'Georgia', serif;
+  /* Typography (Montserrat across the site) */
+  --font-sans: 'Montserrat', sans-serif;
+  --font-display: 'Montserrat', sans-serif;
     --promo-max-width: 720px; /* Max width for the promo image in the show-promo row */
     /* Promo positioning helpers: change these variables to nudge the promo image
       around without editing the layout rules. Values accept CSS length units. */
@@ -42,7 +42,7 @@
       --video-title-translate-y: 0px;
     --video-max-width: 1100px; /* max width for embedded video */
     /* Show-promo box styling: adjust these to change the container box */
-    --show-promo-box-bg: linear-gradient(180deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.25)); /* gold gradient */
+    --show-promo-box-bg: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(64, 64, 64, 0.5)); /* black to gray gradient */
     --show-promo-box-padding: 32px; /* inner spacing - fixed pixels */
     --show-promo-box-radius: 12px; /* corner rounding */
     --show-promo-box-max-width: 1000px; /* max width of the box */
@@ -171,15 +171,15 @@ body{
   text-rendering: optimizeLegibility;
   font-feature-settings: normal;
   font-variation-settings: normal;
-  /* Custom cursor with gold outline */
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l14 9-6 1-2 6z" fill="black" stroke="%23d4af37" stroke-width="1.5"/></svg>') 0 0, auto;
+  /* Custom cursor with gray/silver outline */
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l14 9-6 1-2 6z" fill="black" stroke="%23c0c0c0" stroke-width="1.5"/></svg>') 0 0, auto;
 }
 
-/* Hover cursor - brighter gold outline for clickable elements */
+/* Hover cursor - brighter silver outline for clickable elements */
 a, button, input[type="submit"], input[type="button"], input[type="reset"], 
 .btn, .thumb, .menu-toggle, [role="button"], 
 select, input[type="checkbox"], input[type="radio"] {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l14 9-6 1-2 6z" fill="black" stroke="%23d4af37" stroke-width="2.5"/></svg>') 0 0, auto;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l14 9-6 1-2 6z" fill="black" stroke="%23ffffff" stroke-width="2.5"/></svg>') 0 0, auto;
 }
 
 /* Utility container used to center page content */
@@ -197,12 +197,12 @@ select, input[type="checkbox"], input[type="radio"] {
   top:8px;
   z-index:1100;
   backdrop-filter: blur(-6px);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), lab(79.6% 8.78 52.34 / 0.24));
-  border-bottom:1px solid rgba(0,0,0,0.06);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(64, 64, 64, 0.5));
+  border-bottom:1px solid rgba(192, 192, 192, 0.3);
   width: 100%;
   box-sizing: border-box;
 }
-:root[data-theme="dark"] .site-header{ background: rgba(16,16,18,0.6); border-bottom:1px solid rgba(255,255,255,0.04);} 
+:root[data-theme="dark"] .site-header{ background: rgba(16,16,18,0.6); border-bottom:1px solid rgba(192, 192, 192, 0.2);} 
 
 .header-inner{
   display:flex;
@@ -215,11 +215,11 @@ select, input[type="checkbox"], input[type="radio"] {
   overflow: visible; /* Allow dropdown to extend beyond header */
 }
 .brand .logo{
-  font-family:var(--font-display);
+  font-family:'Montserrat', sans-serif;
   font-weight:700;
   letter-spacing:0.05em; /* Slightly wider for Roman capitals */
   font-size:30px; /* Fixed size for consistency across all browsers */
-  color:#d4af37;
+  color:#ffffff;
   text-decoration:none;
   white-space: nowrap; /* Prevent logo from wrapping */
   line-height: 1;
@@ -242,7 +242,7 @@ select, input[type="checkbox"], input[type="radio"] {
   margin-left: auto; /* Push nav to the right */
 }
 .main-nav a{
-  color:#d4af37;
+  color:#c0c0c0;
   text-decoration:none;
   padding:6px 10px; /* Fixed pixels */
   border-radius:6px;
@@ -250,7 +250,7 @@ select, input[type="checkbox"], input[type="radio"] {
   white-space: nowrap;
   line-height: 1;
 }
-.main-nav a:hover{background:rgb(70, 70, 70)}
+.main-nav a:hover{background:rgba(192, 192, 192, 0.2); color:#ffffff;}
 
 .menu-toggle{display:none;background:none;border:1px solid rgba(0,0,0,0.06);padding:0.4rem 0.6rem;border-radius:6px}
 
@@ -327,14 +327,14 @@ select, input[type="checkbox"], input[type="radio"] {
 }
 .search-result-item:last-child{ border-bottom: none; }
 .search-result-item:hover{
-  background: rgba(212,175,55,0.15);
+  background: rgba(192,192,192,0.15);
 }
 :root[data-theme="dark"] .search-result-item{
   border-bottom-color: rgba(255,255,255,0.06);
 }
 .result-section{
   font-size: 0.75rem;
-  color: #d4af37;
+  color: #c0c0c0;
   font-weight: 600;
   margin-bottom: 0.25rem;
   text-transform: uppercase;
@@ -422,11 +422,11 @@ section{padding:3rem 0}
   max-width: var(--show-promo-box-max-width);
   margin-left: auto;
   margin-right: auto;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(192, 192, 192, 0.3);
 }
 :root[data-theme="dark"] .show-promo-row{
   background: rgba(16,16,18,0.6);
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(192, 192, 192, 0.2);
 }
 
 /* Homepage-specific: push box down to reveal album art background */
@@ -588,6 +588,7 @@ section{padding:3rem 0}
   padding: 0;
   margin: 0 auto;
   max-width: 70ch;
+  text-align: center;
 }
 .news-list li{
   padding: 0.5rem 0;
@@ -622,22 +623,22 @@ section{padding:3rem 0}
   padding: 0;
   border-radius: 50%;
   text-decoration: none;
-  color: #d4af37; /* Gold color */
+  color: #c0c0c0; /* Gray/silver color */
   background: #000000; /* Black background */
-  border: 2px solid #d4af37; /* Gold border */
+  border: 2px solid #c0c0c0; /* Gray/silver border */
   transition: transform 150ms ease, background-color 150ms ease, color 150ms ease;
   font-size: 1.5rem;
 }
 :root[data-theme="dark"] .show-promo-row .social-list a{
   background: #000000;
-  color: #d4af37;
-  border-color: #d4af37;
+  color: #c0c0c0;
+  border-color: #c0c0c0;
 }
 .show-promo-row .social-list a:hover{
   transform: translateY(-2px) scale(1.08);
-  background: #d4af37; /* Gold background on hover */
+  background: #c0c0c0; /* Gray/silver background on hover */
   color: #000000; /* Black icon on hover */
-  border-color: #d4af37;
+  border-color: #c0c0c0;
 }
 
 /* Booking section inside the show/promo box */
@@ -689,7 +690,7 @@ section{padding:3rem 0}
   width: 75px;
   height: 75px;
   opacity: 0.85;
-  color: #d4af37; /* match nav bar gold */
+  color: #c0c0c0; /* gray/silver to match theme */
   z-index: 5;
   pointer-events: none; /* don't block clicks */
   animation: arrowPulse 1.8s ease-in-out infinite;
@@ -865,13 +866,13 @@ section{padding:3rem 0}
 .site-footer{
   padding:1.25rem 0;
   backdrop-filter: blur(-6px);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), lab(79.6% 8.78 52.34 / 0.24));
-  border-top:1px solid rgba(0,0,0,0.06);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(64, 64, 64, 0.5));
+  border-top:1px solid rgba(192, 192, 192, 0.3);
   margin-top: auto;
 }
 :root[data-theme="dark"] .site-footer{
   background: rgba(16,16,18,0.6);
-  border-top:1px solid rgba(255,255,255,0.04);
+  border-top:1px solid rgba(192, 192, 192, 0.2);
 }
 .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 

@@ -167,17 +167,14 @@
   if(search){
     // Site-wide content map for search
     const siteContent = [
-      { page: 'Nævermore.html', section: 'Home', keywords: 'home landing main page nævermore band' },
-      { page: 'Nævermore.html', section: '- Upcoming Shows', keywords: 'upcoming shows concerts tour dates events gigs performances chester street canopy club memphis main' },
-      { page: 'Nævermore.html', section: '- News', keywords: 'news updates announcements latest ashes echoes ep album release tour dates spring 2026' },
-      { page: 'Nævermore.html', section: '- Follow Us', keywords: 'follow social media instagram facebook youtube tiktok' },
-      { page: 'Nævermore.html', section: '- Booking', keywords: 'booking book us hire contact event venue date message inquiry request' },
-      { page: 'about.html', section: 'About', keywords: 'about band members biography history story bio' },
-      { page: 'music.html', section: 'Music', keywords: 'music songs tracks albums eps discography listen audio video ortus lux' },
-      { page: 'merch.html', section: 'Merch', keywords: 'merch merchandise store shop buy clothing shirts apparel' },
-      { page: 'tour.html', section: 'Tour', keywords: 'tour dates concerts shows schedule calendar tickets' },
-      { page: 'gallery.html', section: 'Gallery', keywords: 'gallery photos pictures images media press' },
-      { page: 'contact.html', section: 'Contact', keywords: 'contact email message reach us get in touch' }
+      { page: 'Nævermore.html', section: 'Home', keywords: 'home landing main page nessie audio' },
+      { page: 'Nævermore.html', section: 'Welcome to Nessie Audio', keywords: 'welcome about professional audio production services music recording mixing mastering' },
+      { page: 'Nævermore.html', section: 'News', keywords: 'news updates announcements latest' },
+      { page: 'Nævermore.html', section: 'Follow Us', keywords: 'follow social media instagram facebook youtube tiktok' },
+      { page: 'Nævermore.html', section: 'Get in Touch', keywords: 'booking contact hire message inquiry request audio production project deadline' },
+      { page: 'music.html', section: 'Portfolio', keywords: 'portfolio music audio songs tracks production work catalogue bluegrass classical cinematic contemporary country edm indie metal punk rap rock' },
+      { page: 'merch.html', section: 'Merch', keywords: 'merch merchandise store shop buy products' },
+      { page: 'nessie-digital.html', section: 'Nessie Digital', keywords: 'nessie digital services' }
     ];
 
     // Create dropdown container
@@ -271,7 +268,7 @@
             if(result.isCurrentPage){
               // Scroll to element on current page
               result.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              result.element.style.backgroundColor = 'rgba(212, 175, 55, 0.2)';
+              result.element.style.backgroundColor = 'rgba(192, 192, 192, 0.3)';
               setTimeout(()=> result.element.style.backgroundColor = '', 2000);
             } else {
               // Navigate to different page

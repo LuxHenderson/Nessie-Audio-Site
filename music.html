@@ -23,12 +23,9 @@
       <nav class="main-nav" aria-label="Main navigation">
         <ul>
           <li><a href="Nævermore.html">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="music.html">Music</a></li>
+          <li><a href="music.html">Portfolio</a></li>
           <li><a href="merch.html">Merch</a></li>
-          <li><a href="tour.html">Tour</a></li>
-          <li><a href="gallery.html">Gallery</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="nessie-digital.html">Nessie Digital</a></li>
         </ul>
       </nav>
       <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
@@ -36,12 +33,9 @@
     <div id="mobile-menu" class="mobile-menu" hidden>
       <ul>
         <li><a href="Nævermore.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="music.html">Music</a></li>
+        <li><a href="music.html">Portfolio</a></li>
         <li><a href="merch.html">Merch</a></li>
-        <li><a href="tour.html">Tour</a></li>
-        <li><a href="gallery.html">Gallery</a></li>
-        <li><a href="contact.html">Contact</a></li>
+        <li><a href="nessie-digital.html">Nessie Digital</a></li>
       </ul>
     </div>
   </header>
@@ -49,37 +43,461 @@
   <main>
     <section class="home-content container">
       <div class="show-promo-row">
-        <!-- Music content -->
+        <!-- Audio Portfolio content -->
         <section class="music">
-          <h1>Music</h1>
-          <p class="lead">Latest release and links to major streaming platforms.</p>
-          <div class="release">
-            <img class="album-art" src="https://via.placeholder.com/280x280?text=Album+Art" alt="Latest release art">
-            <div class="release-info">
-              <h2>- Latest EP — "Midnight Echoes"</h2>
-              <p><strong>Release date: 2025-10-01</strong></p>
-              <div class="stream-links">
-                <a class="btn" href="#">Spotify</a>
-                <a class="btn" href="#">Apple Music</a>
-                <a class="btn" href="#">Bandcamp</a>
+          <h2>- Audio Portfolio</h2><br>
+          <p class="lead">A collection of audio production work spanning multiple genres and artists, crafted with care and attention to detail.</p>
+          
+          <!-- Audio Player Section -->
+          <div class="audio-player-section" style="margin: 3rem 0 4rem 0; padding: 3rem 2rem; background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid rgba(192,192,192,0.25);">
+            <div class="now-playing" style="margin-bottom: 2rem;">
+              <div style="font-size: 0.75rem; color: #c0c0c0; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.5rem; font-weight: 400;">Now Playing</div>
+              <div id="track-info" style="color: #ffffff;">
+                <h2 id="track-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; line-height: 1.1; margin: 0 0 0.75rem 0; letter-spacing: -0.02em; transition: opacity 0.3s ease;"></h2>
+                <div id="track-meta" style="font-size: clamp(1rem, 2.5vw, 1.25rem); color: #c0c0c0; font-weight: 300; letter-spacing: 0.02em; transition: opacity 0.3s ease;"></div>
               </div>
             </div>
-          </div>
-          <!-- Video title and player moved here from the home page -->
-          <h2 class="video-title"><strong id="video-title">Nævermore - YouTube Embed Test</strong></h2>
-          <section class="video-section container" aria-label="Promo video">
-            <div class="video-wrap-youtube">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://www.youtube.com/embed/hY7m5jjJ9mM" 
-                title="Ortus Lux — Music Video Edit 002" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen>
-              </iframe>
+            
+            <!-- Waveform Visualization -->
+            <div id="waveform" style="width: 100%; height: 60px; margin: 2rem 0 1.5rem 0; display: none; opacity: 0; transition: opacity 0.5s ease;">
+              <svg id="waveform-svg" width="100%" height="60" style="display: block;">
+                <!-- Waveform bars will be generated here -->
+              </svg>
             </div>
-          </section>
+            
+            <!-- Single HTML5 Audio Player -->
+            <audio id="main-player" controls controlsList="nodownload noplaybackrate" preload="none" style="width: 100%;">
+              <source id="audio-source" src="" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+
+          <!-- Track Catalogue by Genre -->
+          <div class="track-catalogue" style="margin-top: 2rem;">
+            <h2>- Track Catalogue</h2><br>
+            <p style="margin-bottom: 1.5rem;">Click any genre to expand and select an artist. Then select a track to play.</p>
+            
+            <!-- BLUEGRASS -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Bluegrass
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Barnstar! -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Barnstar!
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Bluegrass/Barnstar!/MP3 Files/Barnstar! - Believer.mp3" data-title="Believer" data-role="Barnstar! • Bluegrass" data-artist="Barnstar!" data-genre="Bluegrass">
+                      <div class="track-item">Believer</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Bluegrass/Barnstar!/MP3 Files/Barnstar! - You Don't Know.mp3" data-title="You Don't Know" data-role="Barnstar! • Bluegrass" data-artist="Barnstar!" data-genre="Bluegrass">
+                      <div class="track-item">You Don't Know</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- CLASSICAL/CINEMATIC -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Classical / Cinematic
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Joey Leal -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Joey Leal
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Clasical:Cinematic/Joey Leal/MP3 Files/Score 001.mp3" data-title="Score 001" data-role="Joey Leal • Classical/Cinematic" data-artist="Joey Leal" data-genre="Classical/Cinematic">
+                      <div class="track-item">Score 001</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Nessie Audio -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Nessie Audio
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Clasical:Cinematic/Nessie Audio/MP3 Files/Score 001.mp3" data-title="Score 001" data-role="Nessie Audio • Classical/Cinematic" data-artist="Nessie Audio" data-genre="Classical/Cinematic">
+                      <div class="track-item">Score 001</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- CONTEMPORARY -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Contemporary
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Inka Land -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Inka Land
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Contemporary/Inka Land/MP3 Files/Inka Land - Audio 001.mp3" data-title="Audio 001" data-role="Inka Land • Contemporary" data-artist="Inka Land" data-genre="Contemporary">
+                      <div class="track-item">Audio 001</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Nessie Audio -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Nessie Audio
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Contemporary/Nessie Audio/MP3 Files/Nessie Audio - Caves And Crickets.mp3" data-title="Caves And Crickets" data-role="Nessie Audio • Contemporary" data-artist="Nessie Audio" data-genre="Contemporary">
+                      <div class="track-item">Caves And Crickets</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- COUNTRY -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Country
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Angela Thomas Wade -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Angela Thomas Wade
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Country/Angela Thomas Wade/MP3 Files/Angela Thomas Wade - Milk Cow Blues.mp3" data-title="Milk Cow Blues" data-role="Angela Thomas Wade • Country" data-artist="Angela Thomas Wade" data-genre="Country">
+                      <div class="track-item">Milk Cow Blues</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Bobby Corbett -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Bobby Corbett
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Country/Bobby Corbett/MP3 Files/Bobby Corbett - Way Back When.mp3" data-title="Way Back When" data-role="Bobby Corbett • Country" data-artist="Bobby Corbett" data-genre="Country">
+                      <div class="track-item">Way Back When</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- EDM -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ EDM
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Laura Schaeffer -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Laura Schaeffer
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/EDM/Laura Schaeffer/MP3 Files/Laura Schaeffer - Soup.mp3" data-title="Soup" data-role="Laura Schaeffer • EDM" data-artist="Laura Schaeffer" data-genre="EDM">
+                      <div class="track-item">Soup</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- INDIE -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Indie
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Chase Jack -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Chase Jack
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/A Reptile Dysfunction.mp3" data-title="A Reptile Dysfunction" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">A Reptile Dysfunction</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Chase Jack - Cradle.mp3" data-title="Cradle" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Cradle</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Chase Jack - Perfect Naivety.mp3" data-title="Perfect Naivety" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Perfect Naivety</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Daddy Issues.mp3" data-title="Daddy Issues" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Daddy Issues</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Fomophobia.mp3" data-title="Fomophobia" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Fomophobia</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Guts.mp3" data-title="Guts" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Guts</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/I'll Be Waiting.mp3" data-title="I'll Be Waiting" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">I'll Be Waiting</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/If It Keeps Me Breathing.mp3" data-title="If It Keeps Me Breathing" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">If It Keeps Me Breathing</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Severance Play.mp3" data-title="Severance Play" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Severance Play</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/SMTTY + Hidden Track.mp3" data-title="SMTTY + Hidden Track" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">SMTTY + Hidden Track</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Sore High.mp3" data-title="Sore High" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Sore High</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/Soul Fork.mp3" data-title="Soul Fork" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">Soul Fork</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/The Bluffs.mp3" data-title="The Bluffs" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">The Bluffs</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/White Torture.mp3" data-title="White Torture" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
+                      <div class="track-item">White Torture</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- METAL -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Metal
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Cosmic Lung -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Cosmic Lung
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Above.mp3" data-title="Above" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Above</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Crystal Ship.mp3" data-title="Crystal Ship" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Crystal Ship</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Endless Illusion.mp3" data-title="Endless Illusion" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Endless Illusion</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Ether.mp3" data-title="Ether" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Ether</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Fallen.mp3" data-title="Fallen" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Fallen</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Forced Metamorphosis.mp3" data-title="Forced Metamorphosis" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Forced Metamorphosis</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Intro.mp3" data-title="Intro" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Intro</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Myst Of Obsidian.mp3" data-title="Myst Of Obsidian" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Myst Of Obsidian</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Rituals.mp3" data-title="Rituals" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Rituals</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Stoned Ape.mp3" data-title="Stoned Ape" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">Stoned Ape</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/The Garden.mp3" data-title="The Garden" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
+                      <div class="track-item">The Garden</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Ortus Lux -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Ortus Lux
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Metal/Ortus Lux/Keeper of Crows/MP3 Files/Despise.mp3" data-title="Despise" data-role="Ortus Lux • Metal" data-artist="Ortus Lux" data-genre="Metal">
+                      <div class="track-item">Despise</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Ortus Lux/Keeper of Crows/MP3 Files/Did My Time.mp3" data-title="Did My Time" data-role="Ortus Lux • Metal" data-artist="Ortus Lux" data-genre="Metal">
+                      <div class="track-item">Did My Time</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Ortus Lux/Keeper of Crows/MP3 Files/Freak.mp3" data-title="Freak" data-role="Ortus Lux • Metal" data-artist="Ortus Lux" data-genre="Metal">
+                      <div class="track-item">Freak</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Ortus Lux/Keeper of Crows/MP3 Files/Not Here.mp3" data-title="Not Here" data-role="Ortus Lux • Metal" data-artist="Ortus Lux" data-genre="Metal">
+                      <div class="track-item">Not Here</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Metal/Ortus Lux/Keeper of Crows/MP3 Files/The Witching Hour.mp3" data-title="The Witching Hour" data-role="Ortus Lux • Metal" data-artist="Ortus Lux" data-genre="Metal">
+                      <div class="track-item">The Witching Hour</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- PUNK -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Punk
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Glampire -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Glampire
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Punk/Glampire/MP3 Files/Glampire - New York Nosferatu.mp3" data-title="New York Nosferatu" data-role="Glampire • Punk" data-artist="Glampire" data-genre="Punk">
+                      <div class="track-item">New York Nosferatu</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- RAP -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Rap
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- G.O.D. -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ G.O.D.
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/I Been The Man.mp3" data-title="I Been The Man" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">I Been The Man</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/I Need You.mp3" data-title="I Need You" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">I Need You</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/I'm From The Go.mp3" data-title="I'm From The Go" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">I'm From The Go</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Meditate.mp3" data-title="Meditate" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Meditate</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Memorial.mp3" data-title="Memorial" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Memorial</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Pain.mp3" data-title="Pain" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Pain</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Pressure.mp3" data-title="Pressure" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Pressure</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Questions.mp3" data-title="Questions" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Questions</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/She My Type.mp3" data-title="She My Type" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">She My Type</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Super Greatness.mp3" data-title="Super Greatness" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Super Greatness</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Vent.mp3" data-title="Vent" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Vent</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Vibe Talk.mp3" data-title="Vibe Talk" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Vibe Talk</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/Water Patec.mp3" data-title="Water Patec" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
+                      <div class="track-item">Water Patec</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- ROCK -->
+            <div class="genre-section" style="margin-bottom: 1.5rem;">
+              <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
+                ▶ Rock
+              </h3>
+              <div class="genre-content" style="display: none; padding: 1rem 0;">
+                
+                <!-- Dahlia Boyer -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Dahlia Boyer
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Rock/Dahlia Boyer/MP3 Files/Dahlia Boyer - Call Me When You_re Sober.mp3" data-title="Call Me When You're Sober" data-role="Dahlia Boyer • Rock" data-artist="Dahlia Boyer" data-genre="Rock">
+                      <div class="track-item">Call Me When You're Sober</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Daimon B -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Daimon B
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Rock/Daimon B/MP3 Files/Daimon B - Pain Remains.mp3" data-title="Pain Remains" data-role="Daimon B • Rock" data-artist="Daimon B" data-genre="Rock">
+                      <div class="track-item">Pain Remains</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Nessie Audio -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Nessie Audio
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Rock/Nessie Audio/MP3 Files/Nessie Audio - Fine Again.mp3" data-title="Fine Again" data-role="Nessie Audio • Rock" data-artist="Nessie Audio" data-genre="Rock">
+                      <div class="track-item">Fine Again</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rock/Nessie Audio/MP3 Files/Nessie Audio - Numb.mp3" data-title="Numb" data-role="Nessie Audio • Rock" data-artist="Nessie Audio" data-genre="Rock">
+                      <div class="track-item">Numb</div>
+                    </li>
+                    <li class="catalogue-item" data-src="Music/Rock/Nessie Audio/MP3 Files/Nessie Audio - Reach For The Sky.mp3" data-title="Reach For The Sky" data-role="Nessie Audio • Rock" data-artist="Nessie Audio" data-genre="Rock">
+                      <div class="track-item">Reach For The Sky</div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Tyler Brundridge -->
+                <div class="artist-section" style="margin-bottom: 1rem;">
+                  <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
+                    ▶ Tyler Brundridge
+                  </h4>
+                  <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
+                    <li class="catalogue-item" data-src="Music/Rock/Tyler Brundridge/MP3 Files/Tyler Brundridge - Still Holding On.mp3" data-title="Still Holding On" data-role="Tyler Brundridge • Rock" data-artist="Tyler Brundridge" data-genre="Rock">
+                      <div class="track-item">Still Holding On</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </section>
       </div>
     </section>
@@ -87,12 +505,223 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <small>© <span id="year">2025</span> Nævermore. All rights reserved.</small>
+      <small>© <span id="year">2026</span> Nessie Audio. All rights reserved.</small>
       <div class="footer-controls"><button id="theme-toggle" class="btn small" aria-pressed="false">Dark Mode</button></div>
     </div>
   </footer>
 
   <script src="script.js" defer></script>
   <script src="fogEffect.js" defer></script>
+  
+  <!-- Audio Portfolio Player Script -->
+  <style>
+    /* Catalogue item styling - player-centric typography focus */
+    .catalogue-item {
+      padding: 0.6rem 1rem;
+      margin: 0.25rem 0;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      list-style: none;
+    }
+    
+    .catalogue-item:hover {
+      background: rgba(192,192,192,0.05);
+      border-left-color: rgba(192,192,192,0.3);
+    }
+    
+    .catalogue-item.active {
+      background: rgba(192,192,192,0.1);
+      border-left-color: #c0c0c0;
+    }
+    
+    .track-item {
+      font-size: 0.95rem;
+      color: #ffffff;
+      transition: color 0.2s ease;
+      font-weight: 400;
+    }
+    
+    .catalogue-item.active .track-item {
+      font-weight: 500;
+    }
+    
+    .genre-header:hover,
+    .artist-header:hover {
+      background: rgba(192,192,192,0.15);
+    }
+  </style>
+  
+  <script>
+    (function() {
+      'use strict';
+      
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', function() {
+        const player = document.getElementById('main-player');
+        const audioSource = document.getElementById('audio-source');
+        const trackTitle = document.getElementById('track-title');
+        const trackMeta = document.getElementById('track-meta');
+        const catalogueItems = document.querySelectorAll('.catalogue-item');
+        const genreHeaders = document.querySelectorAll('.genre-header');
+        const artistHeaders = document.querySelectorAll('.artist-header');
+        const waveformContainer = document.getElementById('waveform');
+        const waveformSvg = document.getElementById('waveform-svg');
+        
+        let currentTrack = null;
+        
+        // Set initial volume to 50%
+        player.volume = 0.5;
+        
+        // Generate waveform visualization
+        function generateWaveform() {
+          const bars = 80;
+          const barWidth = 100 / bars;
+          let svgContent = '';
+          
+          for (let i = 0; i < bars; i++) {
+            const height = Math.random() * 40 + 10;
+            const x = i * barWidth;
+            const y = (60 - height) / 2;
+            
+            svgContent += `<rect x="${x}%" y="${y}" width="${barWidth * 0.7}%" height="${height}" fill="rgba(192,192,192,0.3)" rx="1">
+              <animate attributeName="height" values="${height};${height * 1.2};${height}" dur="${0.5 + Math.random()}s" repeatCount="indefinite" />
+              <animate attributeName="y" values="${y};${y - (height * 0.1)};${y}" dur="${0.5 + Math.random()}s" repeatCount="indefinite" />
+            </rect>`;
+          }
+          
+          waveformSvg.innerHTML = svgContent;
+        }
+        
+        // Toggle genre sections
+        genreHeaders.forEach(function(header) {
+          header.addEventListener('click', function() {
+            const content = this.nextElementSibling;
+            const isOpen = content.style.display === 'block';
+            
+            // Get current text, removing any arrows
+            let text = this.textContent.trim();
+            // Remove all arrow characters from the beginning
+            while (text.startsWith('▶') || text.startsWith('▼')) {
+              text = text.substring(1).trim();
+            }
+            
+            if (isOpen) {
+              content.style.display = 'none';
+              this.textContent = '▶ ' + text;
+            } else {
+              content.style.display = 'block';
+              this.textContent = '▼ ' + text;
+            }
+          });
+        });
+        
+        // Toggle artist sections
+        artistHeaders.forEach(function(header) {
+          header.addEventListener('click', function() {
+            const trackList = this.nextElementSibling;
+            const isOpen = trackList.style.display === 'block';
+            
+            // Get current text, removing any arrows
+            let text = this.textContent.trim();
+            // Remove all arrow characters from the beginning
+            while (text.startsWith('▶') || text.startsWith('▼')) {
+              text = text.substring(1).trim();
+            }
+            
+            if (isOpen) {
+              trackList.style.display = 'none';
+              this.textContent = '▶ ' + text;
+            } else {
+              trackList.style.display = 'block';
+              this.textContent = '▼ ' + text;
+            }
+          });
+        });
+        
+        // Handle track selection
+        function loadTrack(item) {
+          const src = item.getAttribute('data-src');
+          const title = item.getAttribute('data-title');
+          const role = item.getAttribute('data-role');
+          
+          // Fade out current info if there is any
+          if (trackTitle.textContent) {
+            trackTitle.style.opacity = '0.3';
+            trackMeta.style.opacity = '0.3';
+          }
+          
+          setTimeout(function() {
+            // Update audio source
+            audioSource.src = src;
+            player.load();
+            
+            // Update now playing display
+            trackTitle.textContent = title;
+            trackMeta.textContent = role;
+            
+            // Fade in new info
+            trackTitle.style.opacity = '1';
+            trackMeta.style.opacity = '1';
+            
+            // Auto-play once loaded
+            player.addEventListener('canplay', function autoPlay() {
+              player.play().catch(function(error) {
+                console.error('Playback failed:', error);
+                trackMeta.textContent = 'Error loading audio file';
+              });
+              player.removeEventListener('canplay', autoPlay);
+            }, { once: true });
+          }, trackTitle.textContent ? 150 : 0);
+          
+          // Update visual state for catalogue items
+          if (currentTrack) {
+            currentTrack.classList.remove('active');
+          }
+          
+          item.classList.add('active');
+          currentTrack = item;
+          
+          // Show and animate waveform
+          waveformContainer.style.display = 'block';
+          setTimeout(function() {
+            waveformContainer.style.opacity = '1';
+            generateWaveform();
+          }, 100);
+        }
+        
+        // Add click handlers to catalogue items
+        catalogueItems.forEach(function(item) {
+          item.addEventListener('click', function() {
+            loadTrack(item);
+          });
+          
+          // Keyboard accessibility
+          item.setAttribute('tabindex', '0');
+          item.setAttribute('role', 'button');
+          item.setAttribute('aria-label', 'Play ' + item.getAttribute('data-title'));
+          
+          item.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              loadTrack(item);
+            }
+          });
+        });
+        
+        // Handle audio end
+        player.addEventListener('ended', function() {
+          console.log('Track ended');
+        });
+        
+        // Error handling
+        player.addEventListener('error', function(e) {
+          console.error('Audio error:', e);
+          trackMeta.textContent = 'Unable to load audio file';
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

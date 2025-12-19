@@ -58,11 +58,139 @@
     <section class="home-content container">
       <div class="show-promo-row">
         <!-- Merch content -->
-        <section class="merch">
-          <h1>Merch</h1>
-          <p class="lead">This is the placeholder Merch page. Add your items, images, and links here.</p>
+        <section class="merch-page">
+          <h1>- Merch</h1>
+          
+          <!-- Intro blurb -->
+          <p class="merch-intro lead">Explore Nessie Audio merch, crafted for creators and fans.</p>
 
-          <p><strong>If you'd like, I can scaffold a simple merch grid with images and "Buy" buttons.</strong></p>
+          <!-- Merch Grid Container -->
+          <!-- This grid is designed to be scalable - add or remove products as needed -->
+          <!-- Backend integration point: Replace placeholder data with dynamic product data from Golang API -->
+          <div class="merch-grid">
+            
+            <!-- Product Item 1 -->
+            <!-- Each product card follows this structure for consistency -->
+            <article class="merch-item">
+              <!-- Product image placeholder - replace src with actual product image URL from backend -->
+              <div class="merch-image-container">
+                <img src="https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Nessie+Audio+Tee" 
+                     alt="Nessie Audio Classic T-Shirt" 
+                     class="merch-image">
+              </div>
+              
+              <div class="merch-details">
+                <!-- Product title - will come from backend database -->
+                <h3 class="merch-title">Nessie Audio Classic Tee</h3>
+                
+                <!-- Product description - will come from backend -->
+                <p class="merch-description">Premium cotton t-shirt with the iconic Nessie Audio logo. Comfortable fit for studio sessions or casual wear.</p>
+                
+                <!-- Price placeholder - will be dynamically populated from backend -->
+                <p class="merch-price">$29.99</p>
+                
+                <!-- Buy button - currently non-functional, will connect to eCommerce backend -->
+                <!-- Backend hook: Add data-product-id attribute for cart integration -->
+                <button class="merch-buy-btn" data-product-id="001" aria-label="Add Nessie Audio Classic Tee to cart">
+                  Buy Now
+                </button>
+              </div>
+            </article>
+
+            <!-- Product Item 2 -->
+            <article class="merch-item">
+              <div class="merch-image-container">
+                <img src="https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Studio+Hoodie" 
+                     alt="Nessie Audio Studio Hoodie" 
+                     class="merch-image">
+              </div>
+              <div class="merch-details">
+                <h3 class="merch-title">Studio Session Hoodie</h3>
+                <p class="merch-description">Heavyweight hoodie perfect for late-night studio sessions. Features embroidered logo and kangaroo pocket.</p>
+                <p class="merch-price">$54.99</p>
+                <button class="merch-buy-btn" data-product-id="002" aria-label="Add Studio Session Hoodie to cart">
+                  Buy Now
+                </button>
+              </div>
+            </article>
+
+            <!-- Product Item 3 -->
+            <article class="merch-item">
+              <div class="merch-image-container">
+                <img src="https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Snapback+Hat" 
+                     alt="Nessie Audio Snapback" 
+                     class="merch-image">
+              </div>
+              <div class="merch-details">
+                <h3 class="merch-title">Nessie Snapback Hat</h3>
+                <p class="merch-description">Classic snapback with embroidered Nessie logo. Adjustable fit with structured front panels.</p>
+                <p class="merch-price">$24.99</p>
+                <button class="merch-buy-btn" data-product-id="003" aria-label="Add Nessie Snapback Hat to cart">
+                  Buy Now
+                </button>
+              </div>
+            </article>
+
+            <!-- Product Item 4 -->
+            <article class="merch-item">
+              <div class="merch-image-container">
+                <img src="https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Vinyl+Sticker" 
+                     alt="Nessie Audio Sticker Pack" 
+                     class="merch-image">
+              </div>
+              <div class="merch-details">
+                <h3 class="merch-title">Vinyl Sticker Pack</h3>
+                <p class="merch-description">Weatherproof vinyl stickers featuring various Nessie Audio designs. Perfect for laptops, instruments, and gear.</p>
+                <p class="merch-price">$8.99</p>
+                <button class="merch-buy-btn" data-product-id="004" aria-label="Add Vinyl Sticker Pack to cart">
+                  Buy Now
+                </button>
+              </div>
+            </article>
+
+            <!-- Product Item 5 -->
+            <article class="merch-item">
+              <div class="merch-image-container">
+                <img src="https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Tote+Bag" 
+                     alt="Nessie Audio Tote Bag" 
+                     class="merch-image">
+              </div>
+              <div class="merch-details">
+                <h3 class="merch-title">Canvas Tote Bag</h3>
+                <p class="merch-description">Heavy-duty canvas tote with screen-printed Nessie logo. Perfect for carrying gear, records, or daily essentials.</p>
+                <p class="merch-price">$19.99</p>
+                <button class="merch-buy-btn" data-product-id="005" aria-label="Add Canvas Tote Bag to cart">
+                  Buy Now
+                </button>
+              </div>
+            </article>
+
+            <!-- Product Item 6 -->
+            <article class="merch-item">
+              <div class="merch-image-container">
+                <img src="https://via.placeholder.com/400x400/1a1a1a/ffffff?text=Poster+Pack" 
+                     alt="Nessie Audio Poster Collection" 
+                     class="merch-image">
+              </div>
+              <div class="merch-details">
+                <h3 class="merch-title">Limited Edition Poster Pack</h3>
+                <p class="merch-description">Set of three 18x24" posters featuring exclusive Nessie Audio artwork. Printed on premium matte paper.</p>
+                <p class="merch-price">$34.99</p>
+                <button class="merch-buy-btn" data-product-id="006" aria-label="Add Limited Edition Poster Pack to cart">
+                  Buy Now
+                </button>
+              </div>
+            </article>
+
+          </div>
+          <!-- End of Merch Grid -->
+
+          <!-- Note for developers: 
+               To add more products, simply duplicate a merch-item article block above
+               and update the image src, title, description, price, and data-product-id
+               The grid will automatically adjust to accommodate new items
+          -->
+
         </section>
       </div>
     </section>
@@ -79,5 +207,6 @@
 
   <script src="script.js" defer></script>
   <script src="fogEffect.js" defer></script>
+  <script src="merch.js" defer></script>
 </body>
 </html>

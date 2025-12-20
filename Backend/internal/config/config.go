@@ -1,0 +1,102 @@
+package config
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
+// Config holds all application configuration
+type Config struct {
+	// Server
+	Port string
+	Env  string
+
+	// Database
+	DatabasePath string
+
+	// Printful
+	PrintfulAPIKey    string
+	PrintfulAPIURL    string
+	PrintfulWebhookSecret string
+
+	// Stripe
+	StripeSecretKey      string
+	StripePublishableKey string
+	StripeWebhookSecret  string
+	StripeSuccessURL     string
+	StripeCancelURL      string
+
+	// CORS
+	AllowedOrigins string
+
+	// Logging
+	LogLevel string
+}
+
+// Load reads configuration from environment variables
+func Load() (*Config, error) {
+	// Load .env file if it exists (ignore error in production)
+	_ = godotenv.Load()
+
+	cfg := &Config{
+		Port:                  getEnv("PORT", "8080"),
+		Env:                   getEnv("ENV", "development"),
+		DatabasePath:          getEnv("DATABASE_PATH", "./nessie_store.db"),
+		PrintfulAPIKey:        getEnv("PRINTFUL_API_KEY", ""),
+		PrintfulAPIURL:        getEnv("PRINTFUL_API_URL", "https://api.printful.com"),
+		PrintfulWebhookSecret: getEnv("PRINTFUL_WEBHOOK_SECRET", ""),
+		StripeSecretKey:       getEnv("STRIPE_SECRET_KEY", ""),
+		StripePublishableKey:  getEnv("STRIPE_PUBLISHABLE_KEY", ""),
+		StripeWebhookSecret:   getEnv("STRIPE_WEBHOOK_SECRET", ""),
+		StripeSuccessURL:      getEnv("STRIPE_SUCCESS_URL", "http://localhost:3000/checkout/success"),
+		StripeCancelURL:       getEnv("STRIPE_CANCEL_URL", "http://localhost:3000/checkout/cancel"),
+		AllowedOrigins:        getEnv("ALLOWED_ORIGINS", "http://localhost:3000"),
+		LogLevel:              getEnv("LOG_LEVEL", "info"),
+	}
+
+	// Validate required fields
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
+}
+
+// Validate checks that required configuration is present
+func (c *Config) Validate() error {
+	// Only check critical fields - API keys can be added later
+	if c.Port == "" {
+		return fmt.Errorf("PORT is required")
+	}
+
+	// Log warnings for missing API keys
+	if c.PrintfulAPIKey == "" {
+		log.Println("WARNING: PRINTFUL_API_KEY not set - Printful integration will not work")
+	}
+	if c.StripeSecretKey == "" {
+		log.Println("WARNING: STRIPE_SECRET_KEY not set - payment processing will not work")
+	}
+
+	return nil
+}
+
+// getEnv retrieves an environment variable or returns a default value
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+// IsDevelopment returns true if running in development mode
+func (c *Config) IsDevelopment() bool {
+	return c.Env == "development"
+}
+
+// IsProduction returns true if running in production mode
+func (c *Config) IsProduction() bool {
+	return c.Env == "production"
+}

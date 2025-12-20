@@ -8,7 +8,7 @@
 
 // ========== CONFIGURATION ==========
 // Backend API endpoint - update this with your Golang server URL
-const API_BASE_URL = 'http://localhost:8080/api'; // Example: Change to your deployed backend URL
+const API_BASE_URL = 'http://localhost:8080/api/v1'; // Example: Change to your deployed backend URL
 const PRODUCTS_ENDPOINT = `${API_BASE_URL}/products`;
 const CART_ENDPOINT = `${API_BASE_URL}/cart`;
 
@@ -81,18 +81,12 @@ const placeholderProducts = [
  */
 async function fetchProducts() {
   try {
-    // TODO: Uncomment when backend is ready
-    // const response = await fetch(PRODUCTS_ENDPOINT);
-    // if (!response.ok) {
-    //   throw new Error(`HTTP error! status: ${response.status}`);
-    // }
-    // const products = await response.json();
-    // return products;
-
-    // For now, return placeholder data
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(placeholderProducts), 100);
-    });
+    const response = await fetch(PRODUCTS_ENDPOINT);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.products || [];
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -109,7 +103,7 @@ function createProductHTML(product) {
   return `
     <article class="merch-item">
       <div class="merch-image-container">
-        <img src="${product.imageUrl}" 
+        <img src="${product.image_url || product.imageUrl}" 
              alt="${product.name}" 
              class="merch-image">
       </div>
@@ -289,13 +283,9 @@ function showNotification(message, type = 'success') {
 async function initMerchPage() {
   console.log('Initializing Merch page...');
   
-  // Option 1: Use static HTML (current implementation in merch.html)
-  // Just attach event listeners to existing buy buttons
-  attachBuyButtonListeners();
-  
-  // Option 2: Load products dynamically (uncomment to enable)
-  // const products = await fetchProducts();
-  // renderProducts(products);
+  // Load products dynamically from backend
+  const products = await fetchProducts();
+  renderProducts(products);
   
   console.log('Merch page initialized');
 }

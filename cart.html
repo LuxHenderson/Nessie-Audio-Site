@@ -1,23 +1,21 @@
 <!doctype html>
-
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Nessie Audio - Merch</title>
+  <title>Nessie Audio - Shopping Cart</title>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="Nessie Audio 2026.jpg" type="image/jpeg">
   <meta name="color-scheme" content="light dark">
   
-  <!-- Three.js for atmospheric fog effect -->
+  <script src="https://js.stripe.com/v3/"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
 </head>
 
 <body>
-  <!-- Three.js fog effect canvas container (background layer) -->
   <div id="fog-canvas-container"></div>
+  
   <header class="site-header" id="top">
     <div class="container header-inner">
       <div class="brand">
@@ -47,7 +45,7 @@
         <li><a href="music.html">Portfolio</a></li>
         <li><a href="merch.html">Merch</a></li>
         <li><a href="nessie-digital.html">Nessie Digital</a></li>
-        <li><a href="merch.html">Merch</a></li>
+        <li><a href="cart.html">Cart</a></li>
         <li><a href="tour.html">Tour</a></li>
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="contact.html">Contact</a></li>
@@ -57,27 +55,50 @@
 
   <main>
     <section class="home-content container">
-      <div class="show-promo-row">
-        <!-- Merch content -->
-        <section class="merch-page">
-          
-          <!-- Intro blurb -->
-          <p class="merch-intro lead">Explore Nessie Audio merch, crafted for creators and fans.</p>
+      <div class="cart-page">
+        <h1 class="page-title">Shopping Cart</h1>
 
-          <!-- Merch Grid Container -->
-          <!-- Products are dynamically loaded from the backend API via merch.js -->
-          <div class="merch-grid">
-            <!-- Products will be inserted here by JavaScript -->
+        <!-- Empty cart message -->
+        <div id="empty-cart" class="empty-cart" style="display: none;">
+          <p>Your cart is empty.</p>
+          <a href="merch.html" class="btn">Continue Shopping</a>
+        </div>
+
+        <!-- Cart contents -->
+        <div id="cart-contents" class="cart-contents">
+          <!-- Cart items grid -->
+          <div class="cart-items">
+            <div id="cart-items-list">
+              <!-- Cart items will be inserted here -->
+            </div>
           </div>
-          <!-- End of Merch Grid -->
 
-          <!-- Note for developers: 
-               To add more products, simply duplicate a merch-item article block above
-               and update the image src, title, description, price, and data-product-id
-               The grid will automatically adjust to accommodate new items
-          -->
+          <!-- Cart summary -->
+          <div class="cart-summary">
+            <h2>Order Summary</h2>
+            
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span id="cart-subtotal">$0.00</span>
+            </div>
+            
+            <div class="summary-row">
+              <span>Shipping:</span>
+              <span id="cart-shipping">Calculated at checkout</span>
+            </div>
+            
+            <div class="summary-row total">
+              <span>Total:</span>
+              <span id="cart-total">$0.00</span>
+            </div>
 
-        </section>
+            <button id="checkout-btn" class="btn btn-checkout">
+              Proceed to Checkout
+            </button>
+
+            <a href="merch.html" class="btn-continue-shopping">Continue Shopping</a>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -94,6 +115,6 @@
   <script src="script.js" defer></script>
   <script src="fogEffect.js" defer></script>
   <script src="cart.js" defer></script>
-  <script src="merch.js" defer></script>
+  <script src="cart-page.js" defer></script>
 </body>
 </html>

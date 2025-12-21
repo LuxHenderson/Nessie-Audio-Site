@@ -18,6 +18,8 @@ type ProductResponse struct {
 	Name         string            `json:"name"`
 	Description  string            `json:"description"`
 	Price        float64           `json:"price"`
+	MinPrice     float64           `json:"min_price,omitempty"`
+	MaxPrice     float64           `json:"max_price,omitempty"`
 	Currency     string            `json:"currency"`
 	ImageURL     string            `json:"image_url"`
 	ThumbnailURL string            `json:"thumbnail_url"`
@@ -65,6 +67,19 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 		p.ImageURL = imageURL.String
 		p.ThumbnailURL = thumbnailURL.String
 		p.Category = category.String
+
+		// Get min and max prices from variants
+		var minPrice, maxPrice sql.NullFloat64
+		err := h.db.QueryRow(`
+			SELECT MIN(price), MAX(price)
+			FROM variants
+			WHERE product_id = ? AND available = 1
+		`, p.ID).Scan(&minPrice, &maxPrice)
+		
+		if err == nil && minPrice.Valid && maxPrice.Valid {
+			p.MinPrice = minPrice.Float64
+			p.MaxPrice = maxPrice.Float64
+		}
 
 		products = append(products, p)
 	}

@@ -100,6 +100,14 @@ async function fetchProducts() {
  * @returns {string} HTML string for product card
  */
 function createProductHTML(product) {
+  // Determine price display
+  let priceDisplay;
+  if (product.min_price && product.max_price && product.min_price !== product.max_price) {
+    priceDisplay = `$${product.min_price.toFixed(2)} - $${product.max_price.toFixed(2)}`;
+  } else {
+    priceDisplay = `$${product.price.toFixed(2)}`;
+  }
+
   return `
     <article class="merch-item" onclick="navigateToProduct('${product.id}')" style="cursor: pointer;">
       <div class="merch-image-container">
@@ -109,8 +117,7 @@ function createProductHTML(product) {
       </div>
       <div class="merch-details">
         <h3 class="merch-title">${product.name}</h3>
-        <p class="merch-description">${product.description}</p>
-        <p class="merch-price">$${product.price.toFixed(2)}</p>
+        <p class="merch-price">${priceDisplay}</p>
         <button class="merch-buy-btn" 
                 data-product-id="${product.id}" 
                 aria-label="Add ${product.name} to cart"

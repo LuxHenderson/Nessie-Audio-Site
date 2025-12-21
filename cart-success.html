@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Order Success - Nessie Audio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Nessie Audio 2026.jpg" type="image/jpeg">
+  <meta name="color-scheme" content="light dark">
+  
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+</head>
+
+<body>
+  <div id="fog-canvas-container"></div>
+  
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <div class="brand">
+        <a href="index.html">
+          <img src="Nessie Audio 2026.jpg" alt="Nessie Audio Logo">
+        </a>
+      </div>
+      <nav class="nav-desktop">
+        <ul>
+          <li><a href="index.html#home">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="merch.html">Merch</a></li>
+          <li><a href="tour.html">Tour</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li class="cart-nav-item">
+            <a href="cart.html" class="cart-link">
+              🛒 <span class="cart-count">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="mobile-nav" id="mobile-nav">
+    <ul>
+      <li><a href="index.html#home">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="music.html">Music</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="merch.html">Merch</a></li>
+      <li><a href="tour.html">Tour</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="cart.html">Cart 🛒 <span class="cart-count">0</span></a></li>
+    </ul>
+  </nav>
+
+  <main class="cart-page">
+    <h1 class="page-title">Order Successful! 🎉</h1>
+
+    <div class="success-message">
+      <div class="success-content">
+        <div class="success-icon">✓</div>
+        <h2>Thank you for your order!</h2>
+        <p>Your payment has been processed successfully.</p>
+        <p>You will receive an order confirmation email shortly with tracking information once your items ship.</p>
+        
+        <div class="success-actions">
+          <a href="merch.html" class="btn btn-primary">Continue Shopping</a>
+          <a href="index.html" class="btn btn-secondary">Return Home</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 Nessie Audio. All rights reserved.</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com/nessieaudioproductions" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.tiktok.com/@nessieaudio" target="_blank" rel="noopener">TikTok</a>
+        <a href="https://www.youtube.com/@NessieAudio" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="fogEffect.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script>
+    // Clear cart on success page load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.cart) {
+        cart.clearCart();
+      }
+    });
+  </script>
+</body>
+</html>

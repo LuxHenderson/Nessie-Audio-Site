@@ -61,6 +61,65 @@ async function fetchProductFromList(productId) {
   }
 }
 
+// ========== FORMAT DESCRIPTION ==========
+/**
+ * Format product description by converting line breaks to paragraph tags
+ * @param {string} description - Raw description text
+ * @returns {string} HTML formatted description
+ */
+function formatDescription(description) {
+  if (!description) return '';
+  
+  // Split by double line breaks to create paragraphs
+  const paragraphs = description.split('\n\n').filter(p => p.trim());
+  
+  return paragraphs.map(p => {
+    const trimmed = p.trim();
+    
+    // Check if paragraph contains bullet points (lines starting with -)
+    if (trimmed.includes('\n-')) {
+      const lines = trimmed.split('\n');
+      const listItems = [];
+      let regularText = [];
+      
+      lines.forEach(line => {
+        if (line.trim().startsWith('-')) {
+          // If we have regular text before bullets, add it as a paragraph
+          if (regularText.length > 0) {
+            listItems.push(`<p>${regularText.join(' ')}</p>`);
+            regularText = [];
+          }
+          listItems.push(`<li>${line.trim().substring(1).trim()}</li>`);
+        } else if (line.trim()) {
+          regularText.push(line.trim());
+        }
+      });
+      
+      // Add any remaining regular text
+      if (regularText.length > 0) {
+        listItems.push(`<p>${regularText.join(' ')}</p>`);
+      }
+      
+      // Wrap list items in <ul> tags
+      const listHTML = listItems.map(item => {
+        if (item.startsWith('<li>')) {
+          return item;
+        }
+        return item;
+      }).join('');
+      
+      // Find where the list items start and wrap them
+      const parts = listHTML.split('<li>');
+      if (parts.length > 1) {
+        return parts[0] + '<ul>' + parts.slice(1).map(p => '<li>' + p).join('') + '</ul>';
+      }
+      return listHTML;
+    }
+    
+    return `<p>${trimmed}</p>`;
+  }).join('<br>');
+}
+
 // ========== RENDER PRODUCT DETAIL ==========
 /**
  * Render the complete product detail view
@@ -99,7 +158,7 @@ function renderProductDetail(product) {
         <!-- Product Description -->
         <div class="product-detail-description">
           <h3>About this product</h3>
-          <p>${product.description || 'Premium Nessie Audio merchandise, crafted for creators and fans.'}</p>
+          <div>${formatDescription(product.description) || '<p>Premium Nessie Audio merchandise, crafted for creators and fans.</p>'}</div>
         </div>
 
         <!-- Availability Status -->
@@ -130,6 +189,47 @@ function renderProductDetail(product) {
 
   // Attach event listeners
   attachProductDetailListeners(product);
+}
+
+/**
+ * Sort variants by size in logical order
+ * @param {Array} variants - Array of variant objects with size property
+ * @returns {Array} Sorted variants array
+ */
+function sortVariantsBySize(variants) {
+  // Define size order for clothing
+  const clothingSizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+  
+  return variants.sort((a, b) => {
+    const sizeA = a.size.trim();
+    const sizeB = b.size.trim();
+    
+    // Check if both are clothing sizes
+    const aIsClothing = clothingSizeOrder.includes(sizeA);
+    const bIsClothing = clothingSizeOrder.includes(sizeB);
+    
+    if (aIsClothing && bIsClothing) {
+      return clothingSizeOrder.indexOf(sizeA) - clothingSizeOrder.indexOf(sizeB);
+    }
+    
+    // Check if both contain "oz" (mugs)
+    if (sizeA.includes('oz') && sizeB.includes('oz')) {
+      const ozA = parseInt(sizeA.match(/(\d+)\s*oz/)[1]);
+      const ozB = parseInt(sizeB.match(/(\d+)\s*oz/)[1]);
+      return ozA - ozB;
+    }
+    
+    // Check if both contain dimensions (stickers - e.g., "3″×3″")
+    if (sizeA.includes('″') && sizeB.includes('″')) {
+      // Extract first dimension for comparison
+      const dimA = parseFloat(sizeA.match(/(\d+\.?\d*)″/)[1]);
+      const dimB = parseFloat(sizeB.match(/(\d+\.?\d*)″/)[1]);
+      return dimA - dimB;
+    }
+    
+    // Default: alphabetical order
+    return sizeA.localeCompare(sizeB);
+  });
 }
 
 /**
@@ -168,7 +268,10 @@ function renderVariantsSection(product) {
     };
   });
 
-  const optionsHTML = sizeOptions.map(opt => 
+  // Sort variants by size
+  const sortedOptions = sortVariantsBySize(sizeOptions);
+
+  const optionsHTML = sortedOptions.map(opt => 
     `<option value="${opt.id}" data-price="${opt.price}">${opt.size} - $${parseFloat(opt.price).toFixed(2)}</option>`
   ).join('');
 
@@ -228,15 +331,49 @@ function attachProductDetailListeners(product) {
  * @param {Object} product - Product object
  */
 function handleAddToCart(product) {
-  console.log('Adding to cart:', product);
+  // Get selected variant
+  const variantSelect = document.getElementById('variant-select');
+  if (!variantSelect) {
+    showNotification('Please select a size', 'error');
+    return;
+  }
+
+  const selectedVariantId = variantSelect.value;
+  const selectedVariant = product.variants.find(v => v.id === selectedVariantId);
   
-  // Show success notification
-  showNotification(`${product.name} added to cart!`, 'success');
-  
-  // TODO: Implement actual cart logic
-  // - Store in localStorage or backend
-  // - Update cart count in header
-  // - Sync with checkout system
+  if (!selectedVariant) {
+    console.error('Selected variant not found:', {
+      selectedVariantId,
+      availableVariants: product.variants.map(v => ({ id: v.id, name: v.name }))
+    });
+    showNotification('Please select a valid size', 'error');
+    return;
+  }
+
+  // Get quantity
+  const quantityInput = document.getElementById('quantity-input');
+  const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+
+  // Use image_url or imageUrl from product
+  const productImage = product.image_url || product.imageUrl || (product.images && product.images[0]) || '';
+
+  // Add to cart using the global cart object
+  if (window.cart) {
+    cart.addItem({
+      productId: product.id,
+      productName: product.name,
+      variantId: selectedVariant.id,
+      variantName: selectedVariant.name,
+      price: selectedVariant.price,
+      image: productImage,
+      quantity: quantity
+    });
+    
+    showNotification(`${product.name} added to cart!`, 'success');
+  } else {
+    console.error('Cart not initialized');
+    showNotification('Cart not available', 'error');
+  }
 }
 
 /**
@@ -244,19 +381,13 @@ function handleAddToCart(product) {
  * @param {Object} product - Product object
  */
 function handleBuyNow(product) {
-  console.log('Buy now:', product);
-  
-  // Show notification
-  showNotification('Redirecting to checkout...', 'success');
-  
-  // TODO: Implement checkout redirect
-  // For now, just add to cart
+  // First add to cart
   handleAddToCart(product);
   
-  // Would redirect to checkout page:
-  // setTimeout(() => {
-  //   window.location.href = '/checkout.html';
-  // }, 1000);
+  // Then redirect to cart/checkout page
+  setTimeout(() => {
+    window.location.href = 'cart.html';
+  }, 500);
 }
 
 // ========== NOTIFICATION SYSTEM ==========

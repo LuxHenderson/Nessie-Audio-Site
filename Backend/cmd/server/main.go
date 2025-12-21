@@ -51,6 +51,18 @@ func main() {
 
 	// Setup router
 	router := mux.NewRouter()
+	
+	// Serve static files from Product Photos directory BEFORE registering API routes
+	// This allows the frontend to load local product images
+	productPhotosPath := "../Product Photos"
+	if _, err := os.Stat(productPhotosPath); err == nil {
+		fs := http.FileServer(http.Dir(".."))
+		router.PathPrefix("/Product Photos/").Handler(fs)
+		log.Println("Serving product images from local Product Photos directory")
+	} else {
+		log.Println("⚠️  WARNING: Product Photos directory not found at", productPhotosPath)
+	}
+	
 	handler.RegisterRoutes(router)
 
 	// Apply middleware
@@ -77,6 +89,7 @@ func main() {
 		log.Printf("  - POST /api/v1/orders")
 		log.Printf("  - GET  /api/v1/orders/{id}")
 		log.Printf("  - POST /api/v1/checkout")
+		log.Printf("  - POST /api/v1/cart/checkout")
 		log.Printf("  - POST /webhooks/stripe")
 		log.Printf("  - POST /webhooks/printful")
 		log.Println()

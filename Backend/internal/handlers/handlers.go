@@ -54,6 +54,10 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Checkout
 	api.HandleFunc("/checkout", h.CreateCheckout).Methods("POST")
+	api.HandleFunc("/cart/checkout", h.CreateCartCheckout).Methods("POST")
+
+	// Config
+	api.HandleFunc("/config", h.GetConfig).Methods("GET")
 
 	// Webhooks (no auth required)
 	r.HandleFunc("/webhooks/stripe", h.HandleStripeWebhook).Methods("POST")
@@ -75,6 +79,13 @@ func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 // respondError writes an error response
 func respondError(w http.ResponseWriter, status int, message string) {
 	respondJSON(w, status, map[string]string{"error": message})
+}
+
+// GetConfig returns public configuration for frontend
+func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
+	respondJSON(w, http.StatusOK, map[string]string{
+		"stripe_publishable_key": h.config.StripePublishableKey,
+	})
 }
 
 // HealthCheck returns server health status

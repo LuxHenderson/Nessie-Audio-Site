@@ -18,6 +18,19 @@ type CreateCheckoutResponse struct {
 	SessionID string `json:"session_id"`
 }
 
+// CartCheckoutRequest represents a cart-based checkout request
+type CartCheckoutRequest struct {
+	Items []CartCheckoutItem `json:"items"`
+	Email string             `json:"email"`
+}
+
+// CartCheckoutItem represents a single item in the cart
+type CartCheckoutItem struct {
+	ProductID int    `json:"product_id"`
+	VariantID int    `json:"variant_id"`
+	Quantity  int    `json:"quantity"`
+}
+
 // CreateCheckout initiates a Stripe checkout session
 // POST /api/v1/checkout
 //
@@ -69,6 +82,83 @@ func (h *Handler) CreateCheckout(w http.ResponseWriter, r *http.Request) {
 	sessionID, err := h.stripeClient.CreateCheckoutSession(&stripe.CheckoutSessionRequest{
 		OrderID:       order.ID,
 		CustomerEmail: customerEmail,
+		LineItems:     lineItems,
+	})
+
+	if err != nil {
+		log.Printf("Stripe checkout error: %v", err)
+		respondError(w, http.StatusInternalServerError, "Failed to create checkout session")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, CreateCheckoutResponse{
+		SessionID: sessionID,
+	})
+}
+
+// CreateCartCheckout creates a Stripe checkout session directly from cart data
+// POST /api/v1/cart/checkout
+//
+// Frontend contract:
+// Request: { 
+//   "items": [{"product_id": 1, "variant_id": 1, "quantity": 2}], 
+//   "email": "customer@example.com" 
+// }
+// Response: { "session_id": "cs_test_..." }
+func (h *Handler) CreateCartCheckout(w http.ResponseWriter, r *http.Request) {
+	var req CartCheckoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request")
+		return
+	}
+
+	// Validate email
+	if req.Email == "" {
+		respondError(w, http.StatusBadRequest, "Email is required")
+		return
+	}
+
+	// Validate items
+	if len(req.Items) == 0 {
+		respondError(w, http.StatusBadRequest, "Cart is empty")
+		return
+	}
+
+	// Build line items by querying database for each cart item
+	var lineItems []stripe.CheckoutLineItem
+	for _, cartItem := range req.Items {
+		// Get product name
+		var productName string
+		err := h.db.QueryRow("SELECT name FROM products WHERE id = ?", cartItem.ProductID).Scan(&productName)
+		if err != nil {
+			log.Printf("Failed to get product %d: %v", cartItem.ProductID, err)
+			respondError(w, http.StatusBadRequest, "Invalid product")
+			return
+		}
+
+		// Get variant name and price
+		var variantName string
+		var price float64
+		err = h.db.QueryRow("SELECT name, price FROM variants WHERE id = ? AND product_id = ?", 
+			cartItem.VariantID, cartItem.ProductID).Scan(&variantName, &price)
+		if err != nil {
+			log.Printf("Failed to get variant %d for product %d: %v", cartItem.VariantID, cartItem.ProductID, err)
+			respondError(w, http.StatusBadRequest, "Invalid variant")
+			return
+		}
+
+		lineItems = append(lineItems, stripe.CheckoutLineItem{
+			ProductName: productName,
+			VariantName: variantName,
+			Quantity:    int64(cartItem.Quantity),
+			UnitPrice:   int64(price * 100), // Convert to cents
+		})
+	}
+
+	// Create Stripe checkout session
+	sessionID, err := h.stripeClient.CreateCheckoutSession(&stripe.CheckoutSessionRequest{
+		OrderID:       "", // No order created yet
+		CustomerEmail: req.Email,
 		LineItems:     lineItems,
 	})
 

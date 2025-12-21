@@ -101,7 +101,7 @@ async function fetchProducts() {
  */
 function createProductHTML(product) {
   return `
-    <article class="merch-item">
+    <article class="merch-item" onclick="navigateToProduct('${product.id}')" style="cursor: pointer;">
       <div class="merch-image-container">
         <img src="${product.image_url || product.imageUrl}" 
              alt="${product.name}" 
@@ -113,7 +113,8 @@ function createProductHTML(product) {
         <p class="merch-price">$${product.price.toFixed(2)}</p>
         <button class="merch-buy-btn" 
                 data-product-id="${product.id}" 
-                aria-label="Add ${product.name} to cart">
+                aria-label="Add ${product.name} to cart"
+                onclick="event.stopPropagation(); addToCart('${product.id}')">
           Buy Now
         </button>
       </div>
@@ -138,9 +139,14 @@ function renderProducts(products) {
     return;
   }
 
+  console.log('Rendering products to grid:', products);
+  
   // Generate HTML for all products
   const productsHTML = products.map(createProductHTML).join('');
+  console.log('Generated HTML length:', productsHTML.length);
   grid.innerHTML = productsHTML;
+  
+  console.log('Products rendered to DOM');
 
   // Attach event listeners to buy buttons after rendering
   attachBuyButtonListeners();
@@ -285,9 +291,37 @@ async function initMerchPage() {
   
   // Load products dynamically from backend
   const products = await fetchProducts();
-  renderProducts(products);
+  console.log('Fetched products:', products);
+  console.log('Number of products:', products.length);
+  
+  // Sort products in desired display order
+  const productOrder = [
+    'Nessie Audio Unisex t-shirt',
+    'Nessie Audio Unisex Champion hoodie',
+    'Nessie Audio Black Glossy Mug',
+    'Hardcover bound Nessie Audio notebook',
+    'Nessie Audio Eco Tote Bag',
+    'Nessie Audio Bubble-free stickers'
+  ];
+  
+  const sortedProducts = products.sort((a, b) => {
+    const indexA = productOrder.indexOf(a.name);
+    const indexB = productOrder.indexOf(b.name);
+    return indexA - indexB;
+  });
+  
+  renderProducts(sortedProducts);
   
   console.log('Merch page initialized');
+}
+
+// ========== NAVIGATION ==========
+/**
+ * Navigate to product detail page
+ * @param {string} productId - ID of the product
+ */
+function navigateToProduct(productId) {
+  window.location.href = `product-detail.html?id=${productId}`;
 }
 
 // ========== EVENT LISTENERS ==========

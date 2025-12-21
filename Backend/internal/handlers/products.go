@@ -60,12 +60,12 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 			respondError(w, http.StatusInternalServerError, "Error reading products")
 			return
 		}
-		
+
 		p.Description = description.String
 		p.ImageURL = imageURL.String
 		p.ThumbnailURL = thumbnailURL.String
 		p.Category = category.String
-		
+
 		products = append(products, p)
 	}
 
@@ -80,11 +80,12 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	// Get product
 	var product ProductResponse
+	var description, imageURL, thumbnailURL, category sql.NullString
 	err := h.db.QueryRow(`
 		SELECT id, name, description, price, currency, image_url, thumbnail_url, category
 		FROM products WHERE id = ? AND active = 1
-	`, productID).Scan(&product.ID, &product.Name, &product.Description, &product.Price,
-		&product.Currency, &product.ImageURL, &product.ThumbnailURL, &product.Category)
+	`, productID).Scan(&product.ID, &product.Name, &description, &product.Price,
+		&product.Currency, &imageURL, &thumbnailURL, &category)
 
 	if err == sql.ErrNoRows {
 		respondError(w, http.StatusNotFound, "Product not found")
@@ -95,11 +96,16 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	product.Description = description.String
+	product.ImageURL = imageURL.String
+	product.ThumbnailURL = thumbnailURL.String
+	product.Category = category.String
+
 	// Get variants
 	rows, err := h.db.Query(`
-		SELECT id, product_id, name, size, color, price, available
+		SELECT id, product_id, name, COALESCE(size, ''), COALESCE(color, ''), price, available
 		FROM variants WHERE product_id = ? AND available = 1
-		ORDER BY size, color
+		ORDER BY name
 	`, productID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to fetch variants")

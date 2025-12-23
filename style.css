@@ -977,13 +977,22 @@ section{padding:3rem 0}
   }
 }
 
+/* ========== MUSIC/PORTFOLIO PAGE STYLES ========== */
+/* Music/Portfolio page container - matches merch page spacing */
+.show-promo-row .music {
+  grid-column: 1 / -1;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0; /* Match box-booking bottom spacing */
+}
+
 /* ========== MERCH PAGE STYLES ========== */
 /* Modular and scalable merch grid system for eCommerce integration */
 
 /* Merch page container */
 .merch-page {
   width: 100%;
-  padding: 2rem 0;
+  padding: 2rem 0 0 0; /* Reduced bottom padding to match box-booking */
 }
 
 .merch-page h1 {

@@ -53,8 +53,8 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	api.HandleFunc("/orders/{id}", h.GetOrder).Methods("GET")
 
 	// Checkout
-	api.HandleFunc("/checkout", h.CreateCheckout).Methods("POST")
-	api.HandleFunc("/cart/checkout", h.CreateCartCheckout).Methods("POST")
+	api.HandleFunc("/checkout", h.CreateCheckout).Methods("POST", "OPTIONS")
+	api.HandleFunc("/cart/checkout", h.CreateCartCheckout).Methods("POST", "OPTIONS")
 
 	// Config
 	api.HandleFunc("/config", h.GetConfig).Methods("GET")

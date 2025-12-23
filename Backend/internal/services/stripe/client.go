@@ -78,7 +78,9 @@ func (c *Client) CreateCheckoutSession(req *CheckoutSessionRequest) (string, err
 		SuccessURL: stripe_lib.String(c.successURL + "?session_id={CHECKOUT_SESSION_ID}"),
 		CancelURL:  stripe_lib.String(c.cancelURL),
 		LineItems:  lineItems,
-		CustomerEmail: stripe_lib.String(req.CustomerEmail),
+		PaymentMethodTypes: stripe_lib.StringSlice([]string{
+			"card",
+		}),
 		Metadata: map[string]string{
 			"order_id": req.OrderID, // Link back to your order
 		},
@@ -89,6 +91,11 @@ func (c *Client) CreateCheckoutSession(req *CheckoutSessionRequest) (string, err
 				// TODO: Add more countries as needed
 			},
 		},
+	}
+
+	// Only set customer email if provided, otherwise Stripe will collect it
+	if req.CustomerEmail != "" {
+		params.CustomerEmail = stripe_lib.String(req.CustomerEmail)
 	}
 
 	sess, err := session.New(params)

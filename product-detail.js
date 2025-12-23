@@ -381,13 +381,46 @@ function handleAddToCart(product) {
  * @param {Object} product - Product object
  */
 function handleBuyNow(product) {
-  // First add to cart
-  handleAddToCart(product);
-  
-  // Then redirect to cart/checkout page
-  setTimeout(() => {
+  // Get selected variant
+  const variantSelect = document.getElementById('variant-select');
+  if (!variantSelect) {
+    showNotification('Please select a size', 'error');
+    return;
+  }
+
+  const selectedVariantId = variantSelect.value;
+  const selectedVariant = product.variants.find(v => v.id === selectedVariantId);
+
+  if (!selectedVariant) {
+    showNotification('Please select a valid size', 'error');
+    return;
+  }
+
+  // Get quantity
+  const quantityInput = document.getElementById('quantity-input');
+  const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+
+  // Use image_url or imageUrl from product
+  const productImage = product.image_url || product.imageUrl || (product.images && product.images[0]) || '';
+
+  // Add to cart silently (no notification)
+  if (window.cart) {
+    cart.addItem({
+      productId: product.id,
+      productName: product.name,
+      variantId: selectedVariant.id,
+      variantName: selectedVariant.name,
+      price: selectedVariant.price,
+      image: productImage,
+      quantity: quantity
+    });
+
+    // Immediately redirect to cart page (no notification)
     window.location.href = 'cart.html';
-  }, 500);
+  } else {
+    console.error('Cart not initialized');
+    showNotification('Cart not available', 'error');
+  }
 }
 
 // ========== NOTIFICATION SYSTEM ==========

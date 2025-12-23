@@ -6,6 +6,32 @@
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 let stripeInstance = null;
 
+/**
+ * Wait for cart object to be initialized
+ * @returns {Promise} Resolves when cart is ready
+ */
+function waitForCart() {
+  return new Promise((resolve) => {
+    if (window.cart) {
+      resolve();
+    } else {
+      const checkInterval = setInterval(() => {
+        if (window.cart) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 50);
+
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        console.error('Cart initialization timeout');
+        resolve(); // Resolve anyway to prevent hanging
+      }, 5000);
+    }
+  });
+}
+
 // Initialize Stripe
 async function initStripe() {
   try {
@@ -19,6 +45,11 @@ async function initStripe() {
 
 // ========== RENDER CART PAGE ==========
 function renderCartPage() {
+  if (!window.cart) {
+    console.error('Cart not initialized');
+    return;
+  }
+
   const items = cart.getItems();
   const emptyCart = document.getElementById('empty-cart');
   const cartContents = document.getElementById('cart-contents');
@@ -172,17 +203,15 @@ function attachCartItemListeners() {
  * Handle checkout button click
  */
 async function handleCheckout() {
-  const items = cart.getItems();
-  
-  if (items.length === 0) {
-    alert('Your cart is empty.');
+  if (!window.cart) {
+    alert('Cart is not ready. Please refresh the page and try again.');
     return;
   }
 
-  // Prompt for email
-  const email = prompt('Please enter your email address for order confirmation:');
-  if (!email || !email.includes('@')) {
-    alert('A valid email address is required for checkout.');
+  const items = cart.getItems();
+
+  if (items.length === 0) {
+    alert('Your cart is empty.');
     return;
   }
 
@@ -192,13 +221,14 @@ async function handleCheckout() {
 
   try {
     // Create Stripe checkout session
+    // Note: Email will be collected by Stripe during checkout
     const response = await fetch(`${API_BASE_URL}/cart/checkout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        email: email,
+        email: '', // Stripe will collect this
         items: items.map(item => ({
           product_id: item.productId,
           variant_id: item.variantId,
@@ -233,9 +263,12 @@ async function handleCheckout() {
 
 // ========== INITIALIZE PAGE ==========
 document.addEventListener('DOMContentLoaded', async () => {
+  // Wait for cart to be ready
+  await waitForCart();
+
   // Initialize Stripe
   await initStripe();
-  
+
   // Render cart
   renderCartPage();
 

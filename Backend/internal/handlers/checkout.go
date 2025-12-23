@@ -26,8 +26,8 @@ type CartCheckoutRequest struct {
 
 // CartCheckoutItem represents a single item in the cart
 type CartCheckoutItem struct {
-	ProductID int    `json:"product_id"`
-	VariantID int    `json:"variant_id"`
+	ProductID string `json:"product_id"` // UUID string
+	VariantID string `json:"variant_id"` // UUID string
 	Quantity  int    `json:"quantity"`
 }
 
@@ -108,16 +108,14 @@ func (h *Handler) CreateCheckout(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CreateCartCheckout(w http.ResponseWriter, r *http.Request) {
 	var req CartCheckoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Failed to decode cart checkout request: %v", err)
 		respondError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
-	// Validate email
-	if req.Email == "" {
-		respondError(w, http.StatusBadRequest, "Email is required")
-		return
-	}
+	log.Printf("Cart checkout request received: %d items, email: %s", len(req.Items), req.Email)
 
+	// Email is optional - Stripe will collect it if not provided
 	// Validate items
 	if len(req.Items) == 0 {
 		respondError(w, http.StatusBadRequest, "Cart is empty")

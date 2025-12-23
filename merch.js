@@ -10,7 +10,6 @@
 // Backend API endpoint - update this with your Golang server URL
 const API_BASE_URL = 'http://localhost:8080/api/v1'; // Example: Change to your deployed backend URL
 const PRODUCTS_ENDPOINT = `${API_BASE_URL}/products`;
-const CART_ENDPOINT = `${API_BASE_URL}/cart`;
 
 // ========== PRODUCT DATA STRUCTURE ==========
 /**
@@ -111,19 +110,13 @@ function createProductHTML(product) {
   return `
     <article class="merch-item" onclick="navigateToProduct('${product.id}')" style="cursor: pointer;">
       <div class="merch-image-container">
-        <img src="${product.image_url || product.imageUrl}" 
-             alt="${product.name}" 
+        <img src="${product.image_url || product.imageUrl}"
+             alt="${product.name}"
              class="merch-image">
       </div>
       <div class="merch-details">
         <h3 class="merch-title">${product.name}</h3>
         <p class="merch-price">${priceDisplay}</p>
-        <button class="merch-buy-btn" 
-                data-product-id="${product.id}" 
-                aria-label="Add ${product.name} to cart"
-                onclick="event.stopPropagation(); addToCart('${product.id}')">
-          Buy Now
-        </button>
       </div>
     </article>
   `;
@@ -152,141 +145,8 @@ function renderProducts(products) {
   const productsHTML = products.map(createProductHTML).join('');
   console.log('Generated HTML length:', productsHTML.length);
   grid.innerHTML = productsHTML;
-  
+
   console.log('Products rendered to DOM');
-
-  // Attach event listeners to buy buttons after rendering
-  attachBuyButtonListeners();
-}
-
-// ========== SHOPPING CART FUNCTIONALITY ==========
-/**
- * Add product to shopping cart
- * @param {string} productId - ID of the product to add
- */
-async function addToCart(productId) {
-  try {
-    console.log(`Adding product ${productId} to cart`);
-    
-    // TODO: Implement backend cart API call
-    // const response = await fetch(CART_ENDPOINT, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     productId: productId,
-    //     quantity: 1
-    //   })
-    // });
-    // 
-    // if (!response.ok) {
-    //   throw new Error(`HTTP error! status: ${response.status}`);
-    // }
-    // 
-    // const result = await response.json();
-    // console.log('Product added to cart:', result);
-
-    // Placeholder feedback for now
-    showNotification(`Product added to cart!`);
-    
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    showNotification('Error adding product to cart', 'error');
-  }
-}
-
-/**
- * Attach click event listeners to all buy buttons
- */
-function attachBuyButtonListeners() {
-  const buyButtons = document.querySelectorAll('.merch-buy-btn');
-  
-  buyButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
-      const productId = e.target.getAttribute('data-product-id');
-      if (productId) {
-        addToCart(productId);
-        
-        // Visual feedback - button animation
-        e.target.textContent = 'Added!';
-        e.target.style.background = 'rgba(100, 200, 100, 0.3)';
-        
-        setTimeout(() => {
-          e.target.textContent = 'Buy Now';
-          e.target.style.background = '';
-        }, 1500);
-      }
-    });
-  });
-}
-
-// ========== NOTIFICATION SYSTEM ==========
-/**
- * Display notification message to user
- * @param {string} message - Notification message
- * @param {string} type - Notification type ('success' or 'error')
- */
-function showNotification(message, type = 'success') {
-  // Check if notification container exists, create if not
-  let notificationContainer = document.querySelector('.notification-container');
-  
-  if (!notificationContainer) {
-    notificationContainer = document.createElement('div');
-    notificationContainer.className = 'notification-container';
-    notificationContainer.style.cssText = `
-      position: fixed;
-      top: 100px;
-      right: 20px;
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    `;
-    document.body.appendChild(notificationContainer);
-  }
-
-  // Create notification element
-  const notification = document.createElement('div');
-  notification.className = `notification notification-${type}`;
-  notification.textContent = message;
-  notification.style.cssText = `
-    background: ${type === 'success' ? 'rgba(100, 200, 100, 0.9)' : 'rgba(200, 100, 100, 0.9)'};
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    font-size: 0.95rem;
-    font-weight: 600;
-    animation: slideIn 0.3s ease;
-  `;
-
-  // Add CSS animation
-  if (!document.querySelector('#notification-styles')) {
-    const style = document.createElement('style');
-    style.id = 'notification-styles';
-    style.textContent = `
-      @keyframes slideIn {
-        from {
-          transform: translateX(400px);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  notificationContainer.appendChild(notification);
-
-  // Auto-remove notification after 3 seconds
-  setTimeout(() => {
-    notification.style.animation = 'slideIn 0.3s ease reverse';
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
 }
 
 // ========== INITIALIZE ON PAGE LOAD ==========

@@ -51,7 +51,12 @@ func main() {
 
 	// Setup router
 	router := mux.NewRouter()
-	
+
+	// Apply middleware FIRST (before routes)
+	router.Use(middleware.Recovery)
+	router.Use(middleware.Logging)
+	router.Use(middleware.CORS(cfg.AllowedOrigins))
+
 	// Serve static files from Product Photos directory BEFORE registering API routes
 	// This allows the frontend to load local product images
 	productPhotosPath := "../Product Photos"
@@ -62,13 +67,8 @@ func main() {
 	} else {
 		log.Println("⚠️  WARNING: Product Photos directory not found at", productPhotosPath)
 	}
-	
-	handler.RegisterRoutes(router)
 
-	// Apply middleware
-	router.Use(middleware.Recovery)
-	router.Use(middleware.Logging)
-	router.Use(middleware.CORS(cfg.AllowedOrigins))
+	handler.RegisterRoutes(router)
 
 	// Create HTTP server
 	server := &http.Server{

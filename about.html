@@ -30,6 +30,7 @@
           <li><a href="tour.html">Tour</a></li>
           <li><a href="gallery.html">Gallery</a></li>
           <li><a href="contact.html">Contact</a></li>
+          <li class="cart-nav-item"><a href="cart.html" class="cart-link"><span class="cart-emoji">🛒</span> <span class="cart-count">0</span></a></li>
         </ul>
       </nav>
       <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
@@ -43,6 +44,7 @@
         <li><a href="tour.html">Tour</a></li>
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html">Cart <span class="cart-emoji">🛒</span> <span class="cart-count">0</span></a></li>
       </ul>
     </div>
   </header>
@@ -97,5 +99,7 @@
 
   <script src="script.js" defer></script>
   <script src="fogEffect.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script>document.addEventListener('DOMContentLoaded',function(){if(window.cart&&cart.updateCartUI)cart.updateCartUI();});</script>
 </body>
 </html>

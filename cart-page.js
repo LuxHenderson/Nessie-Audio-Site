@@ -1,9 +1,10 @@
 /**
  * cart-page.js
  * Handles the shopping cart page display and interactions
+ * NOTE: This file requires config.js to be loaded first in the HTML
  */
 
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+const API_BASE_URL = API_CONFIG.BASE_URL;
 let stripeInstance = null;
 
 /**

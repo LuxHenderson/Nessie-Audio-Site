@@ -7,9 +7,10 @@
  */
 
 // ========== CONFIGURATION ==========
-// Backend API endpoint - update this with your Golang server URL
-const API_BASE_URL = 'http://localhost:8080/api/v1'; // Example: Change to your deployed backend URL
-const PRODUCTS_ENDPOINT = `${API_BASE_URL}/products`;
+// Backend API endpoint - automatically detects environment (see config.js)
+// NOTE: This file requires config.js to be loaded first in the HTML
+const API_BASE_URL = API_CONFIG.BASE_URL;
+const PRODUCTS_ENDPOINT = API_CONFIG.PRODUCTS_ENDPOINT;
 
 // ========== PRODUCT DATA STRUCTURE ==========
 /**

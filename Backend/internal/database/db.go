@@ -24,6 +24,11 @@ func InitDB(dbPath string) (*sql.DB, error) {
 		return nil, fmt.Errorf("create tables: %w", err)
 	}
 
+	// Run migrations
+	if err := runMigrations(db); err != nil {
+		return nil, fmt.Errorf("run migrations: %w", err)
+	}
+
 	return db, nil
 }
 
@@ -71,6 +76,7 @@ func createTables(db *sql.DB) error {
 	CREATE TABLE IF NOT EXISTS orders (
 		id TEXT PRIMARY KEY,
 		customer_id TEXT NOT NULL,
+		customer_email TEXT,
 		status TEXT NOT NULL,
 		total_amount REAL NOT NULL,
 		currency TEXT DEFAULT 'USD',
@@ -133,4 +139,29 @@ func createTables(db *sql.DB) error {
 
 	_, err := db.Exec(schema)
 	return err
+}
+
+// runMigrations runs database migrations to add new columns
+func runMigrations(db *sql.DB) error {
+	// Check if customer_email column exists in orders table
+	var columnExists bool
+	err := db.QueryRow(`
+		SELECT COUNT(*) > 0
+		FROM pragma_table_info('orders')
+		WHERE name='customer_email'
+	`).Scan(&columnExists)
+
+	if err != nil {
+		return fmt.Errorf("check customer_email column: %w", err)
+	}
+
+	// Add customer_email column if it doesn't exist
+	if !columnExists {
+		_, err := db.Exec(`ALTER TABLE orders ADD COLUMN customer_email TEXT`)
+		if err != nil {
+			return fmt.Errorf("add customer_email column: %w", err)
+		}
+	}
+
+	return nil
 }

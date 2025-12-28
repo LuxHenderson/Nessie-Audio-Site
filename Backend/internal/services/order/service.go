@@ -29,12 +29,12 @@ func (s *Service) CreateOrder(order *models.Order, items []models.OrderItem) err
 	// Insert order
 	_, err = tx.Exec(`
 		INSERT INTO orders (
-			id, customer_id, status, total_amount, currency,
+			id, customer_id, customer_email, status, total_amount, currency,
 			shipping_name, shipping_address1, shipping_address2,
 			shipping_city, shipping_state, shipping_zip, shipping_country,
 			created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, order.ID, order.CustomerID, order.Status, order.TotalAmount, order.Currency,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, order.ID, order.CustomerID, order.CustomerEmail, order.Status, order.TotalAmount, order.Currency,
 		order.ShippingName, order.ShippingAddress1, order.ShippingAddress2,
 		order.ShippingCity, order.ShippingState, order.ShippingZip, order.ShippingCountry,
 		order.CreatedAt, order.UpdatedAt)
@@ -73,14 +73,14 @@ func (s *Service) GetOrder(id string) (*models.Order, error) {
 	var trackingURL sql.NullString
 
 	err := s.db.QueryRow(`
-		SELECT id, customer_id, status, total_amount, currency,
+		SELECT id, customer_id, customer_email, status, total_amount, currency,
 			stripe_session_id, stripe_payment_intent_id, printful_order_id,
 			shipping_name, shipping_address1, shipping_address2,
 			shipping_city, shipping_state, shipping_zip, shipping_country,
 			tracking_number, tracking_url, created_at, updated_at
 		FROM orders WHERE id = ?
 	`, id).Scan(
-		&order.ID, &order.CustomerID, &order.Status, &order.TotalAmount, &order.Currency,
+		&order.ID, &order.CustomerID, &order.CustomerEmail, &order.Status, &order.TotalAmount, &order.Currency,
 		&order.StripeSessionID, &order.StripePaymentIntentID, &printfulOrderID,
 		&order.ShippingName, &order.ShippingAddress1, &order.ShippingAddress2,
 		&order.ShippingCity, &order.ShippingState, &order.ShippingZip, &order.ShippingCountry,

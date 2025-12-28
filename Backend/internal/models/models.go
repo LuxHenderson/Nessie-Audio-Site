@@ -36,6 +36,7 @@ type Variant struct {
 type Order struct {
 	ID                    string    `json:"id" db:"id"`
 	CustomerID            string    `json:"customer_id" db:"customer_id"`
+	CustomerEmail         string    `json:"customer_email" db:"customer_email"`
 	Status                string    `json:"status" db:"status"` // pending, paid, fulfilled, shipped, cancelled
 	TotalAmount           float64   `json:"total_amount" db:"total_amount"`
 	Currency              string    `json:"currency" db:"currency"`

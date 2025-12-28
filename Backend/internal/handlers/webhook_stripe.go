@@ -277,6 +277,12 @@ func (h *Handler) createOrderFromSession(session *stripeLib.CheckoutSession) (*m
 	// Create customer ID (we'll use email as a simple identifier for now)
 	customerID := uuid.New().String()
 
+	// Extract customer email from session
+	customerEmail := ""
+	if session.CustomerDetails != nil {
+		customerEmail = session.CustomerDetails.Email
+	}
+
 	// Calculate total from session
 	totalAmount := float64(session.AmountTotal) / 100.0 // Convert from cents
 
@@ -311,13 +317,13 @@ func (h *Handler) createOrderFromSession(session *stripeLib.CheckoutSession) (*m
 	orderID := uuid.New().String()
 	_, err := h.db.Exec(`
 		INSERT INTO orders (
-			id, customer_id, status, total_amount, currency,
+			id, customer_id, customer_email, status, total_amount, currency,
 			stripe_session_id, stripe_payment_intent_id,
 			shipping_name, shipping_address1, shipping_address2,
 			shipping_city, shipping_state, shipping_zip, shipping_country,
 			created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, orderID, customerID, models.OrderStatusPending, totalAmount, "usd",
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, orderID, customerID, customerEmail, models.OrderStatusPending, totalAmount, "usd",
 		session.ID, paymentIntentID,
 		shippingName, shippingAddress1, shippingAddress2,
 		shippingCity, shippingState, shippingZip, shippingCountry,

@@ -145,6 +145,7 @@ func (c *Client) CreateOrder(order *models.Order, items []models.OrderItem) (int
 			StateCode:   order.ShippingState,
 			CountryCode: order.ShippingCountry,
 			Zip:         order.ShippingZip,
+			Email:       order.CustomerEmail,
 		},
 		Items: make([]PrintfulOrderItem, len(items)),
 	}

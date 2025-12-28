@@ -13,6 +13,7 @@ import (
 	"github.com/nessieaudio/ecommerce-backend/internal/database"
 	"github.com/nessieaudio/ecommerce-backend/internal/handlers"
 	"github.com/nessieaudio/ecommerce-backend/internal/middleware"
+	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/order"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/printful"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/stripe"
@@ -45,9 +46,10 @@ func main() {
 		cfg.StripeCancelURL,
 	)
 	orderService := order.NewService(db)
+	emailClient := email.NewClient(cfg)
 
 	// Initialize handlers
-	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService)
+	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService, emailClient)
 
 	// Setup router
 	router := mux.NewRouter()

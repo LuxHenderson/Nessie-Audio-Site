@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nessieaudio/ecommerce-backend/internal/config"
+	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/order"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/printful"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/stripe"
@@ -20,6 +21,7 @@ type Handler struct {
 	printfulClient *printful.Client
 	stripeClient   *stripe.Client
 	orderService   *order.Service
+	emailClient    *email.Client
 }
 
 // NewHandler creates a new handler with dependencies
@@ -29,6 +31,7 @@ func NewHandler(
 	printfulClient *printful.Client,
 	stripeClient *stripe.Client,
 	orderService *order.Service,
+	emailClient *email.Client,
 ) *Handler {
 	return &Handler{
 		db:             db,
@@ -36,6 +39,7 @@ func NewHandler(
 		printfulClient: printfulClient,
 		stripeClient:   stripeClient,
 		orderService:   orderService,
+		emailClient:    emailClient,
 	}
 }
 

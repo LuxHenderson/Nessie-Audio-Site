@@ -106,9 +106,12 @@ func (c *Client) CreateCheckoutSession(req *CheckoutSessionRequest) (string, err
 	return sess.ID, nil
 }
 
-// GetSession retrieves a checkout session by ID
+// GetSession retrieves a checkout session by ID with line items expanded
 func (c *Client) GetSession(sessionID string) (*stripe_lib.CheckoutSession, error) {
-	sess, err := session.Get(sessionID, nil)
+	params := &stripe_lib.CheckoutSessionParams{}
+	params.AddExpand("line_items")
+
+	sess, err := session.Get(sessionID, params)
 	if err != nil {
 		return nil, fmt.Errorf("get session: %w", err)
 	}

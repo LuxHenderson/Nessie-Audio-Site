@@ -68,6 +68,10 @@ func (s *Service) CreateOrder(order *models.Order, items []models.OrderItem) err
 // GetOrder retrieves an order by ID
 func (s *Service) GetOrder(id string) (*models.Order, error) {
 	order := &models.Order{}
+	var printfulOrderID sql.NullInt64
+	var trackingNumber sql.NullString
+	var trackingURL sql.NullString
+
 	err := s.db.QueryRow(`
 		SELECT id, customer_id, status, total_amount, currency,
 			stripe_session_id, stripe_payment_intent_id, printful_order_id,
@@ -77,14 +81,25 @@ func (s *Service) GetOrder(id string) (*models.Order, error) {
 		FROM orders WHERE id = ?
 	`, id).Scan(
 		&order.ID, &order.CustomerID, &order.Status, &order.TotalAmount, &order.Currency,
-		&order.StripeSessionID, &order.StripePaymentIntentID, &order.PrintfulOrderID,
+		&order.StripeSessionID, &order.StripePaymentIntentID, &printfulOrderID,
 		&order.ShippingName, &order.ShippingAddress1, &order.ShippingAddress2,
 		&order.ShippingCity, &order.ShippingState, &order.ShippingZip, &order.ShippingCountry,
-		&order.TrackingNumber, &order.TrackingURL, &order.CreatedAt, &order.UpdatedAt,
+		&trackingNumber, &trackingURL, &order.CreatedAt, &order.UpdatedAt,
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf("get order: %w", err)
+	}
+
+	// Convert nullable fields
+	if printfulOrderID.Valid {
+		order.PrintfulOrderID = printfulOrderID.Int64
+	}
+	if trackingNumber.Valid {
+		order.TrackingNumber = trackingNumber.String
+	}
+	if trackingURL.Valid {
+		order.TrackingURL = trackingURL.String
 	}
 
 	return order, nil

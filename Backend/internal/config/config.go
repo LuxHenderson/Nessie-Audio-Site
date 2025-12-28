@@ -35,6 +35,14 @@ type Config struct {
 	// CORS
 	AllowedOrigins string
 
+	// Email (SMTP)
+	SMTPHost      string
+	SMTPPort      string
+	SMTPUsername  string
+	SMTPPassword  string
+	SMTPFromEmail string
+	SMTPFromName  string
+
 	// Logging
 	LogLevel string
 }
@@ -89,6 +97,24 @@ func getStripeCancelURL(cfg *Config) string {
 	return "http://localhost:5500/cart-cancel.html"
 }
 
+// getAllowedOrigins returns the appropriate CORS origins based on environment
+func getAllowedOrigins(cfg *Config) string {
+	// Start with base origins from .env (localhost for development)
+	baseOrigins := os.Getenv("ALLOWED_ORIGINS")
+	if baseOrigins == "" {
+		baseOrigins = "http://localhost:5500,http://127.0.0.1:5500"
+	}
+
+	// In production, add the production domain origins
+	if cfg.Env == "production" && cfg.ProductionDomain != "" {
+		productionOrigins := fmt.Sprintf("https://%s,https://www.%s", cfg.ProductionDomain, cfg.ProductionDomain)
+		return fmt.Sprintf("%s,%s", baseOrigins, productionOrigins)
+	}
+
+	// Development mode - just return base origins
+	return baseOrigins
+}
+
 // Load reads configuration from environment variables
 func Load() (*Config, error) {
 	// Load .env file if it exists (ignore error in production)
@@ -106,12 +132,21 @@ func Load() (*Config, error) {
 		StripeWebhookSecret:   getEnv("STRIPE_WEBHOOK_SECRET", ""),
 		ProductionDomain:      getEnv("PRODUCTION_DOMAIN", ""),
 		AllowedOrigins:        getEnv("ALLOWED_ORIGINS", "http://localhost:3000"),
+		SMTPHost:              getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:              getEnv("SMTP_PORT", "587"),
+		SMTPUsername:          getEnv("SMTP_USERNAME", ""),
+		SMTPPassword:          getEnv("SMTP_PASSWORD", ""),
+		SMTPFromEmail:         getEnv("SMTP_FROM_EMAIL", ""),
+		SMTPFromName:          getEnv("SMTP_FROM_NAME", "Nessie Audio"),
 		LogLevel:              getEnv("LOG_LEVEL", "info"),
 	}
 
 	// Auto-detect Stripe redirect URLs based on environment
 	cfg.StripeSuccessURL = getStripeSuccessURL(cfg)
 	cfg.StripeCancelURL = getStripeCancelURL(cfg)
+
+	// Auto-detect CORS allowed origins based on environment
+	cfg.AllowedOrigins = getAllowedOrigins(cfg)
 
 	// Validate required fields
 	if err := cfg.Validate(); err != nil {

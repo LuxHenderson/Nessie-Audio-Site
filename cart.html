@@ -60,8 +60,25 @@
 
         <!-- Empty cart message -->
         <div id="empty-cart" class="empty-cart" style="display: none;">
-          <p>Your cart is empty.</p>
-          <a href="merch.html" class="btn">Continue Shopping</a>
+          <div class="product-detail-container">
+            <div class="product-detail" style="display: flex; flex-direction: column; max-width: 600px; margin: 0 auto; min-height: 500px; padding: 3rem;">
+              <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <h1 class="product-detail-title" style="display: flex; align-items: baseline; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
+                  <span>Your Cart is Empty</span>
+                  <span style="font-size: 2.5rem; line-height: 1;">🛒</span>
+                </h1>
+
+                <div class="product-detail-description">
+                  <p>Looks like you haven't added anything to your cart yet.</p>
+                  <p>Browse our merch collection to find something you love!</p>
+                </div>
+
+                <div class="product-actions" style="justify-content: center; margin-top: 2rem;">
+                  <a href="merch.html" class="btn-buy-now" style="text-decoration: none; display: inline-block;">Continue Shopping</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Cart contents -->

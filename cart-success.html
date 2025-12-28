@@ -8,90 +8,100 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="Nessie Audio 2026.jpg" type="image/jpeg">
   <meta name="color-scheme" content="light dark">
-  
+
+  <!-- Three.js for atmospheric fog effect -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
 </head>
-
 <body>
+  <!-- Three.js fog effect canvas container (background layer) -->
   <div id="fog-canvas-container"></div>
-  
+
   <header class="site-header" id="top">
     <div class="container header-inner">
-      <div class="brand">
-        <a href="index.html">
-          <img src="Nessie Audio 2026.jpg" alt="Nessie Audio Logo">
-        </a>
+      <div class="brand"><a href="Nævermore.html" class="logo">Nessie Audio</a></div>
+
+      <div class="search-wrap">
+        <input id="site-search" class="site-search" type="search" placeholder="Search site..." aria-label="Search site">
       </div>
-      <nav class="nav-desktop">
+
+      <nav class="main-nav" aria-label="Main navigation">
         <ul>
-          <li><a href="index.html#home">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="music.html">Music</a></li>
-          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="Nævermore.html">Home</a></li>
+          <li><a href="music.html">Portfolio</a></li>
           <li><a href="merch.html">Merch</a></li>
-          <li><a href="tour.html">Tour</a></li>
-          <li><a href="contact.html">Contact</a></li>
-          <li class="cart-nav-item">
-            <a href="cart.html" class="cart-link">
-              🛒 <span class="cart-count">0</span>
-            </a>
-          </li>
+          <li><a href="nessie-digital.html">Nessie Digital</a></li>
+          <li class="cart-nav-item"><a href="cart.html" class="cart-link"><span class="cart-emoji">🛒</span> <span class="cart-count">0</span></a></li>
         </ul>
       </nav>
-      <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-        <span></span><span></span><span></span>
-      </button>
+
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
+
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <ul>
+        <li><a href="Nævermore.html">Home</a></li>
+        <li><a href="music.html">Portfolio</a></li>
+        <li><a href="merch.html">Merch</a></li>
+        <li><a href="nessie-digital.html">Nessie Digital</a></li>
+        <li><a href="cart.html">Cart <span class="cart-emoji">🛒</span> <span class="cart-count">0</span></a></li>
+        <li><a href="tour.html">Tour</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
     </div>
   </header>
 
-  <nav class="mobile-nav" id="mobile-nav">
-    <ul>
-      <li><a href="index.html#home">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="music.html">Music</a></li>
-      <li><a href="gallery.html">Gallery</a></li>
-      <li><a href="merch.html">Merch</a></li>
-      <li><a href="tour.html">Tour</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li><a href="cart.html">Cart 🛒 <span class="cart-count">0</span></a></li>
-    </ul>
-  </nav>
+  <main>
+    <section class="home-content container" style="min-height: calc(100vh - 200px); display: flex; align-items: center; padding-top: 4rem; padding-bottom: 4rem;">
+      <!-- Success message container -->
+      <div class="product-detail-container" style="width: 100%;">
+        <div class="product-detail" style="display: flex; flex-direction: column; max-width: 600px; margin: 0 auto; min-height: 500px; padding: 3rem;">
+          <!-- Centered content wrapper -->
+          <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <!-- Title with checkmark -->
+            <h1 class="product-detail-title" style="display: flex; align-items: baseline; justify-content: center; gap: 1rem; margin-bottom: 2rem;">
+              <span>Order Successful!</span>
+              <span class="success-icon" style="font-size: 2.5rem; color: var(--accent-color, #4CAF50); line-height: 1;">✓</span>
+            </h1>
 
-  <main class="cart-page">
-    <h1 class="page-title">Order Successful! 🎉</h1>
+            <div class="product-detail-description">
+              <h3>Thank you for your order!</h3>
+              <p>Your payment has been processed successfully.</p>
+              <p>You will receive an order confirmation email shortly with tracking information once your items ship.</p>
+            </div>
 
-    <div class="success-message">
-      <div class="success-content">
-        <div class="success-icon">✓</div>
-        <h2>Thank you for your order!</h2>
-        <p>Your payment has been processed successfully.</p>
-        <p>You will receive an order confirmation email shortly with tracking information once your items ship.</p>
-        
-        <div class="success-actions">
-          <a href="merch.html" class="btn btn-primary">Continue Shopping</a>
-          <a href="index.html" class="btn btn-secondary">Return Home</a>
+            <!-- Action Buttons -->
+            <div class="product-actions" style="justify-content: center; margin-top: 2rem;">
+              <button class="btn-add-to-cart" onclick="window.location.href='merch.html'">
+                Continue Shopping
+              </button>
+              <button class="btn-buy-now" onclick="window.location.href='Nævermore.html'">
+                Return Home
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container">
-      <p>&copy; 2025 Nessie Audio. All rights reserved.</p>
-      <div class="social-links">
-        <a href="https://www.instagram.com/nessieaudioproductions" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://www.tiktok.com/@nessieaudio" target="_blank" rel="noopener">TikTok</a>
-        <a href="https://www.youtube.com/@NessieAudio" target="_blank" rel="noopener">YouTube</a>
-      </div>
+    <div class="container footer-inner">
+      <small>© <span id="year">2026</span> Nessie Audio. All rights reserved.</small>
+      <div class="footer-controls"><button id="theme-toggle" class="btn small" aria-pressed="false">Dark Mode</button></div>
     </div>
   </footer>
 
-  <script src="fogEffect.js" defer></script>
   <script src="script.js" defer></script>
+  <script src="fogEffect.js" defer></script>
   <script src="cart.js" defer></script>
   <script>
-    // Clear cart on success page load
-    document.addEventListener('DOMContentLoaded', () => {
+    // Update cart UI and clear cart on success page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.cart && cart.updateCartUI) {
+        cart.updateCartUI();
+      }
+      // Clear the cart after successful purchase
       if (window.cart) {
         cart.clearCart();
       }

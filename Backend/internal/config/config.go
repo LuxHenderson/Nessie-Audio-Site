@@ -29,11 +29,64 @@ type Config struct {
 	StripeSuccessURL     string
 	StripeCancelURL      string
 
+	// Production
+	ProductionDomain string
+
 	// CORS
 	AllowedOrigins string
 
 	// Logging
 	LogLevel string
+}
+
+// getEnv retrieves an environment variable or returns a default value
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+// getStripeSuccessURL returns the appropriate success URL based on environment
+func getStripeSuccessURL(cfg *Config) string {
+	// Check if explicitly set in environment
+	if url := os.Getenv("STRIPE_SUCCESS_URL"); url != "" {
+		return url
+	}
+
+	// Auto-detect based on environment
+	if cfg.Env == "production" {
+		if cfg.ProductionDomain != "" {
+			return fmt.Sprintf("https://%s/cart-success.html", cfg.ProductionDomain)
+		}
+		// Fallback: Will need to be configured
+		log.Println("WARNING: Production mode but PRODUCTION_DOMAIN not set. Set STRIPE_SUCCESS_URL or PRODUCTION_DOMAIN.")
+		return "https://yoursite.com/cart-success.html"
+	}
+
+	// Development mode
+	return "http://localhost:5500/cart-success.html"
+}
+
+// getStripeCancelURL returns the appropriate cancel URL based on environment
+func getStripeCancelURL(cfg *Config) string {
+	// Check if explicitly set in environment
+	if url := os.Getenv("STRIPE_CANCEL_URL"); url != "" {
+		return url
+	}
+
+	// Auto-detect based on environment
+	if cfg.Env == "production" {
+		if cfg.ProductionDomain != "" {
+			return fmt.Sprintf("https://%s/cart-cancel.html", cfg.ProductionDomain)
+		}
+		// Fallback: Will need to be configured
+		log.Println("WARNING: Production mode but PRODUCTION_DOMAIN not set. Set STRIPE_CANCEL_URL or PRODUCTION_DOMAIN.")
+		return "https://yoursite.com/cart-cancel.html"
+	}
+
+	// Development mode
+	return "http://localhost:5500/cart-cancel.html"
 }
 
 // Load reads configuration from environment variables
@@ -51,11 +104,14 @@ func Load() (*Config, error) {
 		StripeSecretKey:       getEnv("STRIPE_SECRET_KEY", ""),
 		StripePublishableKey:  getEnv("STRIPE_PUBLISHABLE_KEY", ""),
 		StripeWebhookSecret:   getEnv("STRIPE_WEBHOOK_SECRET", ""),
-		StripeSuccessURL:      getEnv("STRIPE_SUCCESS_URL", "http://localhost:3000/checkout/success"),
-		StripeCancelURL:       getEnv("STRIPE_CANCEL_URL", "http://localhost:3000/checkout/cancel"),
+		ProductionDomain:      getEnv("PRODUCTION_DOMAIN", ""),
 		AllowedOrigins:        getEnv("ALLOWED_ORIGINS", "http://localhost:3000"),
 		LogLevel:              getEnv("LOG_LEVEL", "info"),
 	}
+
+	// Auto-detect Stripe redirect URLs based on environment
+	cfg.StripeSuccessURL = getStripeSuccessURL(cfg)
+	cfg.StripeCancelURL = getStripeCancelURL(cfg)
 
 	// Validate required fields
 	if err := cfg.Validate(); err != nil {
@@ -81,14 +137,6 @@ func (c *Config) Validate() error {
 	}
 
 	return nil
-}
-
-// getEnv retrieves an environment variable or returns a default value
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
 
 // IsDevelopment returns true if running in development mode

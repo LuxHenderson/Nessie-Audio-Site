@@ -63,9 +63,9 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	// Config
 	api.HandleFunc("/config", h.GetConfig).Methods("GET")
 
-	// Webhooks (no auth required)
+	// Webhooks
 	r.HandleFunc("/webhooks/stripe", h.HandleStripeWebhook).Methods("POST")
-	r.HandleFunc("/webhooks/printful", h.HandlePrintfulWebhook).Methods("POST")
+	r.HandleFunc("/webhooks/printful/{token}", h.HandlePrintfulWebhook).Methods("POST")
 
 	// Health check
 	r.HandleFunc("/health", h.HealthCheck).Methods("GET")

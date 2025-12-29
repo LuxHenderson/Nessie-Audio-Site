@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
@@ -11,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 // PrintfulWebhookPayload represents a Printful webhook event
@@ -26,26 +24,33 @@ type PrintfulWebhookPayload struct {
 }
 
 // HandlePrintfulWebhook processes Printful webhook events
-// POST /webhooks/printful
+// POST /webhooks/printful/{token}
 //
+// Security: Uses secret token in URL since Printful doesn't provide signature verification
 // Events we care about:
 // - order_updated: Order status changed
 // - shipment_created: Tracking info available
 func (h *Handler) HandlePrintfulWebhook(w http.ResponseWriter, r *http.Request) {
+	// Verify webhook token from URL
+	vars := mux.Vars(r)
+	token := vars["token"]
+
+	if h.config.PrintfulWebhookSecret == "" {
+		log.Printf("WARNING: PRINTFUL_WEBHOOK_SECRET not configured - rejecting webhook")
+		respondError(w, http.StatusUnauthorized, "Webhook not configured")
+		return
+	}
+
+	if token != h.config.PrintfulWebhookSecret {
+		log.Printf("Invalid Printful webhook token received")
+		respondError(w, http.StatusUnauthorized, "Invalid token")
+		return
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "Error reading request")
 		return
-	}
-
-	// Verify webhook signature
-	// TODO: Implement signature verification when PRINTFUL_WEBHOOK_SECRET is set
-	if h.config.PrintfulWebhookSecret != "" {
-		if !h.verifyPrintfulSignature(r, body) {
-			log.Printf("Invalid Printful webhook signature")
-			respondError(w, http.StatusUnauthorized, "Invalid signature")
-			return
-		}
 	}
 
 	// Parse webhook payload
@@ -148,21 +153,6 @@ func (h *Handler) handlePrintfulOrderFailed(payload PrintfulWebhookPayload) {
 	}
 
 	// TODO: Alert admin and potentially refund customer
-}
-
-// verifyPrintfulSignature verifies the webhook signature
-func (h *Handler) verifyPrintfulSignature(r *http.Request, body []byte) bool {
-	signature := r.Header.Get("X-Printful-Signature")
-	if signature == "" {
-		return false
-	}
-
-	// Printful uses HMAC-SHA256
-	mac := hmac.New(sha256.New, []byte(h.config.PrintfulWebhookSecret))
-	mac.Write(body)
-	expectedMAC := hex.EncodeToString(mac.Sum(nil))
-
-	return hmac.Equal([]byte(signature), []byte(expectedMAC))
 }
 
 // logPrintfulWebhookEvent saves webhook event for audit

@@ -193,6 +193,68 @@ func (c *Client) ConfirmOrder(printfulOrderID int64) error {
 	return nil
 }
 
+// WebhookConfig represents the webhook configuration
+type WebhookConfig struct {
+	URL    string   `json:"url"`
+	Types  []string `json:"types"`
+	Params struct {
+		Secret string `json:"secret,omitempty"`
+	} `json:"params,omitempty"`
+}
+
+// WebhookInfo represents webhook information from Printful
+type WebhookInfo struct {
+	URL   string   `json:"url"`
+	Types []string `json:"types"`
+}
+
+// SetupWebhook registers or updates webhook configuration with Printful
+func (c *Client) SetupWebhook(webhookURL string, eventTypes []string) error {
+	config := WebhookConfig{
+		URL:   webhookURL,
+		Types: eventTypes,
+	}
+
+	resp, err := c.makeRequest("POST", "/webhooks", config)
+	if err != nil {
+		return fmt.Errorf("setup webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
+// GetWebhook retrieves current webhook configuration
+func (c *Client) GetWebhook() (*WebhookInfo, error) {
+	resp, err := c.makeRequest("GET", "/webhooks", nil)
+	if err != nil {
+		return nil, fmt.Errorf("get webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Code   int          `json:"code"`
+		Result WebhookInfo  `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("decode webhook info: %w", err)
+	}
+
+	return &result.Result, nil
+}
+
+// DisableWebhook removes webhook configuration
+func (c *Client) DisableWebhook() error {
+	resp, err := c.makeRequest("DELETE", "/webhooks", nil)
+	if err != nil {
+		return fmt.Errorf("disable webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
 // makeRequest makes an authenticated request to Printful API
 func (c *Client) makeRequest(method, endpoint string, body interface{}) (*http.Response, error) {
 	var reqBody io.Reader

@@ -93,7 +93,7 @@ func main() {
 		log.Printf("  - POST /api/v1/checkout")
 		log.Printf("  - POST /api/v1/cart/checkout")
 		log.Printf("  - POST /webhooks/stripe")
-		log.Printf("  - POST /webhooks/printful")
+		log.Printf("  - POST /webhooks/printful/{token}")
 		log.Println()
 
 		if cfg.PrintfulAPIKey == "" {

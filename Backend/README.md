@@ -325,9 +325,30 @@ const sessionId = urlParams.get('session_id');
 - `order_failed` - Fulfillment failed
 
 **Setup:**
-1. Go to Printful Dashboard > Settings > Webhooks
-2. Add webhook URL: `https://yourdomain.com/webhooks/printful`
-3. Copy webhook secret to `.env`
+
+Printful manages webhooks through their API (not through a dashboard UI). Use the included setup script:
+
+```bash
+# Make sure your .env file has:
+# - PRINTFUL_API_KEY set to your API token
+# - PRINTFUL_WEBHOOK_SECRET set to a secure random token
+# - PRODUCTION_DOMAIN set to your domain (or you'll be prompted)
+
+./setup-printful-webhook.sh
+```
+
+The script will:
+1. Check for existing webhooks
+2. Register your webhook URL: `https://yourdomain.com/webhooks/printful/{SECRET_TOKEN}`
+3. Subscribe to events: `package_shipped`, `order_created`, `order_updated`, `order_failed`, `order_canceled`
+
+**Manual Setup (if needed):**
+```bash
+# Build and run the setup tool
+go run ./cmd/setup-webhook/main.go
+```
+
+**Security Note:** Printful doesn't provide signature verification like Stripe does, so we use a secret token in the URL path instead. The webhook secret from your `.env` is embedded in the URL to prevent unauthorized requests. Keep this token secure.
 
 ## Adding Products
 

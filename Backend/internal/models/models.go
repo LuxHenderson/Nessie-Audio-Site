@@ -58,16 +58,17 @@ type Order struct {
 
 // OrderItem represents a line item in an order
 type OrderItem struct {
-	ID              string    `json:"id" db:"id"`
-	OrderID         string    `json:"order_id" db:"order_id"`
-	ProductID       string    `json:"product_id" db:"product_id"`
-	VariantID       string    `json:"variant_id" db:"variant_id"`
-	Quantity        int       `json:"quantity" db:"quantity"`
-	UnitPrice       float64   `json:"unit_price" db:"unit_price"`
-	TotalPrice      float64   `json:"total_price" db:"total_price"`
-	ProductName     string    `json:"product_name" db:"product_name"`     // Snapshot at order time
-	VariantName     string    `json:"variant_name" db:"variant_name"`     // Snapshot
-	CreatedAt       time.Time `json:"created_at" db:"created_at"`
+	ID                string    `json:"id" db:"id"`
+	OrderID           string    `json:"order_id" db:"order_id"`
+	ProductID         string    `json:"product_id" db:"product_id"`
+	VariantID         string    `json:"variant_id" db:"variant_id"`
+	PrintfulVariantID int64     `json:"printful_variant_id" db:"printful_variant_id"` // Fetched from variants table
+	Quantity          int       `json:"quantity" db:"quantity"`
+	UnitPrice         float64   `json:"unit_price" db:"unit_price"`
+	TotalPrice        float64   `json:"total_price" db:"total_price"`
+	ProductName       string    `json:"product_name" db:"product_name"`     // Snapshot at order time
+	VariantName       string    `json:"variant_name" db:"variant_name"`     // Snapshot
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
 }
 
 // Customer represents a customer

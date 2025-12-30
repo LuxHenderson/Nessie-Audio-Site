@@ -150,12 +150,10 @@ func (c *Client) CreateOrder(order *models.Order, items []models.OrderItem) (int
 		Items: make([]PrintfulOrderItem, len(items)),
 	}
 
-	// TODO: Map your OrderItems to Printful items
-	// You need to store PrintfulVariantID in your Variant model
+	// Map OrderItems to Printful items using stored variant IDs
 	for i, item := range items {
 		req.Items[i] = PrintfulOrderItem{
-			// TODO: Get PrintfulVariantID from your database
-			VariantID: 0, // PLACEHOLDER - must be actual Printful variant ID
+			VariantID: item.PrintfulVariantID, // Now populated from database
 			Quantity:  item.Quantity,
 		}
 	}

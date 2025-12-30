@@ -108,9 +108,13 @@ func (s *Service) GetOrder(id string) (*models.Order, error) {
 // GetOrderItems retrieves all items for an order
 func (s *Service) GetOrderItems(orderID string) ([]models.OrderItem, error) {
 	rows, err := s.db.Query(`
-		SELECT id, order_id, product_id, variant_id, quantity,
-			unit_price, total_price, product_name, variant_name, created_at
-		FROM order_items WHERE order_id = ?
+		SELECT oi.id, oi.order_id, oi.product_id, oi.variant_id,
+			COALESCE(v.printful_variant_id, 0) as printful_variant_id,
+			oi.quantity, oi.unit_price, oi.total_price,
+			oi.product_name, oi.variant_name, oi.created_at
+		FROM order_items oi
+		LEFT JOIN variants v ON oi.variant_id = v.id
+		WHERE oi.order_id = ?
 	`, orderID)
 	if err != nil {
 		return nil, fmt.Errorf("query order items: %w", err)
@@ -121,8 +125,10 @@ func (s *Service) GetOrderItems(orderID string) ([]models.OrderItem, error) {
 	for rows.Next() {
 		var item models.OrderItem
 		if err := rows.Scan(
-			&item.ID, &item.OrderID, &item.ProductID, &item.VariantID, &item.Quantity,
-			&item.UnitPrice, &item.TotalPrice, &item.ProductName, &item.VariantName, &item.CreatedAt,
+			&item.ID, &item.OrderID, &item.ProductID, &item.VariantID,
+			&item.PrintfulVariantID,
+			&item.Quantity, &item.UnitPrice, &item.TotalPrice,
+			&item.ProductName, &item.VariantName, &item.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan order item: %w", err)
 		}

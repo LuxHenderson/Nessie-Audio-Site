@@ -93,9 +93,12 @@ func (c *Client) CreateCheckoutSession(req *CheckoutSessionRequest) (string, err
 		},
 	}
 
-	// Only set customer email if provided, otherwise Stripe will collect it
+	// Set customer email if provided, otherwise tell Stripe to collect it
 	if req.CustomerEmail != "" {
 		params.CustomerEmail = stripe_lib.String(req.CustomerEmail)
+	} else {
+		// Force Stripe to collect email during checkout
+		params.CustomerCreation = stripe_lib.String("always")
 	}
 
 	sess, err := session.New(params)

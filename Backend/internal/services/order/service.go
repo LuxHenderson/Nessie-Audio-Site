@@ -69,12 +69,14 @@ func (s *Service) CreateOrder(order *models.Order, items []models.OrderItem) err
 func (s *Service) GetOrder(id string) (*models.Order, error) {
 	order := &models.Order{}
 	var printfulOrderID sql.NullInt64
+	var printfulRetryCount sql.NullInt64
 	var trackingNumber sql.NullString
 	var trackingURL sql.NullString
 
 	err := s.db.QueryRow(`
 		SELECT id, customer_id, customer_email, status, total_amount, currency,
 			stripe_session_id, stripe_payment_intent_id, printful_order_id,
+			COALESCE(printful_retry_count, 0) as printful_retry_count,
 			shipping_name, shipping_address1, shipping_address2,
 			shipping_city, shipping_state, shipping_zip, shipping_country,
 			tracking_number, tracking_url, created_at, updated_at
@@ -82,6 +84,7 @@ func (s *Service) GetOrder(id string) (*models.Order, error) {
 	`, id).Scan(
 		&order.ID, &order.CustomerID, &order.CustomerEmail, &order.Status, &order.TotalAmount, &order.Currency,
 		&order.StripeSessionID, &order.StripePaymentIntentID, &printfulOrderID,
+		&printfulRetryCount,
 		&order.ShippingName, &order.ShippingAddress1, &order.ShippingAddress2,
 		&order.ShippingCity, &order.ShippingState, &order.ShippingZip, &order.ShippingCountry,
 		&trackingNumber, &trackingURL, &order.CreatedAt, &order.UpdatedAt,
@@ -94,6 +97,9 @@ func (s *Service) GetOrder(id string) (*models.Order, error) {
 	// Convert nullable fields
 	if printfulOrderID.Valid {
 		order.PrintfulOrderID = printfulOrderID.Int64
+	}
+	if printfulRetryCount.Valid {
+		order.PrintfulRetryCount = int(printfulRetryCount.Int64)
 	}
 	if trackingNumber.Valid {
 		order.TrackingNumber = trackingNumber.String
@@ -208,4 +214,109 @@ func (s *Service) UpdateOrderTracking(orderID, trackingNumber, trackingURL strin
 	}
 
 	return nil
+}
+
+// IncrementPrintfulRetryCount increments the retry count for an order
+func (s *Service) IncrementPrintfulRetryCount(orderID string) error {
+	_, err := s.db.Exec(`
+		UPDATE orders SET
+			printful_retry_count = printful_retry_count + 1,
+			updated_at = ?
+		WHERE id = ?
+	`, time.Now(), orderID)
+
+	if err != nil {
+		return fmt.Errorf("increment retry count: %w", err)
+	}
+
+	return nil
+}
+
+// RecordPrintfulFailure logs a Printful submission failure
+func (s *Service) RecordPrintfulFailure(orderID string, attemptNumber int, errorMsg, errorDetails string) error {
+	_, err := s.db.Exec(`
+		INSERT INTO printful_submission_failures (
+			id, order_id, attempt_number, error_message, error_details, created_at
+		) VALUES (?, ?, ?, ?, ?, ?)
+	`, fmt.Sprintf("%s-%d", orderID, attemptNumber), orderID, attemptNumber, errorMsg, errorDetails, time.Now())
+
+	if err != nil {
+		return fmt.Errorf("record printful failure: %w", err)
+	}
+
+	return nil
+}
+
+// GetFailedPrintfulOrders returns orders that failed Printful submission and are eligible for retry
+func (s *Service) GetFailedPrintfulOrders() ([]models.Order, error) {
+	// Find orders that:
+	// 1. Have status = 'paid' (payment confirmed)
+	// 2. Have NULL printful_order_id (not yet submitted)
+	// 3. Were created less than 24 hours ago
+	// 4. Have at least one retry attempt (failed at least once)
+	rows, err := s.db.Query(`
+		SELECT id, customer_id, customer_email, status, total_amount, currency,
+			stripe_session_id, stripe_payment_intent_id, printful_order_id,
+			printful_retry_count,
+			shipping_name, shipping_address1, shipping_address2,
+			shipping_city, shipping_state, shipping_zip, shipping_country,
+			tracking_number, tracking_url, created_at, updated_at
+		FROM orders
+		WHERE status = ?
+			AND printful_order_id IS NULL
+			AND created_at > datetime('now', '-24 hours')
+			AND printful_retry_count > 0
+		ORDER BY created_at ASC
+	`, models.OrderStatusPaid)
+
+	if err != nil {
+		return nil, fmt.Errorf("query failed orders: %w", err)
+	}
+	defer rows.Close()
+
+	var orders []models.Order
+	for rows.Next() {
+		var order models.Order
+		var printfulOrderID sql.NullInt64
+		var trackingNumber sql.NullString
+		var trackingURL sql.NullString
+		var shippingAddress2 sql.NullString
+		var stripeSessionID sql.NullString
+		var stripePaymentIntentID sql.NullString
+
+		if err := rows.Scan(
+			&order.ID, &order.CustomerID, &order.CustomerEmail, &order.Status, &order.TotalAmount, &order.Currency,
+			&stripeSessionID, &stripePaymentIntentID, &printfulOrderID,
+			&order.PrintfulRetryCount,
+			&order.ShippingName, &order.ShippingAddress1, &shippingAddress2,
+			&order.ShippingCity, &order.ShippingState, &order.ShippingZip, &order.ShippingCountry,
+			&trackingNumber, &trackingURL, &order.CreatedAt, &order.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan order: %w", err)
+		}
+
+		// Convert nullable fields
+		if printfulOrderID.Valid {
+			order.PrintfulOrderID = printfulOrderID.Int64
+		}
+		if trackingNumber.Valid {
+			order.TrackingNumber = trackingNumber.String
+		}
+		if trackingURL.Valid {
+			order.TrackingURL = trackingURL.String
+		}
+		if shippingAddress2.Valid {
+			order.ShippingAddress2 = shippingAddress2.String
+		}
+		if stripeSessionID.Valid {
+			order.StripeSessionID = stripeSessionID.String
+		}
+		if stripePaymentIntentID.Valid {
+			order.StripePaymentIntentID = stripePaymentIntentID.String
+		}
+
+		orders = append(orders, order)
+	}
+
+	return orders, nil
 }

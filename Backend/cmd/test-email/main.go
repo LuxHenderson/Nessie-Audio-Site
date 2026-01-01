@@ -4,13 +4,12 @@ import (
 	"log"
 
 	"github.com/nessieaudio/ecommerce-backend/internal/config"
-	"github.com/nessieaudio/ecommerce-backend/internal/models"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 )
 
 func main() {
-	log.Println("Email Test Utility")
-	log.Println("==================")
+	log.Println("📧 Testing Email Sending Directly")
+	log.Println("==================================")
 
 	// Load config
 	cfg, err := config.Load()
@@ -21,38 +20,30 @@ func main() {
 	// Create email client
 	emailClient := email.NewClient(cfg)
 
-	// Test email data
-	testData := email.OrderConfirmationData{
-		OrderID:       "TEST-ORDER-12345",
-		CustomerName:  "Test Customer",
-		CustomerEmail: "jon.sanderson91@gmail.com", // Your email
-		Items: []models.OrderItem{
-			{
-				ProductName: "Test Product",
-				VariantName: "Large / Black",
-				Quantity:    2,
-				UnitPrice:   29.99,
-				TotalPrice:  59.98,
-			},
-		},
-		Total: 59.98,
-		ShippingInfo: email.ShippingInfo{
-			Name:    "Test Customer",
-			Address: "123 Test Street",
-			City:    "Test City",
-			State:   "CA",
-			Zip:     "12345",
-			Country: "US",
-		},
+	// Test sending a simple email
+	subject := "🧪 Test Email from Nessie Audio Backend"
+	body := `Hello,
+
+This is a test email to verify the SMTP configuration is working correctly.
+
+If you receive this email, it means:
+  ✅ SMTP authentication is successful
+  ✅ Email sending functionality works
+  ✅ Admin alerts should be delivered properly
+
+---
+Sent from Nessie Audio eCommerce Backend Test Suite
+`
+
+	log.Printf("\n📤 Sending test email to: %s", cfg.AdminEmail)
+	log.Printf("   SMTP Host: %s:%s", cfg.SMTPHost, cfg.SMTPPort)
+	log.Printf("   From: %s <%s>", cfg.SMTPFromName, cfg.SMTPFromEmail)
+
+	err = emailClient.SendRawEmail(cfg.AdminEmail, subject, body)
+	if err != nil {
+		log.Fatalf("❌ Failed to send email: %v", err)
 	}
 
-	log.Println("\nSending test order confirmation email...")
-	log.Printf("To: %s", testData.CustomerEmail)
-
-	if err := emailClient.SendOrderConfirmation(testData); err != nil {
-		log.Fatalf("Failed to send email: %v", err)
-	}
-
-	log.Println("✅ Email sent successfully!")
-	log.Println("Check your inbox at:", testData.CustomerEmail)
+	log.Println("\n✅ Email sent successfully!")
+	log.Printf("📬 Check your inbox at: %s\n", cfg.AdminEmail)
 }

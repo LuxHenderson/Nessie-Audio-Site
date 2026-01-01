@@ -163,5 +163,47 @@ func runMigrations(db *sql.DB) error {
 		}
 	}
 
+	// Check if printful_retry_count column exists in orders table
+	var retryCountExists bool
+	err = db.QueryRow(`
+		SELECT COUNT(*) > 0
+		FROM pragma_table_info('orders')
+		WHERE name='printful_retry_count'
+	`).Scan(&retryCountExists)
+
+	if err != nil {
+		return fmt.Errorf("check printful_retry_count column: %w", err)
+	}
+
+	// Add printful_retry_count column if it doesn't exist
+	if !retryCountExists {
+		_, err := db.Exec(`ALTER TABLE orders ADD COLUMN printful_retry_count INTEGER DEFAULT 0`)
+		if err != nil {
+			return fmt.Errorf("add printful_retry_count column: %w", err)
+		}
+	}
+
+	// Create printful_submission_failures table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS printful_submission_failures (
+			id TEXT PRIMARY KEY,
+			order_id TEXT NOT NULL,
+			attempt_number INTEGER NOT NULL,
+			error_message TEXT NOT NULL,
+			error_details TEXT,
+			created_at DATETIME NOT NULL,
+			FOREIGN KEY (order_id) REFERENCES orders(id)
+		)
+	`)
+	if err != nil {
+		return fmt.Errorf("create printful_submission_failures table: %w", err)
+	}
+
+	// Create index for querying failures by order
+	_, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_printful_failures_order ON printful_submission_failures(order_id)`)
+	if err != nil {
+		return fmt.Errorf("create printful failures index: %w", err)
+	}
+
 	return nil
 }

@@ -200,42 +200,96 @@ func main() {
 		// Use custom description if available
 		description := getProductDescription(item.SyncProduct.Name)
 
-		// Insert product
-		_, err = db.Exec(`
-			INSERT INTO products (
-				id, name, description, printful_id, 
-				price, currency, category, image_url, active, 
-				created_at, updated_at
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-		`, productID, item.SyncProduct.Name, description, item.SyncProduct.ID, 
-			price, currency, category, imageURL, 1)
+		// Check if product already exists by printful_id
+		var existingProductID string
+		err = db.QueryRow(`SELECT id FROM products WHERE printful_id = ?`, item.SyncProduct.ID).Scan(&existingProductID)
 
-		if err != nil {
-			log.Printf("Failed to insert product %s: %v", item.SyncProduct.Name, err)
-			continue
-		}
-
-		log.Printf("✓ Added product: %s (ID: %s)", item.SyncProduct.Name, productID)
-
-		// Insert variants
-		for _, variant := range item.SyncVariants {
-			variantID := uuid.New().String()
-
-			_, err := db.Exec(`
-				INSERT INTO variants (
-					id, product_id, printful_variant_id, name,
-					price, available,
-					created_at, updated_at
-				) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-			`, variantID, productID, variant.SyncVariantID, variant.Name,
-				variant.Price, 1)
+		if err == nil {
+			// Product exists, update it
+			_, err = db.Exec(`
+				UPDATE products SET
+					name = ?,
+					description = ?,
+					price = ?,
+					currency = ?,
+					category = ?,
+					image_url = ?,
+					updated_at = datetime('now')
+				WHERE id = ?
+			`, item.SyncProduct.Name, description, price, currency, category, imageURL, existingProductID)
 
 			if err != nil {
-				log.Printf("  Failed to insert variant %s: %v", variant.Name, err)
+				log.Printf("Failed to update product %s: %v", item.SyncProduct.Name, err)
 				continue
 			}
 
-			log.Printf("  ✓ Added variant: %s", variant.Name)
+			productID = existingProductID
+			log.Printf("✓ Updated product: %s (ID: %s)", item.SyncProduct.Name, productID)
+		} else {
+			// Product doesn't exist, insert it
+			_, err = db.Exec(`
+				INSERT INTO products (
+					id, name, description, printful_id,
+					price, currency, category, image_url, active,
+					created_at, updated_at
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+			`, productID, item.SyncProduct.Name, description, item.SyncProduct.ID,
+				price, currency, category, imageURL, 1)
+
+			if err != nil {
+				log.Printf("Failed to insert product %s: %v", item.SyncProduct.Name, err)
+				continue
+			}
+
+			log.Printf("✓ Added product: %s (ID: %s)", item.SyncProduct.Name, productID)
+		}
+
+		// Sync variants (update existing or insert new)
+		for _, variant := range item.SyncVariants {
+			// Check if variant already exists by printful_variant_id and product_id
+			var existingVariantID string
+			err := db.QueryRow(`
+				SELECT id FROM variants
+				WHERE printful_variant_id = ? AND product_id = ?
+			`, variant.SyncVariantID, productID).Scan(&existingVariantID)
+
+			if err == nil {
+				// Variant exists, update it
+				_, err = db.Exec(`
+					UPDATE variants SET
+						name = ?,
+						price = ?,
+						available = ?,
+						updated_at = datetime('now')
+					WHERE id = ?
+				`, variant.Name, variant.Price, 1, existingVariantID)
+
+				if err != nil {
+					log.Printf("  Failed to update variant %s: %v", variant.Name, err)
+					continue
+				}
+
+				log.Printf("  ✓ Updated variant: %s", variant.Name)
+			} else {
+				// Variant doesn't exist, insert it
+				variantID := uuid.New().String()
+
+				_, err := db.Exec(`
+					INSERT INTO variants (
+						id, product_id, printful_variant_id, name,
+						price, available,
+						created_at, updated_at
+					) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+				`, variantID, productID, variant.SyncVariantID, variant.Name,
+					variant.Price, 1)
+
+				if err != nil {
+					log.Printf("  Failed to insert variant %s: %v", variant.Name, err)
+					continue
+				}
+
+				log.Printf("  ✓ Added variant: %s", variant.Name)
+			}
 		}
 	}
 

@@ -42,6 +42,7 @@ type Config struct {
 	SMTPPassword  string
 	SMTPFromEmail string
 	SMTPFromName  string
+	AdminEmail    string
 
 	// Logging
 	LogLevel string
@@ -138,6 +139,7 @@ func Load() (*Config, error) {
 		SMTPPassword:          getEnv("SMTP_PASSWORD", ""),
 		SMTPFromEmail:         getEnv("SMTP_FROM_EMAIL", ""),
 		SMTPFromName:          getEnv("SMTP_FROM_NAME", "Nessie Audio"),
+		AdminEmail:            getEnv("ADMIN_EMAIL", ""),
 		LogLevel:              getEnv("LOG_LEVEL", "info"),
 	}
 

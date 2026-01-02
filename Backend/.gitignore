@@ -16,12 +16,17 @@
 # Go workspace
 go.work
 
-# Environment variables
+# Environment variables (NEVER commit real credentials)
 .env
 .env.local
 .env.*.local
-.env.production
 .env.development
+.env.staging
+.env.production
+
+# Environment marker files
+.production
+.staging
 
 # Database
 *.db

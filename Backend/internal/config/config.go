@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -46,6 +47,71 @@ type Config struct {
 
 	// Logging
 	LogLevel string
+}
+
+// detectEnvironment automatically detects the environment based on context
+func detectEnvironment() string {
+	// Priority 1: Check if ENV is explicitly set
+	if env := os.Getenv("ENV"); env != "" {
+		return env
+	}
+
+	// Priority 2: Check hostname for auto-detection
+	hostname, err := os.Hostname()
+	if err == nil {
+		hostname = strings.ToLower(hostname)
+
+		// Production patterns
+		if strings.Contains(hostname, "nessieaudio.com") ||
+			strings.Contains(hostname, "production") ||
+			strings.Contains(hostname, "prod-") {
+			log.Println("Environment auto-detected: production (based on hostname)")
+			return "production"
+		}
+
+		// Staging patterns
+		if strings.Contains(hostname, "staging") ||
+			strings.Contains(hostname, "stage-") ||
+			strings.Contains(hostname, "stg-") {
+			log.Println("Environment auto-detected: staging (based on hostname)")
+			return "staging"
+		}
+	}
+
+	// Priority 3: Check for environment marker files
+	if _, err := os.Stat(".production"); err == nil {
+		log.Println("Environment auto-detected: production (found .production marker)")
+		return "production"
+	}
+	if _, err := os.Stat(".staging"); err == nil {
+		log.Println("Environment auto-detected: staging (found .staging marker)")
+		return "staging"
+	}
+
+	// Default: Development (local machine)
+	log.Println("Environment auto-detected: development (default/local)")
+	return "development"
+}
+
+// loadEnvFile loads the appropriate .env file based on detected environment
+func loadEnvFile(env string) error {
+	envFile := fmt.Sprintf(".env.%s", env)
+
+	// Try to load environment-specific file
+	if err := godotenv.Load(envFile); err == nil {
+		log.Printf("Loaded configuration from %s", envFile)
+		return nil
+	}
+
+	// Fallback: Try generic .env file
+	if err := godotenv.Load(".env"); err == nil {
+		log.Println("Loaded configuration from .env")
+		return nil
+	}
+
+	// No .env file found - use system environment variables only
+	log.Println("No .env file found - using system environment variables")
+	return nil
 }
 
 // getEnv retrieves an environment variable or returns a default value
@@ -118,12 +184,15 @@ func getAllowedOrigins(cfg *Config) string {
 
 // Load reads configuration from environment variables
 func Load() (*Config, error) {
-	// Load .env file if it exists (ignore error in production)
-	_ = godotenv.Load()
+	// Auto-detect environment first
+	detectedEnv := detectEnvironment()
+
+	// Load the appropriate .env file
+	_ = loadEnvFile(detectedEnv)
 
 	cfg := &Config{
 		Port:                  getEnv("PORT", "8080"),
-		Env:                   getEnv("ENV", "development"),
+		Env:                   detectedEnv,
 		DatabasePath:          getEnv("DATABASE_PATH", "./nessie_store.db"),
 		PrintfulAPIKey:        getEnv("PRINTFUL_API_KEY", ""),
 		PrintfulAPIURL:        getEnv("PRINTFUL_API_URL", "https://api.printful.com"),
@@ -179,6 +248,11 @@ func (c *Config) Validate() error {
 // IsDevelopment returns true if running in development mode
 func (c *Config) IsDevelopment() bool {
 	return c.Env == "development"
+}
+
+// IsStaging returns true if running in staging mode
+func (c *Config) IsStaging() bool {
+	return c.Env == "staging"
 }
 
 // IsProduction returns true if running in production mode

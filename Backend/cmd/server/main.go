@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/nessieaudio/ecommerce-backend/internal/backup"
 	"github.com/nessieaudio/ecommerce-backend/internal/config"
 	"github.com/nessieaudio/ecommerce-backend/internal/database"
 	"github.com/nessieaudio/ecommerce-backend/internal/handlers"
@@ -57,6 +58,31 @@ func main() {
 	defer appLogger.Close()
 
 	appLogger.Info("Nessie Audio eCommerce Backend started")
+
+	// Initialize backup manager
+	backupManager, err := backup.NewManager(db, backup.Config{
+		BackupDir:        "backups",
+		DatabasePath:     cfg.DatabasePath,
+		DailyRetention:   30,
+		MonthlyRetention: 12,
+		CompressBackups:  true,
+	})
+	if err != nil {
+		log.Fatalf("Failed to initialize backup manager: %v", err)
+	}
+
+	// Start scheduled backups (daily at 3:00 AM)
+	backupManager.StartScheduledBackups()
+	appLogger.Info("Backup system initialized - daily backups at 3:00 AM")
+
+	// Create initial backup on startup
+	go func() {
+		if err := backupManager.CreateBackup("daily"); err != nil {
+			appLogger.Warning("Failed to create startup backup", err)
+		} else {
+			log.Println("Initial backup created successfully")
+		}
+	}()
 
 	// Initialize handlers
 	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService, emailClient, appLogger)

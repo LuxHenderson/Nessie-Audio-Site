@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/nessieaudio/ecommerce-backend/internal/logger"
 	"github.com/nessieaudio/ecommerce-backend/internal/models"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/stripe"
@@ -44,6 +45,10 @@ func (h *Handler) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Webhook signature verification failed: %v", err)
+		h.logger.Critical("Stripe webhook signature verification failed", err, map[string]interface{}{
+			"endpoint": "/webhooks/stripe",
+			"ip":       r.RemoteAddr,
+		})
 		respondError(w, http.StatusBadRequest, "Invalid signature")
 		return
 	}
@@ -92,6 +97,20 @@ func (h *Handler) handlePaymentFailed(event stripeLib.Event) {
 	if paymentIntent.LastPaymentError != nil {
 		errorMessage = paymentIntent.LastPaymentError.Msg
 	}
+
+	// Log critical payment failure
+	h.logger.CriticalWithContext(logger.ErrorContext{
+		Message:  "Payment failed",
+		Error:    fmt.Errorf("payment intent failed: %s", errorMessage),
+		Endpoint: "/webhooks/stripe - payment_intent.payment_failed",
+		Details: map[string]interface{}{
+			"payment_intent_id": paymentIntent.ID,
+			"amount":            float64(paymentIntent.Amount) / 100.0,
+			"currency":          paymentIntent.Currency,
+			"status":            paymentIntent.Status,
+			"error_message":     errorMessage,
+		},
+	})
 
 	// Extract customer details
 	customerEmail := ""

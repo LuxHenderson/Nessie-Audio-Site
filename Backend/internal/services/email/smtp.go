@@ -487,6 +487,53 @@ func (c *Client) SendRawEmail(to, subject, body string) error {
 	return nil
 }
 
+// SendHTMLEmail sends an HTML email (for formatted alerts)
+func (c *Client) SendHTMLEmail(to, subject, htmlBody string) error {
+	// Check if SMTP is configured
+	if c.config.SMTPUsername == "" || c.config.SMTPPassword == "" {
+		log.Println("WARNING: SMTP not configured, skipping email send")
+		return nil
+	}
+
+	// If no recipient specified, skip
+	if to == "" {
+		log.Println("WARNING: No recipient email specified, skipping email send")
+		return nil
+	}
+
+	// SMTP authentication
+	auth := smtp.PlainAuth("", c.config.SMTPUsername, c.config.SMTPPassword, c.config.SMTPHost)
+
+	// Build email message
+	from := c.config.SMTPFromEmail
+	fromName := c.config.SMTPFromName
+
+	// Email headers
+	headers := make(map[string]string)
+	headers["From"] = fmt.Sprintf("%s <%s>", fromName, from)
+	headers["To"] = to
+	headers["Subject"] = subject
+	headers["MIME-Version"] = "1.0"
+	headers["Content-Type"] = "text/html; charset=\"UTF-8\""
+
+	// Build message
+	message := ""
+	for k, v := range headers {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+	message += "\r\n" + htmlBody
+
+	// Send email
+	addr := fmt.Sprintf("%s:%s", c.config.SMTPHost, c.config.SMTPPort)
+	err := smtp.SendMail(addr, auth, from, []string{to}, []byte(message))
+	if err != nil {
+		return fmt.Errorf("smtp error: %w", err)
+	}
+
+	log.Printf("HTML email sent to %s", to)
+	return nil
+}
+
 // Helper function to format price
 func formatPrice(price float64) string {
 	return fmt.Sprintf("%.2f", price)

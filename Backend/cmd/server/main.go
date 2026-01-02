@@ -12,6 +12,7 @@ import (
 	"github.com/nessieaudio/ecommerce-backend/internal/config"
 	"github.com/nessieaudio/ecommerce-backend/internal/database"
 	"github.com/nessieaudio/ecommerce-backend/internal/handlers"
+	"github.com/nessieaudio/ecommerce-backend/internal/logger"
 	"github.com/nessieaudio/ecommerce-backend/internal/middleware"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/order"
@@ -48,8 +49,17 @@ func main() {
 	orderService := order.NewService(db)
 	emailClient := email.NewClient(cfg)
 
+	// Initialize logger
+	appLogger, err := logger.New("logs/error.log", emailClient, cfg.AdminEmail)
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer appLogger.Close()
+
+	appLogger.Info("Nessie Audio eCommerce Backend started")
+
 	// Initialize handlers
-	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService, emailClient)
+	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService, emailClient, appLogger)
 
 	// Setup router
 	router := mux.NewRouter()

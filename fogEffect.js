@@ -214,8 +214,18 @@
       isPageVisible = true;
       lastTime = Date.now(); // Reset time tracking to prevent jumps
 
-      // Force restart animation if it somehow stopped
-      if (!animationId) {
+      // CRITICAL: Always restart animation when becoming visible
+      // Chrome may have completely stopped RAF/setInterval when minimized
+      const timeSinceLastFrame = Date.now() - lastFrameTime;
+
+      if (!animationId || timeSinceLastFrame > 1000) {
+        // Animation stopped or stalled - force restart
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+        animationId = null;
+        lastFrameTime = Date.now();
+        console.log('Visibility restored: Restarting fog animation');
         animate();
       }
     }
@@ -232,8 +242,17 @@
     isPageVisible = true;
     lastTime = Date.now();
 
-    // Critical: Always ensure animation loop is running when we regain focus
-    if (!animationId) {
+    // Critical: Check if animation has stalled
+    const timeSinceLastFrame = Date.now() - lastFrameTime;
+
+    if (!animationId || timeSinceLastFrame > 1000) {
+      // Animation stopped or stalled - force restart
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      animationId = null;
+      lastFrameTime = Date.now();
+      console.log('Window focus restored: Restarting fog animation');
       animate();
     }
   }

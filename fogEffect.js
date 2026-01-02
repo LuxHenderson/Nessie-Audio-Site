@@ -28,6 +28,8 @@
   let fogDensity = config.initialFogDensity;
   let lightIntensity = 0;
   let startTime = Date.now();
+  let isPageVisible = true;
+  let lastTime = Date.now();
 
   // Initialize Three.js scene
   function init() {
@@ -52,10 +54,10 @@
       camera.position.z = 5;
 
       // Renderer setup
-      renderer = new THREE.WebGLRenderer({ 
-        alpha: true, 
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
         antialias: false, // Disable for performance
-        powerPreference: 'low-power' // Prefer low GPU usage
+        powerPreference: 'high-performance' // Changed from 'low-power' to prevent Chrome from releasing GPU resources
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap pixel ratio for performance
@@ -79,6 +81,11 @@
 
       // Window resize handler
       window.addEventListener('resize', onWindowResize, false);
+
+      // Visibility change detection - pause/resume animation for Chrome tab throttling
+      document.addEventListener('visibilitychange', handleVisibilityChange, false);
+      window.addEventListener('blur', handleWindowBlur, false);
+      window.addEventListener('focus', handleWindowFocus, false);
 
       // Start animation loop
       animate();
@@ -171,6 +178,43 @@
     return 1 - Math.pow(1 - t, 3);
   }
 
+  // Handle visibility change (tab switching, minimizing)
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      // Tab is now hidden - pause animation
+      isPageVisible = false;
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    } else {
+      // Tab is now visible - resume animation
+      isPageVisible = true;
+      lastTime = Date.now(); // Reset time tracking to prevent jumps
+      if (!animationId) {
+        animate();
+      }
+    }
+  }
+
+  // Handle window blur (user clicked away)
+  function handleWindowBlur() {
+    isPageVisible = false;
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  }
+
+  // Handle window focus (user came back)
+  function handleWindowFocus() {
+    isPageVisible = true;
+    lastTime = Date.now();
+    if (!animationId && !document.hidden) {
+      animate();
+    }
+  }
+
   // Animation loop
   function animate() {
     animationId = requestAnimationFrame(animate);
@@ -243,6 +287,9 @@
       cancelAnimationFrame(animationId);
     }
     window.removeEventListener('resize', onWindowResize);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('blur', handleWindowBlur);
+    window.removeEventListener('focus', handleWindowFocus);
     if (renderer) {
       renderer.dispose();
       const container = document.getElementById('fog-canvas-container');

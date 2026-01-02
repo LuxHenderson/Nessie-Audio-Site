@@ -144,10 +144,12 @@ body {
 }
 
 /* Fixed background image layer using pseudo-element for cross-browser compatibility */
+/* Chrome fix: Removed background-attachment:fixed (causes Chrome rendering bug after tab inactivity) */
+/* Using position:fixed + transform instead for same visual effect without Chrome bugs */
 body::before {
   content: '';
   position: fixed;
-  top: 0;
+  top: 75px; /* Moved translateY into top property to avoid transform on fixed elements */
   left: 0;
   width: 100%;
   height: 100%;
@@ -156,8 +158,8 @@ body::before {
   background-size: contain;
   background-position: 48.5% center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
-  transform: translateY(75px);
+  /* background-attachment: fixed; REMOVED - causes Chrome bug */
+  will-change: auto; /* Tell browser to keep this element rendered */
   z-index: -2; /* Behind fog effect */
   pointer-events: none;
 }

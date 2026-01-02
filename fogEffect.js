@@ -30,6 +30,8 @@
   let startTime = Date.now();
   let isPageVisible = true;
   let lastTime = Date.now();
+  let lastFrameTime = Date.now();
+  let watchdogInterval = null;
 
   // Initialize Three.js scene
   function init() {
@@ -86,6 +88,9 @@
       document.addEventListener('visibilitychange', handleVisibilityChange, false);
       window.addEventListener('blur', handleWindowBlur, false);
       window.addEventListener('focus', handleWindowFocus, false);
+
+      // Start watchdog to detect if Chrome completely stops RAF
+      startWatchdog();
 
       // Start animation loop
       animate();
@@ -178,39 +183,57 @@
     return 1 - Math.pow(1 - t, 3);
   }
 
+  // Watchdog timer to detect if RAF has been completely stopped by Chrome
+  function startWatchdog() {
+    // Check every 2 seconds if animation is still running
+    watchdogInterval = setInterval(() => {
+      const now = Date.now();
+      const timeSinceLastFrame = now - lastFrameTime;
+
+      // If more than 3 seconds since last frame AND page is visible, restart
+      if (timeSinceLastFrame > 3000 && !document.hidden) {
+        console.log('Fog animation watchdog: Restarting animation after Chrome throttle');
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+        animationId = null;
+        lastFrameTime = now;
+        animate();
+      }
+    }, 2000);
+  }
+
   // Handle visibility change (tab switching, minimizing)
   function handleVisibilityChange() {
     if (document.hidden) {
-      // Tab is now hidden - pause animation
+      // Tab is now hidden - just mark as not visible
+      // DON'T cancel RAF - let it throttle naturally
       isPageVisible = false;
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-      }
     } else {
-      // Tab is now visible - resume animation
+      // Tab is now visible - ensure animation is running
       isPageVisible = true;
       lastTime = Date.now(); // Reset time tracking to prevent jumps
+
+      // Force restart animation if it somehow stopped
       if (!animationId) {
         animate();
       }
     }
   }
 
-  // Handle window blur (user clicked away)
+  // Handle window blur (user clicked away) - be less aggressive
   function handleWindowBlur() {
+    // Just mark as not visible, don't stop the loop
     isPageVisible = false;
-    if (animationId) {
-      cancelAnimationFrame(animationId);
-      animationId = null;
-    }
   }
 
-  // Handle window focus (user came back)
+  // Handle window focus (user came back) - ensure animation restarts
   function handleWindowFocus() {
     isPageVisible = true;
     lastTime = Date.now();
-    if (!animationId && !document.hidden) {
+
+    // Critical: Always ensure animation loop is running when we regain focus
+    if (!animationId) {
       animate();
     }
   }
@@ -218,6 +241,9 @@
   // Animation loop
   function animate() {
     animationId = requestAnimationFrame(animate);
+
+    // Update last frame time for watchdog
+    lastFrameTime = Date.now();
 
     const elapsed = Date.now() - startTime;
     const fadeProgress = Math.min(elapsed / config.fadeInDuration, 1);
@@ -285,6 +311,9 @@
   function destroy() {
     if (animationId) {
       cancelAnimationFrame(animationId);
+    }
+    if (watchdogInterval) {
+      clearInterval(watchdogInterval);
     }
     window.removeEventListener('resize', onWindowResize);
     document.removeEventListener('visibilitychange', handleVisibilityChange);

@@ -5,21 +5,42 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nessieaudio/ecommerce-backend/internal/inventory"
 	"github.com/nessieaudio/ecommerce-backend/internal/models"
 )
 
 // Service handles order business logic
 type Service struct {
-	db *sql.DB
+	db                *sql.DB
+	inventoryService  *inventory.Service
 }
 
 // NewService creates a new order service
 func NewService(db *sql.DB) *Service {
-	return &Service{db: db}
+	return &Service{
+		db:               db,
+		inventoryService: inventory.NewService(db),
+	}
 }
 
 // CreateOrder creates a new pending order
 func (s *Service) CreateOrder(order *models.Order, items []models.OrderItem) error {
+	// First, check stock availability for all items
+	for _, item := range items {
+		stockCheck, err := s.inventoryService.CheckStock(item.VariantID, item.Quantity)
+		if err != nil {
+			return fmt.Errorf("check stock for variant %s: %w", item.VariantID, err)
+		}
+
+		if !stockCheck.Available {
+			if stockCheck.StockQuantity != nil {
+				return fmt.Errorf("insufficient stock for %s: requested %d, available %d",
+					item.VariantName, item.Quantity, *stockCheck.StockQuantity)
+			}
+			return fmt.Errorf("item %s is out of stock", item.VariantName)
+		}
+	}
+
 	tx, err := s.db.Begin()
 	if err != nil {
 		return fmt.Errorf("begin transaction: %w", err)
@@ -43,7 +64,7 @@ func (s *Service) CreateOrder(order *models.Order, items []models.OrderItem) err
 		return fmt.Errorf("insert order: %w", err)
 	}
 
-	// Insert order items
+	// Insert order items and deduct stock
 	for _, item := range items {
 		_, err = tx.Exec(`
 			INSERT INTO order_items (
@@ -55,6 +76,11 @@ func (s *Service) CreateOrder(order *models.Order, items []models.OrderItem) err
 
 		if err != nil {
 			return fmt.Errorf("insert order item: %w", err)
+		}
+
+		// Deduct stock for this item
+		if err := s.inventoryService.DeductStock(item.VariantID, item.Quantity); err != nil {
+			return fmt.Errorf("deduct stock for variant %s: %w", item.VariantID, err)
 		}
 	}
 

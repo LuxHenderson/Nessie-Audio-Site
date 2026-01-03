@@ -205,5 +205,65 @@ func runMigrations(db *sql.DB) error {
 		return fmt.Errorf("create printful failures index: %w", err)
 	}
 
+	// Check if stock_quantity column exists in variants table
+	var stockQuantityExists bool
+	err = db.QueryRow(`
+		SELECT COUNT(*) > 0
+		FROM pragma_table_info('variants')
+		WHERE name='stock_quantity'
+	`).Scan(&stockQuantityExists)
+
+	if err != nil {
+		return fmt.Errorf("check stock_quantity column: %w", err)
+	}
+
+	// Add stock_quantity column if it doesn't exist (default to NULL for print-on-demand)
+	if !stockQuantityExists {
+		_, err := db.Exec(`ALTER TABLE variants ADD COLUMN stock_quantity INTEGER`)
+		if err != nil {
+			return fmt.Errorf("add stock_quantity column: %w", err)
+		}
+	}
+
+	// Check if low_stock_threshold column exists in variants table
+	var lowStockThresholdExists bool
+	err = db.QueryRow(`
+		SELECT COUNT(*) > 0
+		FROM pragma_table_info('variants')
+		WHERE name='low_stock_threshold'
+	`).Scan(&lowStockThresholdExists)
+
+	if err != nil {
+		return fmt.Errorf("check low_stock_threshold column: %w", err)
+	}
+
+	// Add low_stock_threshold column if it doesn't exist (default 5)
+	if !lowStockThresholdExists {
+		_, err := db.Exec(`ALTER TABLE variants ADD COLUMN low_stock_threshold INTEGER DEFAULT 5`)
+		if err != nil {
+			return fmt.Errorf("add low_stock_threshold column: %w", err)
+		}
+	}
+
+	// Check if track_inventory column exists in variants table
+	var trackInventoryExists bool
+	err = db.QueryRow(`
+		SELECT COUNT(*) > 0
+		FROM pragma_table_info('variants')
+		WHERE name='track_inventory'
+	`).Scan(&trackInventoryExists)
+
+	if err != nil {
+		return fmt.Errorf("check track_inventory column: %w", err)
+	}
+
+	// Add track_inventory column if it doesn't exist (default FALSE for print-on-demand)
+	if !trackInventoryExists {
+		_, err := db.Exec(`ALTER TABLE variants ADD COLUMN track_inventory BOOLEAN DEFAULT 0`)
+		if err != nil {
+			return fmt.Errorf("add track_inventory column: %w", err)
+		}
+	}
+
 	return nil
 }

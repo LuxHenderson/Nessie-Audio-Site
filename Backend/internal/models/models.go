@@ -20,16 +20,19 @@ type Product struct {
 
 // Variant represents a product variant (size, color, etc.)
 type Variant struct {
-	ID              string    `json:"id" db:"id"`
-	ProductID       string    `json:"product_id" db:"product_id"`
-	PrintfulVariantID int64   `json:"printful_variant_id" db:"printful_variant_id"` // TODO: From Printful
-	Name            string    `json:"name" db:"name"` // e.g., "Large / Black"
-	Size            string    `json:"size" db:"size"`
-	Color           string    `json:"color" db:"color"`
-	Price           float64   `json:"price" db:"price"` // Variant-specific price override
-	Available       bool      `json:"available" db:"available"`
-	CreatedAt       time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
+	ID                string    `json:"id" db:"id"`
+	ProductID         string    `json:"product_id" db:"product_id"`
+	PrintfulVariantID int64     `json:"printful_variant_id" db:"printful_variant_id"` // TODO: From Printful
+	Name              string    `json:"name" db:"name"` // e.g., "Large / Black"
+	Size              string    `json:"size" db:"size"`
+	Color             string    `json:"color" db:"color"`
+	Price             float64   `json:"price" db:"price"` // Variant-specific price override
+	Available         bool      `json:"available" db:"available"`
+	StockQuantity     *int      `json:"stock_quantity,omitempty" db:"stock_quantity"` // NULL = unlimited (print-on-demand)
+	LowStockThreshold int       `json:"low_stock_threshold" db:"low_stock_threshold"` // Alert when stock <= this
+	TrackInventory    bool      `json:"track_inventory" db:"track_inventory"` // FALSE for print-on-demand items
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // Order represents a customer order

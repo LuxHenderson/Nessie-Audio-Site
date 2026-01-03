@@ -80,6 +80,13 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	// Config - General limits
 	api.Handle("/config", generalLimiter(http.HandlerFunc(h.GetConfig))).Methods("GET")
 
+	// Inventory - General limits
+	api.Handle("/inventory", generalLimiter(http.HandlerFunc(h.GetInventoryStatus))).Methods("GET")
+	api.Handle("/inventory/low-stock", generalLimiter(http.HandlerFunc(h.GetLowStockItems))).Methods("GET")
+	api.Handle("/inventory/send-alert", generalLimiter(http.HandlerFunc(h.SendLowStockAlert))).Methods("POST")
+	api.Handle("/inventory/{variant_id}", generalLimiter(http.HandlerFunc(h.UpdateVariantInventory))).Methods("PUT")
+	api.Handle("/inventory/{variant_id}/check", generalLimiter(http.HandlerFunc(h.CheckVariantStock))).Methods("GET")
+
 	// Webhooks - NO rate limiting (Stripe/Printful need reliable delivery)
 	r.HandleFunc("/webhooks/stripe", h.HandleStripeWebhook).Methods("POST")
 	r.HandleFunc("/webhooks/printful/{token}", h.HandlePrintfulWebhook).Methods("POST")

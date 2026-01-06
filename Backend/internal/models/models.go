@@ -20,16 +20,19 @@ type Product struct {
 
 // Variant represents a product variant (size, color, etc.)
 type Variant struct {
-	ID              string    `json:"id" db:"id"`
-	ProductID       string    `json:"product_id" db:"product_id"`
-	PrintfulVariantID int64   `json:"printful_variant_id" db:"printful_variant_id"` // TODO: From Printful
-	Name            string    `json:"name" db:"name"` // e.g., "Large / Black"
-	Size            string    `json:"size" db:"size"`
-	Color           string    `json:"color" db:"color"`
-	Price           float64   `json:"price" db:"price"` // Variant-specific price override
-	Available       bool      `json:"available" db:"available"`
-	CreatedAt       time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
+	ID                string    `json:"id" db:"id"`
+	ProductID         string    `json:"product_id" db:"product_id"`
+	PrintfulVariantID int64     `json:"printful_variant_id" db:"printful_variant_id"` // TODO: From Printful
+	Name              string    `json:"name" db:"name"` // e.g., "Large / Black"
+	Size              string    `json:"size" db:"size"`
+	Color             string    `json:"color" db:"color"`
+	Price             float64   `json:"price" db:"price"` // Variant-specific price override
+	Available         bool      `json:"available" db:"available"`
+	StockQuantity     *int      `json:"stock_quantity,omitempty" db:"stock_quantity"` // NULL = unlimited (print-on-demand)
+	LowStockThreshold int       `json:"low_stock_threshold" db:"low_stock_threshold"` // Alert when stock <= this
+	TrackInventory    bool      `json:"track_inventory" db:"track_inventory"` // FALSE for print-on-demand items
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // Order represents a customer order
@@ -43,6 +46,7 @@ type Order struct {
 	StripeSessionID       string    `json:"stripe_session_id" db:"stripe_session_id"`
 	StripePaymentIntentID string    `json:"stripe_payment_intent_id" db:"stripe_payment_intent_id"`
 	PrintfulOrderID       int64     `json:"printful_order_id,omitempty" db:"printful_order_id"` // Set after submission
+	PrintfulRetryCount    int       `json:"printful_retry_count" db:"printful_retry_count"` // Number of retry attempts
 	ShippingName          string    `json:"shipping_name" db:"shipping_name"`
 	ShippingAddress1      string    `json:"shipping_address1" db:"shipping_address1"`
 	ShippingAddress2      string    `json:"shipping_address2" db:"shipping_address2"`
@@ -99,6 +103,16 @@ type StripeWebhookEvent struct {
 	Payload   string    `json:"payload" db:"payload"`   // JSON blob
 	Processed bool      `json:"processed" db:"processed"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+// PrintfulSubmissionFailure represents a failed Printful order submission attempt
+type PrintfulSubmissionFailure struct {
+	ID            string    `json:"id" db:"id"`
+	OrderID       string    `json:"order_id" db:"order_id"`
+	AttemptNumber int       `json:"attempt_number" db:"attempt_number"`
+	ErrorMessage  string    `json:"error_message" db:"error_message"`
+	ErrorDetails  string    `json:"error_details" db:"error_details"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
 }
 
 // Order status constants

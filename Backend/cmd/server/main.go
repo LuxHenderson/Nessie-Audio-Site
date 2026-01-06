@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/nessieaudio/ecommerce-backend/internal/backup"
 	"github.com/nessieaudio/ecommerce-backend/internal/config"
 	"github.com/nessieaudio/ecommerce-backend/internal/database"
 	"github.com/nessieaudio/ecommerce-backend/internal/handlers"
+	"github.com/nessieaudio/ecommerce-backend/internal/logger"
 	"github.com/nessieaudio/ecommerce-backend/internal/middleware"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/order"
@@ -48,14 +50,51 @@ func main() {
 	orderService := order.NewService(db)
 	emailClient := email.NewClient(cfg)
 
+	// Initialize logger
+	appLogger, err := logger.New("logs/error.log", emailClient, cfg.AdminEmail)
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer appLogger.Close()
+
+	appLogger.Info("Nessie Audio eCommerce Backend started")
+
+	// Initialize backup manager
+	backupManager, err := backup.NewManager(db, backup.Config{
+		BackupDir:        "backups",
+		DatabasePath:     cfg.DatabasePath,
+		DailyRetention:   30,
+		MonthlyRetention: 12,
+		CompressBackups:  true,
+	})
+	if err != nil {
+		log.Fatalf("Failed to initialize backup manager: %v", err)
+	}
+
+	// Start scheduled backups (daily at 3:00 AM)
+	backupManager.StartScheduledBackups()
+	appLogger.Info("Backup system initialized - daily backups at 3:00 AM")
+
+	// Create initial backup on startup
+	go func() {
+		if err := backupManager.CreateBackup("daily"); err != nil {
+			appLogger.Warning("Failed to create startup backup", err)
+		} else {
+			log.Println("Initial backup created successfully")
+		}
+	}()
+
 	// Initialize handlers
-	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService, emailClient)
+	handler := handlers.NewHandler(db, cfg, printfulClient, stripeClient, orderService, emailClient, appLogger)
 
 	// Setup router
 	router := mux.NewRouter()
 
 	// Apply middleware FIRST (before routes)
+	// Order matters: Recovery → HTTPS Redirect → Security Headers → Logging → CORS
 	router.Use(middleware.Recovery)
+	router.Use(middleware.HTTPSRedirect(cfg.Env))
+	router.Use(middleware.SecurityHeaders())
 	router.Use(middleware.Logging)
 	router.Use(middleware.CORS(cfg.AllowedOrigins))
 
@@ -92,6 +131,9 @@ func main() {
 		log.Printf("  - GET  /api/v1/orders/{id}")
 		log.Printf("  - POST /api/v1/checkout")
 		log.Printf("  - POST /api/v1/cart/checkout")
+		log.Printf("  - GET  /api/v1/inventory")
+		log.Printf("  - GET  /api/v1/inventory/low-stock")
+		log.Printf("  - PUT  /api/v1/inventory/{variant_id}")
 		log.Printf("  - POST /webhooks/stripe")
 		log.Printf("  - POST /webhooks/printful/{token}")
 		log.Println()

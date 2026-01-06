@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/nessieaudio/ecommerce-backend/internal/logger"
 	"github.com/nessieaudio/ecommerce-backend/internal/models"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/stripe"
@@ -43,6 +45,10 @@ func (h *Handler) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Webhook signature verification failed: %v", err)
+		h.logger.Critical("Stripe webhook signature verification failed", err, map[string]interface{}{
+			"endpoint": "/webhooks/stripe",
+			"ip":       r.RemoteAddr,
+		})
 		respondError(w, http.StatusBadRequest, "Invalid signature")
 		return
 	}
@@ -61,13 +67,238 @@ func (h *Handler) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 		log.Printf("PaymentIntent succeeded: %s", event.ID)
 
 	case "payment_intent.payment_failed":
-		log.Printf("PaymentIntent failed: %s", event.ID)
+		h.handlePaymentFailed(event)
+
+	case "payment_intent.canceled":
+		h.handlePaymentCanceled(event)
+
+	case "checkout.session.expired":
+		h.handleCheckoutExpired(event)
 
 	default:
 		log.Printf("Unhandled event type: %s", event.Type)
 	}
 
 	respondJSON(w, http.StatusOK, map[string]string{"status": "received"})
+}
+
+// handlePaymentFailed processes payment failures and sends admin alert
+func (h *Handler) handlePaymentFailed(event stripeLib.Event) {
+	var paymentIntent stripeLib.PaymentIntent
+	if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
+		log.Printf("Error parsing payment intent: %v", err)
+		return
+	}
+
+	log.Printf("PaymentIntent failed: %s", paymentIntent.ID)
+
+	// Extract failure details
+	errorMessage := "Unknown error"
+	if paymentIntent.LastPaymentError != nil {
+		errorMessage = paymentIntent.LastPaymentError.Msg
+	}
+
+	// Log critical payment failure
+	h.logger.CriticalWithContext(logger.ErrorContext{
+		Message:  "Payment failed",
+		Error:    fmt.Errorf("payment intent failed: %s", errorMessage),
+		Endpoint: "/webhooks/stripe - payment_intent.payment_failed",
+		Details: map[string]interface{}{
+			"payment_intent_id": paymentIntent.ID,
+			"amount":            float64(paymentIntent.Amount) / 100.0,
+			"currency":          paymentIntent.Currency,
+			"status":            paymentIntent.Status,
+			"error_message":     errorMessage,
+		},
+	})
+
+	// Extract customer details
+	customerEmail := ""
+	customerName := ""
+	if paymentIntent.LatestCharge != nil && paymentIntent.LatestCharge.BillingDetails != nil {
+		customerEmail = paymentIntent.LatestCharge.BillingDetails.Email
+		customerName = paymentIntent.LatestCharge.BillingDetails.Name
+	}
+
+	// Build alert email
+	amount := float64(paymentIntent.Amount) / 100.0
+	subject := fmt.Sprintf("⚠️ Payment Failed: $%.2f", amount)
+
+	body := fmt.Sprintf(`PAYMENT FAILURE ALERT
+========================
+
+A payment attempt has failed on the Nessie Audio store.
+
+Payment Details:
+  Payment Intent ID: %s
+  Amount: $%.2f %s
+  Status: %s
+
+Error:
+  %s
+
+Customer Information:
+  Email: %s
+  Name: %s
+
+Timestamp: %s
+
+---
+This is an automated alert from Nessie Audio eCommerce Backend.
+`,
+		paymentIntent.ID,
+		amount,
+		paymentIntent.Currency,
+		paymentIntent.Status,
+		errorMessage,
+		customerEmail,
+		customerName,
+		time.Now().Format("2006-01-02 15:04:05 MST"),
+	)
+
+	// Send alert to admin
+	if h.config.AdminEmail != "" {
+		go func() {
+			if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+				log.Printf("Failed to send payment failure alert: %v", err)
+			} else {
+				log.Printf("Payment failure alert sent to %s", h.config.AdminEmail)
+			}
+		}()
+	}
+}
+
+// handlePaymentCanceled processes payment intent cancellations and sends admin alert
+func (h *Handler) handlePaymentCanceled(event stripeLib.Event) {
+	var paymentIntent stripeLib.PaymentIntent
+	if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
+		log.Printf("Error parsing payment intent: %v", err)
+		return
+	}
+
+	log.Printf("PaymentIntent canceled: %s (Reason: %s)", paymentIntent.ID, paymentIntent.CancellationReason)
+
+	// Extract customer details
+	customerEmail := ""
+	customerName := ""
+	if paymentIntent.LatestCharge != nil && paymentIntent.LatestCharge.BillingDetails != nil {
+		customerEmail = paymentIntent.LatestCharge.BillingDetails.Email
+		customerName = paymentIntent.LatestCharge.BillingDetails.Name
+	}
+
+	// Build alert email
+	amount := float64(paymentIntent.Amount) / 100.0
+	subject := fmt.Sprintf("🚫 Payment Canceled: $%.2f", amount)
+
+	body := fmt.Sprintf(`PAYMENT CANCELLATION ALERT
+==========================
+
+A payment has been canceled on the Nessie Audio store.
+
+Payment Details:
+  Payment Intent ID: %s
+  Amount: $%.2f %s
+  Status: %s
+  Cancellation Reason: %s
+
+Customer Information:
+  Email: %s
+  Name: %s
+
+Timestamp: %s
+
+---
+This is an automated alert from Nessie Audio eCommerce Backend.
+`,
+		paymentIntent.ID,
+		amount,
+		paymentIntent.Currency,
+		paymentIntent.Status,
+		paymentIntent.CancellationReason,
+		customerEmail,
+		customerName,
+		time.Now().Format("2006-01-02 15:04:05 MST"),
+	)
+
+	// Send alert to admin
+	if h.config.AdminEmail != "" {
+		go func() {
+			if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+				log.Printf("Failed to send payment cancellation alert: %v", err)
+			} else {
+				log.Printf("Payment cancellation alert sent to %s", h.config.AdminEmail)
+			}
+		}()
+	}
+}
+
+// handleCheckoutExpired processes expired checkout sessions and sends admin alert
+func (h *Handler) handleCheckoutExpired(event stripeLib.Event) {
+	var session stripeLib.CheckoutSession
+	if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
+		log.Printf("Error parsing checkout session: %v", err)
+		return
+	}
+
+	log.Printf("Checkout session expired: %s", session.ID)
+
+	// Extract customer details
+	customerEmail := ""
+	customerName := ""
+	if session.CustomerDetails != nil {
+		customerEmail = session.CustomerDetails.Email
+		customerName = session.CustomerDetails.Name
+	}
+
+	// Calculate total from session
+	totalAmount := float64(session.AmountTotal) / 100.0
+
+	// Build alert email
+	subject := fmt.Sprintf("⏱️ Checkout Expired: $%.2f", totalAmount)
+
+	body := fmt.Sprintf(`CHECKOUT SESSION EXPIRED ALERT
+==============================
+
+A checkout session has expired without completion on the Nessie Audio store.
+
+Session Details:
+  Session ID: %s
+  Amount: $%.2f %s
+  Status: %s
+
+Customer Information:
+  Email: %s
+  Name: %s
+
+Possible Reasons:
+  - Customer abandoned cart
+  - Session timeout (24 hours)
+  - Customer did not complete payment
+
+Timestamp: %s
+
+---
+This is an automated alert from Nessie Audio eCommerce Backend.
+`,
+		session.ID,
+		totalAmount,
+		session.Currency,
+		session.Status,
+		customerEmail,
+		customerName,
+		time.Now().Format("2006-01-02 15:04:05 MST"),
+	)
+
+	// Send alert to admin
+	if h.config.AdminEmail != "" {
+		go func() {
+			if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+				log.Printf("Failed to send checkout expiration alert: %v", err)
+			} else {
+				log.Printf("Checkout expiration alert sent to %s", h.config.AdminEmail)
+			}
+		}()
+	}
 }
 
 // handleCheckoutSessionCompleted processes successful checkout
@@ -129,46 +360,89 @@ func (h *Handler) handleCheckoutSessionCompleted(event stripeLib.Event) {
 
 // submitOrderToPrintful submits a paid order to Printful for fulfillment
 // Runs asynchronously to not block webhook response
+// Implements immediate retry with exponential backoff (3 attempts: 1s, 2s, 4s)
 func (h *Handler) submitOrderToPrintful(orderID string) {
-	order, err := h.orderService.GetOrder(orderID)
-	if err != nil {
-		log.Printf("Failed to get order for Printful: %v", err)
+	const maxImmediateRetries = 3
+	backoffDurations := []time.Duration{1 * time.Second, 2 * time.Second, 4 * time.Second}
+
+	for attempt := 1; attempt <= maxImmediateRetries; attempt++ {
+		order, err := h.orderService.GetOrder(orderID)
+		if err != nil {
+			log.Printf("Failed to get order for Printful: %v", err)
+			return
+		}
+
+		items, err := h.orderService.GetOrderItems(orderID)
+		if err != nil {
+			log.Printf("Failed to get order items for Printful: %v", err)
+			return
+		}
+
+		// Attempt to submit to Printful
+		printfulOrderID, err := h.printfulClient.CreateOrder(order, items)
+		if err != nil {
+			log.Printf("Printful submission attempt %d/%d failed for order %s: %v", attempt, maxImmediateRetries, orderID, err)
+
+			// Increment retry count
+			if err := h.orderService.IncrementPrintfulRetryCount(orderID); err != nil {
+				log.Printf("Failed to increment retry count: %v", err)
+			}
+
+			// Record failure in audit table
+			if err := h.orderService.RecordPrintfulFailure(orderID, attempt, err.Error(), ""); err != nil {
+				log.Printf("Failed to record Printful failure: %v", err)
+			}
+
+			// If this wasn't the last attempt, wait and retry
+			if attempt < maxImmediateRetries {
+				log.Printf("Retrying in %v...", backoffDurations[attempt-1])
+				time.Sleep(backoffDurations[attempt-1])
+				continue
+			}
+
+			// All immediate retries exhausted
+			log.Printf("All immediate retries exhausted for order %s. Will retry via background job.", orderID)
+			return
+		}
+
+		// Success! Confirm the order with Printful
+		if err := h.printfulClient.ConfirmOrder(printfulOrderID); err != nil {
+			log.Printf("Failed to confirm Printful order: %v", err)
+
+			// Record this as a failure too
+			if err := h.orderService.IncrementPrintfulRetryCount(orderID); err != nil {
+				log.Printf("Failed to increment retry count: %v", err)
+			}
+			if err := h.orderService.RecordPrintfulFailure(orderID, attempt, "Confirm failed: "+err.Error(), ""); err != nil {
+				log.Printf("Failed to record Printful failure: %v", err)
+			}
+
+			// Retry if we have attempts left
+			if attempt < maxImmediateRetries {
+				log.Printf("Retrying in %v...", backoffDurations[attempt-1])
+				time.Sleep(backoffDurations[attempt-1])
+				continue
+			}
+
+			log.Printf("All immediate retries exhausted for order %s. Will retry via background job.", orderID)
+			return
+		}
+
+		// Update order with Printful ID
+		if err := h.orderService.UpdateOrderWithPrintful(orderID, printfulOrderID); err != nil {
+			log.Printf("Failed to update order with Printful ID: %v", err)
+			return
+		}
+
+		// Update status to fulfilled
+		if err := h.orderService.UpdateOrderStatus(orderID, models.OrderStatusFulfilled); err != nil {
+			log.Printf("Failed to update order status: %v", err)
+			return
+		}
+
+		log.Printf("✅ Order %s submitted to Printful successfully (ID: %d) on attempt %d", orderID, printfulOrderID, attempt)
 		return
 	}
-
-	items, err := h.orderService.GetOrderItems(orderID)
-	if err != nil {
-		log.Printf("Failed to get order items for Printful: %v", err)
-		return
-	}
-
-	// Submit to Printful
-	printfulOrderID, err := h.printfulClient.CreateOrder(order, items)
-	if err != nil {
-		log.Printf("Failed to create Printful order: %v", err)
-		// TODO: Implement retry logic or alert system
-		return
-	}
-
-	// Confirm the order with Printful
-	if err := h.printfulClient.ConfirmOrder(printfulOrderID); err != nil {
-		log.Printf("Failed to confirm Printful order: %v", err)
-		return
-	}
-
-	// Update order with Printful ID
-	if err := h.orderService.UpdateOrderWithPrintful(orderID, printfulOrderID); err != nil {
-		log.Printf("Failed to update order with Printful ID: %v", err)
-		return
-	}
-
-	// Update status to fulfilled
-	if err := h.orderService.UpdateOrderStatus(orderID, models.OrderStatusFulfilled); err != nil {
-		log.Printf("Failed to update order status: %v", err)
-		return
-	}
-
-	log.Printf("Order %s submitted to Printful (ID: %d)", orderID, printfulOrderID)
 }
 
 // sendOrderConfirmationEmail sends order confirmation email to customer

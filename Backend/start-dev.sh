@@ -45,6 +45,11 @@ echo -e "${BLUE}[Stripe Webhooks]${NC} Starting webhook forwarding..."
 stripe listen --forward-to localhost:8080/webhooks/stripe 2>&1 | sed 's/^/[Stripe] /' &
 STRIPE_PID=$!
 
+# Start Printful retry worker in background
+echo -e "${BLUE}[Retry Worker]${NC} Starting Printful retry worker..."
+./start-retry-worker.sh &
+RETRY_PID=$!
+
 # Wait a moment for Stripe to start
 sleep 2
 
@@ -71,6 +76,7 @@ echo ""
 echo "Services:"
 echo "  • Backend Server:    http://localhost:8080"
 echo "  • Stripe Webhooks:   Forwarding to /webhooks/stripe"
+echo "  • Retry Worker:      Running every 15 minutes"
 echo ""
 echo "Press Ctrl+C to stop all services"
 echo ""

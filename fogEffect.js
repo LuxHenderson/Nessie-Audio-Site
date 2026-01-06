@@ -28,6 +28,10 @@
   let fogDensity = config.initialFogDensity;
   let lightIntensity = 0;
   let startTime = Date.now();
+  let isPageVisible = true;
+  let lastTime = Date.now();
+  let lastFrameTime = Date.now();
+  let watchdogInterval = null;
 
   // Initialize Three.js scene
   function init() {
@@ -52,10 +56,10 @@
       camera.position.z = 5;
 
       // Renderer setup
-      renderer = new THREE.WebGLRenderer({ 
-        alpha: true, 
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
         antialias: false, // Disable for performance
-        powerPreference: 'low-power' // Prefer low GPU usage
+        powerPreference: 'high-performance' // Changed from 'low-power' to prevent Chrome from releasing GPU resources
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap pixel ratio for performance
@@ -79,6 +83,14 @@
 
       // Window resize handler
       window.addEventListener('resize', onWindowResize, false);
+
+      // Visibility change detection - pause/resume animation for Chrome tab throttling
+      document.addEventListener('visibilitychange', handleVisibilityChange, false);
+      window.addEventListener('blur', handleWindowBlur, false);
+      window.addEventListener('focus', handleWindowFocus, false);
+
+      // Start watchdog to detect if Chrome completely stops RAF
+      startWatchdog();
 
       // Start animation loop
       animate();
@@ -171,9 +183,86 @@
     return 1 - Math.pow(1 - t, 3);
   }
 
+  // Watchdog timer to detect if RAF has been completely stopped by Chrome
+  function startWatchdog() {
+    // Check every 2 seconds if animation is still running
+    watchdogInterval = setInterval(() => {
+      const now = Date.now();
+      const timeSinceLastFrame = now - lastFrameTime;
+
+      // If more than 3 seconds since last frame AND page is visible, restart
+      if (timeSinceLastFrame > 3000 && !document.hidden) {
+        console.log('Fog animation watchdog: Restarting animation after Chrome throttle');
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+        animationId = null;
+        lastFrameTime = now;
+        animate();
+      }
+    }, 2000);
+  }
+
+  // Handle visibility change (tab switching, minimizing)
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      // Tab is now hidden - just mark as not visible
+      // DON'T cancel RAF - let it throttle naturally
+      isPageVisible = false;
+    } else {
+      // Tab is now visible - ensure animation is running
+      isPageVisible = true;
+      lastTime = Date.now(); // Reset time tracking to prevent jumps
+
+      // CRITICAL: Always restart animation when becoming visible
+      // Chrome may have completely stopped RAF/setInterval when minimized
+      const timeSinceLastFrame = Date.now() - lastFrameTime;
+
+      if (!animationId || timeSinceLastFrame > 1000) {
+        // Animation stopped or stalled - force restart
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+        animationId = null;
+        lastFrameTime = Date.now();
+        console.log('Visibility restored: Restarting fog animation');
+        animate();
+      }
+    }
+  }
+
+  // Handle window blur (user clicked away) - be less aggressive
+  function handleWindowBlur() {
+    // Just mark as not visible, don't stop the loop
+    isPageVisible = false;
+  }
+
+  // Handle window focus (user came back) - ensure animation restarts
+  function handleWindowFocus() {
+    isPageVisible = true;
+    lastTime = Date.now();
+
+    // Critical: Check if animation has stalled
+    const timeSinceLastFrame = Date.now() - lastFrameTime;
+
+    if (!animationId || timeSinceLastFrame > 1000) {
+      // Animation stopped or stalled - force restart
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      animationId = null;
+      lastFrameTime = Date.now();
+      console.log('Window focus restored: Restarting fog animation');
+      animate();
+    }
+  }
+
   // Animation loop
   function animate() {
     animationId = requestAnimationFrame(animate);
+
+    // Update last frame time for watchdog
+    lastFrameTime = Date.now();
 
     const elapsed = Date.now() - startTime;
     const fadeProgress = Math.min(elapsed / config.fadeInDuration, 1);
@@ -242,7 +331,13 @@
     if (animationId) {
       cancelAnimationFrame(animationId);
     }
+    if (watchdogInterval) {
+      clearInterval(watchdogInterval);
+    }
     window.removeEventListener('resize', onWindowResize);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('blur', handleWindowBlur);
+    window.removeEventListener('focus', handleWindowFocus);
     if (renderer) {
       renderer.dispose();
       const container = document.getElementById('fog-canvas-container');

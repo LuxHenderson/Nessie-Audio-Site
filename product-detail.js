@@ -542,14 +542,67 @@ async function initProductDetailPage() {
   }
 
   console.log('Product loaded:', product);
-  
+
   // Render the product detail view
   renderProductDetail(product);
-  
+
   // Update page title
   document.title = `${product.name} - Nessie Audio`;
-  
+
+  // Update meta tags for SEO and social sharing
+  updateMetaTags(product);
+
   console.log('Product Detail page initialized');
+}
+
+// ========== UPDATE META TAGS ==========
+/**
+ * Update meta tags dynamically for SEO and social sharing
+ * @param {Object} product - Product object
+ */
+function updateMetaTags(product) {
+  const productUrl = `https://nessieaudio.com/product-detail.html?id=${product.id}`;
+  const productImage = product.image_url || product.imageUrl || 'https://nessieaudio.com/Nessie Audio 2026.jpg';
+  const productDescription = product.description
+    ? product.description.substring(0, 150).replace(/\n/g, ' ').trim() + '...'
+    : `Shop ${product.name} at Nessie Audio - Premium merchandise with unique designs.`;
+
+  // Update standard meta description
+  updateMetaTag('name', 'description', productDescription);
+
+  // Update Open Graph tags
+  updateMetaTag('property', 'og:url', productUrl);
+  updateMetaTag('property', 'og:title', `${product.name} - Nessie Audio Merch`);
+  updateMetaTag('property', 'og:description', productDescription);
+  updateMetaTag('property', 'og:image', productImage);
+
+  // Update Twitter Card tags
+  updateMetaTag('property', 'twitter:url', productUrl);
+  updateMetaTag('property', 'twitter:title', `${product.name} - Nessie Audio Merch`);
+  updateMetaTag('property', 'twitter:description', productDescription);
+  updateMetaTag('property', 'twitter:image', productImage);
+
+  console.log('Meta tags updated for product:', product.name);
+}
+
+/**
+ * Helper function to update a specific meta tag
+ * @param {string} attribute - The attribute to match ('name' or 'property')
+ * @param {string} value - The value of the attribute
+ * @param {string} content - The new content for the meta tag
+ */
+function updateMetaTag(attribute, value, content) {
+  let tag = document.querySelector(`meta[${attribute}="${value}"]`);
+
+  if (tag) {
+    tag.setAttribute('content', content);
+  } else {
+    // Create the tag if it doesn't exist
+    tag = document.createElement('meta');
+    tag.setAttribute(attribute, value);
+    tag.setAttribute('content', content);
+    document.head.appendChild(tag);
+  }
 }
 
 // ========== EVENT LISTENERS ==========

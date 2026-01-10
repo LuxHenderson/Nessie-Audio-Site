@@ -93,6 +93,9 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Health check - NO rate limiting (used for monitoring)
 	r.HandleFunc("/health", h.HealthCheck).Methods("GET")
+
+	// Sitemap - NO rate limiting (used by search engines)
+	r.HandleFunc("/sitemap.xml", h.GetSitemap).Methods("GET")
 }
 
 // respondJSON writes a JSON response

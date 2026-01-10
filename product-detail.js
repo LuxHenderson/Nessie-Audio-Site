@@ -139,9 +139,10 @@ function renderProductDetail(product) {
     <div class="product-detail">
       <!-- Product Image Section -->
       <div class="product-detail-image">
-        <img src="${product.image_url || product.imageUrl}" 
-             alt="${product.name}" 
-             class="product-main-image">
+        <img src="${product.image_url || product.imageUrl}"
+             alt="${product.name}"
+             class="product-main-image"
+             loading="eager">
       </div>
 
       <!-- Product Info Section -->

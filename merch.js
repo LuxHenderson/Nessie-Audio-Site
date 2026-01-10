@@ -113,7 +113,8 @@ function createProductHTML(product) {
       <div class="merch-image-container">
         <img src="${product.image_url || product.imageUrl}"
              alt="${product.name}"
-             class="merch-image">
+             class="merch-image"
+             loading="lazy">
       </div>
       <div class="merch-details">
         <h3 class="merch-title">${product.name}</h3>

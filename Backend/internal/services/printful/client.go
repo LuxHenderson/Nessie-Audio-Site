@@ -69,8 +69,8 @@ type PrintfulRecipient struct {
 
 // PrintfulOrderItem represents an item in a Printful order
 type PrintfulOrderItem struct {
-	VariantID int64 `json:"variant_id"` // TODO: Get from your Product.PrintfulVariantID
-	Quantity  int   `json:"quantity"`
+	SyncVariantID int64 `json:"sync_variant_id"` // Store product sync variant ID
+	Quantity      int   `json:"quantity"`
 }
 
 // PrintfulOrderResponse represents Printful's order creation response
@@ -153,8 +153,8 @@ func (c *Client) CreateOrder(order *models.Order, items []models.OrderItem) (int
 	// Map OrderItems to Printful items using stored variant IDs
 	for i, item := range items {
 		req.Items[i] = PrintfulOrderItem{
-			VariantID: item.PrintfulVariantID, // Now populated from database
-			Quantity:  item.Quantity,
+			SyncVariantID: item.PrintfulVariantID, // Now populated from database
+			Quantity:      item.Quantity,
 		}
 	}
 
@@ -179,9 +179,8 @@ func (c *Client) CreateOrder(order *models.Order, items []models.OrderItem) (int
 
 // ConfirmOrder confirms a draft order for fulfillment
 func (c *Client) ConfirmOrder(printfulOrderID int64) error {
-	// TODO: Implement
-	// Endpoint: POST /orders/@{id}/confirm
-	endpoint := fmt.Sprintf("/orders/@%d/confirm", printfulOrderID)
+	// Endpoint: POST /orders/{id}/confirm
+	endpoint := fmt.Sprintf("/orders/%d/confirm", printfulOrderID)
 	resp, err := c.makeRequest("POST", endpoint, nil)
 	if err != nil {
 		return err

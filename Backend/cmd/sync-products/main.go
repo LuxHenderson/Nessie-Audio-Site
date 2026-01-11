@@ -251,7 +251,7 @@ func main() {
 			err := db.QueryRow(`
 				SELECT id FROM variants
 				WHERE printful_variant_id = ? AND product_id = ?
-			`, variant.SyncVariantID, productID).Scan(&existingVariantID)
+			`, variant.ID, productID).Scan(&existingVariantID)
 
 			if err == nil {
 				// Variant exists, update it
@@ -280,7 +280,7 @@ func main() {
 						price, available,
 						created_at, updated_at
 					) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-				`, variantID, productID, variant.SyncVariantID, variant.Name,
+				`, variantID, productID, variant.ID, variant.Name,
 					variant.Price, 1)
 
 				if err != nil {

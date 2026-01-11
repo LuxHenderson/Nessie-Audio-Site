@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/nessieaudio/ecommerce-backend/internal/config"
@@ -119,10 +120,147 @@ func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// HealthCheck returns server health status
+// HealthCheck returns comprehensive server health status
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]string{
-		"status": "healthy",
-		"service": "nessie-audio-ecommerce",
-	})
+	health := h.checkSystemHealth()
+
+	// Return 200 if healthy, 503 if any critical component is down
+	status := http.StatusOK
+	if health.Status != "healthy" {
+		status = http.StatusServiceUnavailable
+	}
+
+	respondJSON(w, status, health)
+}
+
+// HealthStatus represents the health check response
+type HealthStatus struct {
+	Status    string                  `json:"status"`
+	Service   string                  `json:"service"`
+	Timestamp string                  `json:"timestamp"`
+	Checks    map[string]ComponentHealth `json:"checks"`
+}
+
+// ComponentHealth represents the health of a single component
+type ComponentHealth struct {
+	Status  string `json:"status"`
+	Message string `json:"message,omitempty"`
+}
+
+// checkSystemHealth performs comprehensive health checks
+func (h *Handler) checkSystemHealth() HealthStatus {
+	checks := make(map[string]ComponentHealth)
+	allHealthy := true
+
+	// 1. Database connectivity check
+	dbHealth := h.checkDatabase()
+	checks["database"] = dbHealth
+	if dbHealth.Status != "healthy" {
+		allHealthy = false
+	}
+
+	// 2. Stripe API check (lightweight - just verify credentials are set)
+	stripeHealth := h.checkStripeConfig()
+	checks["stripe"] = stripeHealth
+	if stripeHealth.Status != "healthy" {
+		allHealthy = false
+	}
+
+	// 3. Printful API check (lightweight - just verify credentials are set)
+	printfulHealth := h.checkPrintfulConfig()
+	checks["printful"] = printfulHealth
+	if printfulHealth.Status != "healthy" {
+		allHealthy = false
+	}
+
+	// 4. Email service check (verify SMTP config)
+	emailHealth := h.checkEmailConfig()
+	checks["email"] = emailHealth
+	if emailHealth.Status != "healthy" {
+		allHealthy = false
+	}
+
+	// Determine overall status
+	overallStatus := "healthy"
+	if !allHealthy {
+		overallStatus = "unhealthy"
+	}
+
+	return HealthStatus{
+		Status:    overallStatus,
+		Service:   "nessie-audio-ecommerce",
+		Timestamp: time.Now().Format(time.RFC3339),
+		Checks:    checks,
+	}
+}
+
+// checkDatabase verifies database connectivity
+func (h *Handler) checkDatabase() ComponentHealth {
+	err := h.db.Ping()
+	if err != nil {
+		return ComponentHealth{
+			Status:  "unhealthy",
+			Message: "database ping failed: " + err.Error(),
+		}
+	}
+
+	// Also check if we can query
+	var count int
+	err = h.db.QueryRow("SELECT COUNT(*) FROM products").Scan(&count)
+	if err != nil {
+		return ComponentHealth{
+			Status:  "unhealthy",
+			Message: "database query failed: " + err.Error(),
+		}
+	}
+
+	return ComponentHealth{
+		Status:  "healthy",
+		Message: "database operational",
+	}
+}
+
+// checkStripeConfig verifies Stripe configuration
+func (h *Handler) checkStripeConfig() ComponentHealth {
+	if h.config.StripeSecretKey == "" || h.config.StripePublishableKey == "" {
+		return ComponentHealth{
+			Status:  "unhealthy",
+			Message: "stripe credentials not configured",
+		}
+	}
+
+	return ComponentHealth{
+		Status:  "healthy",
+		Message: "stripe configured",
+	}
+}
+
+// checkPrintfulConfig verifies Printful configuration
+func (h *Handler) checkPrintfulConfig() ComponentHealth {
+	if h.config.PrintfulAPIKey == "" {
+		return ComponentHealth{
+			Status:  "unhealthy",
+			Message: "printful credentials not configured",
+		}
+	}
+
+	return ComponentHealth{
+		Status:  "healthy",
+		Message: "printful configured",
+	}
+}
+
+// checkEmailConfig verifies email service configuration
+func (h *Handler) checkEmailConfig() ComponentHealth {
+	if h.config.SMTPHost == "" || h.config.SMTPUsername == "" || h.config.SMTPPassword == "" {
+		return ComponentHealth{
+			Status:  "unhealthy",
+			Message: "email service not configured",
+		}
+	}
+
+	return ComponentHealth{
+		Status:  "healthy",
+		Message: "email service configured",
+	}
 }

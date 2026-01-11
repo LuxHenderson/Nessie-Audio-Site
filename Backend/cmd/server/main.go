@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -35,7 +36,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	defer db.Close()
 
 	log.Println("Database initialized")
 
@@ -55,7 +55,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	defer appLogger.Close()
 
 	appLogger.Info("Nessie Audio eCommerce Backend started")
 
@@ -156,9 +155,30 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Shutting down server...")
-	if err := server.Close(); err != nil {
-		log.Printf("Error closing server: %v", err)
+	log.Println("\n🛑 Shutdown signal received, initiating graceful shutdown...")
+	appLogger.Info("Server shutdown initiated")
+
+	// Create shutdown context with 30 second timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Stop accepting new requests and wait for existing ones to complete
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("❌ Server forced to shutdown: %v", err)
+		appLogger.Critical("Forced server shutdown", err, nil)
+	} else {
+		log.Println("✅ All active requests completed")
 	}
-	log.Println("Server stopped")
+
+	// Close database connections
+	log.Println("🔌 Closing database connections...")
+	if err := db.Close(); err != nil {
+		log.Printf("⚠️  Error closing database: %v", err)
+	}
+
+	// Close logger
+	log.Println("📝 Closing logger...")
+	appLogger.Close()
+
+	log.Println("✅ Server shutdown complete")
 }

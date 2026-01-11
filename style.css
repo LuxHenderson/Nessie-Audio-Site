@@ -684,6 +684,23 @@ section{padding:3rem 0}
 .booking-form .btn:disabled{ opacity: 0.6; cursor: not-allowed; }
 .booking-form .form-status{ grid-column: 1 / -1; margin-top: 0.5rem; font-size: 0.9rem; text-align: center; }
 
+/* Form validation error styles */
+.form-error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.input-error {
+  border-color: #ff6b6b !important;
+  background-color: rgba(255, 107, 107, 0.05);
+}
+
+.has-error label {
+  color: #ff6b6b;
+}
+
 @media (max-width:900px){
   .show-promo-row .box-booking{ padding-left: 1rem; padding-right: 1rem; }
   .booking-form{ grid-template-columns: 1fr; }

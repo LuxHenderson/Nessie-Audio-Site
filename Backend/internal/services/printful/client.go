@@ -8,14 +8,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/nessieaudio/ecommerce-backend/internal/circuitbreaker"
 	"github.com/nessieaudio/ecommerce-backend/internal/models"
 )
 
 // Client wraps the Printful API
 type Client struct {
-	apiKey  string
-	baseURL string
-	client  *http.Client
+	apiKey         string
+	baseURL        string
+	client         *http.Client
+	circuitBreaker *circuitbreaker.CircuitBreaker
 }
 
 // NewClient creates a new Printful API client
@@ -24,8 +26,14 @@ func NewClient(apiKey, baseURL string) *Client {
 		apiKey:  apiKey,
 		baseURL: baseURL,
 		client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: 15 * time.Second, // Reduced from 30s for faster failure detection
 		},
+		circuitBreaker: circuitbreaker.New(circuitbreaker.Config{
+			Name:            "printful",
+			MaxFailures:     5,
+			ResetTimeout:    60 * time.Second,
+			HalfOpenMaxReqs: 1,
+		}),
 	}
 }
 
@@ -252,35 +260,52 @@ func (c *Client) DisableWebhook() error {
 	return nil
 }
 
-// makeRequest makes an authenticated request to Printful API
+// makeRequest makes an authenticated request to Printful API with circuit breaker protection
 func (c *Client) makeRequest(method, endpoint string, body interface{}) (*http.Response, error) {
-	var reqBody io.Reader
-	if body != nil {
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("marshal request: %w", err)
+	var resp *http.Response
+	var respErr error
+
+	// Execute request with circuit breaker protection
+	err := c.circuitBreaker.Execute(func() error {
+		var reqBody io.Reader
+		if body != nil {
+			jsonData, err := json.Marshal(body)
+			if err != nil {
+				return fmt.Errorf("marshal request: %w", err)
+			}
+			reqBody = bytes.NewBuffer(jsonData)
 		}
-		reqBody = bytes.NewBuffer(jsonData)
-	}
 
-	req, err := http.NewRequest(method, c.baseURL+endpoint, reqBody)
+		req, err := http.NewRequest(method, c.baseURL+endpoint, reqBody)
+		if err != nil {
+			return fmt.Errorf("create request: %w", err)
+		}
+
+		// Printful authentication: Bearer token
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err = c.client.Do(req)
+		if err != nil {
+			return fmt.Errorf("execute request: %w", err)
+		}
+
+		if resp.StatusCode >= 400 {
+			bodyBytes, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			respErr = fmt.Errorf("printful API error %d: %s", resp.StatusCode, string(bodyBytes))
+			return respErr
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return nil, err
 	}
 
-	// Printful authentication: Bearer token
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("execute request: %w", err)
-	}
-
-	if resp.StatusCode >= 400 {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		return nil, fmt.Errorf("printful API error %d: %s", resp.StatusCode, string(bodyBytes))
+	if respErr != nil {
+		return nil, respErr
 	}
 
 	return resp, nil

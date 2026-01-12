@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	apierrors "github.com/nessieaudio/ecommerce-backend/internal/errors"
+	"github.com/nessieaudio/ecommerce-backend/internal/middleware"
 )
 
 // GetProductsResponse represents the products API response
@@ -41,6 +43,8 @@ type VariantResponse struct {
 // GetProducts returns all active products
 // GET /api/v1/products
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetRequestID(r.Context())
+
 	// Query products from database
 	rows, err := h.db.Query(`
 		SELECT id, name, description, price, currency, image_url, thumbnail_url, category
@@ -48,7 +52,8 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 		ORDER BY created_at DESC
 	`)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch products")
+		h.logger.Error("Failed to query products [request_id: "+requestID+"]", err)
+		apierrors.RespondInternalError(w, requestID)
 		return
 	}
 	defer rows.Close()
@@ -59,7 +64,8 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 		var description, imageURL, thumbnailURL, category sql.NullString
 		if err := rows.Scan(&p.ID, &p.Name, &description, &p.Price, &p.Currency,
 			&imageURL, &thumbnailURL, &category); err != nil {
-			respondError(w, http.StatusInternalServerError, "Error reading products")
+			h.logger.Error("Failed to scan product row [request_id: "+requestID+"]", err)
+			apierrors.RespondInternalError(w, requestID)
 			return
 		}
 
@@ -75,23 +81,38 @@ func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 			FROM variants
 			WHERE product_id = ? AND available = 1
 		`, p.ID).Scan(&minPrice, &maxPrice)
-		
+
 		if err == nil && minPrice.Valid && maxPrice.Valid {
 			p.MinPrice = minPrice.Float64
 			p.MaxPrice = maxPrice.Float64
 		}
+		// Silently ignore price range errors - not critical
 
 		products = append(products, p)
 	}
 
-	respondJSON(w, http.StatusOK, GetProductsResponse{Products: products})
+	// Check for errors during iteration
+	if err := rows.Err(); err != nil {
+		h.logger.Error("Error iterating product rows [request_id: "+requestID+"]", err)
+		apierrors.RespondInternalError(w, requestID)
+		return
+	}
+
+	apierrors.RespondJSON(w, http.StatusOK, GetProductsResponse{Products: products})
 }
 
 // GetProduct returns a single product with variants
 // GET /api/v1/products/{id}
 func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	requestID := middleware.GetRequestID(r.Context())
 	vars := mux.Vars(r)
 	productID := vars["id"]
+
+	// Validate product ID
+	if productID == "" {
+		apierrors.RespondError(w, http.StatusBadRequest, "Product ID is required", apierrors.ErrCodeBadRequest, nil, requestID)
+		return
+	}
 
 	// Get product
 	var product ProductResponse
@@ -103,11 +124,12 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		&product.Currency, &imageURL, &thumbnailURL, &category)
 
 	if err == sql.ErrNoRows {
-		respondError(w, http.StatusNotFound, "Product not found")
+		apierrors.RespondNotFound(w, "Product", requestID)
 		return
 	}
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch product")
+		h.logger.Error("Failed to fetch product [request_id: "+requestID+", product_id: "+productID+"]", err)
+		apierrors.RespondInternalError(w, requestID)
 		return
 	}
 
@@ -123,7 +145,8 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		ORDER BY name
 	`, productID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch variants")
+		h.logger.Error("Failed to fetch variants [request_id: "+requestID+", product_id: "+productID+"]", err)
+		apierrors.RespondInternalError(w, requestID)
 		return
 	}
 	defer rows.Close()
@@ -132,13 +155,21 @@ func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var v VariantResponse
 		if err := rows.Scan(&v.ID, &v.ProductID, &v.Name, &v.Size, &v.Color, &v.Price, &v.Available); err != nil {
-			respondError(w, http.StatusInternalServerError, "Error reading variants")
+			h.logger.Error("Error scanning variant [request_id: "+requestID+", product_id: "+productID+"]", err)
+			apierrors.RespondInternalError(w, requestID)
 			return
 		}
 		variants = append(variants, v)
 	}
 
+	// Check for errors during iteration
+	if err := rows.Err(); err != nil {
+		h.logger.Error("Error iterating variants [request_id: "+requestID+", product_id: "+productID+"]", err)
+		apierrors.RespondInternalError(w, requestID)
+		return
+	}
+
 	product.Variants = variants
 
-	respondJSON(w, http.StatusOK, product)
+	apierrors.RespondJSON(w, http.StatusOK, product)
 }

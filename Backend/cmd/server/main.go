@@ -96,8 +96,9 @@ func main() {
 	router := mux.NewRouter()
 
 	// Apply middleware FIRST (before routes)
-	// Order matters: Recovery → HTTPS Redirect → Security Headers → Logging → CORS
+	// Order matters: Recovery → RequestID → HTTPS Redirect → Security Headers → Logging → CORS
 	router.Use(middleware.Recovery)
+	router.Use(middleware.RequestID)
 	router.Use(middleware.HTTPSRedirect(cfg.Env))
 	router.Use(middleware.SecurityHeaders())
 	router.Use(middleware.Logging)

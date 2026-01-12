@@ -1,10 +1,15 @@
 package middleware
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	apierrors "github.com/nessieaudio/ecommerce-backend/internal/errors"
 )
 
 // CORS middleware allows cross-origin requests
@@ -64,13 +69,55 @@ func Logging(next http.Handler) http.Handler {
 	})
 }
 
-// Recovery middleware recovers from panics
+// RequestIDKey is the context key for request IDs
+type contextKey string
+
+const RequestIDKey contextKey = "request_id"
+
+// RequestID middleware adds a unique request ID to each request
+func RequestID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Generate unique request ID
+		requestID := uuid.New().String()
+
+		// Add to request context
+		ctx := context.WithValue(r.Context(), RequestIDKey, requestID)
+
+		// Add to response headers for debugging
+		w.Header().Set("X-Request-ID", requestID)
+
+		// Continue with modified request
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// GetRequestID extracts the request ID from context
+func GetRequestID(ctx context.Context) string {
+	if requestID, ok := ctx.Value(RequestIDKey).(string); ok {
+		return requestID
+	}
+	return ""
+}
+
+// Recovery middleware recovers from panics with detailed logging
 func Recovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("PANIC: %v", err)
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				requestID := GetRequestID(r.Context())
+
+				// Log panic with stack trace
+				log.Printf("PANIC [request_id=%s]: %v\n%s", requestID, err, debug.Stack())
+
+				// Return standardized error response
+				apierrors.RespondError(
+					w,
+					http.StatusInternalServerError,
+					"An unexpected error occurred",
+					apierrors.ErrCodeInternal,
+					nil,
+					requestID,
+				)
 			}
 		}()
 

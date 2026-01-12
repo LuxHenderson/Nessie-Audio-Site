@@ -16,6 +16,7 @@ import (
 	"github.com/nessieaudio/ecommerce-backend/internal/handlers"
 	"github.com/nessieaudio/ecommerce-backend/internal/logger"
 	"github.com/nessieaudio/ecommerce-backend/internal/middleware"
+	"github.com/nessieaudio/ecommerce-backend/internal/migrations"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/email"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/order"
 	"github.com/nessieaudio/ecommerce-backend/internal/services/printful"
@@ -38,6 +39,11 @@ func main() {
 	}
 
 	log.Println("Database initialized")
+
+	// Run database migrations
+	if err := migrations.RunMigrations(db); err != nil {
+		log.Fatalf("Failed to run database migrations: %v", err)
+	}
 
 	// Initialize services
 	printfulClient := printful.NewClient(cfg.PrintfulAPIKey, cfg.PrintfulAPIURL)

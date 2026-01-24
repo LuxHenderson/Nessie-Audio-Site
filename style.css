@@ -891,7 +891,8 @@ section{padding:3rem 0}
 
 /* Contact form */
 .contact-form{display:grid;gap:0.75rem;max-width:min(90%, 720px)}
-.contact-form label{display:block}
+.contact-form .form-group{display:flex;flex-direction:column;gap:0.3rem}
+.contact-form label{display:block;font-size:0.9rem}
 .contact-form input,.contact-form textarea{width:100%;padding:0.6rem;border-radius:0.5rem;border:1px solid rgba(0,0,0,0.08);background:var(--panel);color:var(--text)}
 .form-actions{display:flex;gap:0.5rem}
 .form-msg{color:var(--muted);margin-top:0.5rem}
@@ -2035,5 +2036,149 @@ section{padding:3rem 0}
 
   .btn {
     width: 100%;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY STYLES - WCAG 2.1 Level AA
+   ======================================== */
+
+/* Skip to main content link - Hidden until focused */
+.skip-link {
+  position: absolute;
+  top: -50px;
+  left: 0;
+  background: #000;
+  color: #fff;
+  padding: 12px 24px;
+  text-decoration: none;
+  z-index: 10000;
+  border-radius: 0 0 8px 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Screen reader only content - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Enhanced focus indicators for all interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Product card link - fills entire card for keyboard accessibility */
+.merch-item-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  border-radius: var(--radius);
+}
+
+.merch-item-link:hover,
+.merch-item-link:focus {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Product card focus states */
+.merch-item:focus-within {
+  outline: 3px solid #0066cc;
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
+.merch-item-link:focus {
+  outline: none; /* Remove double outline - parent handles it */
+}
+
+.merch-item-link:focus-visible {
+  outline: 3px solid #0066cc;
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Cart link accessibility */
+.cart-count {
+  display: inline-block;
+}
+
+/* Ensure sufficient color contrast for links */
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+/* High contrast focus for dark backgrounds */
+.site-header a:focus-visible,
+.mobile-menu a:focus-visible,
+.footer a:focus-visible {
+  outline-color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Form field focus enhancement */
+.contact-form input:focus-visible,
+.contact-form textarea:focus-visible,
+.booking-form input:focus-visible,
+.booking-form textarea:focus-visible {
+  outline: 3px solid #0066cc;
+  outline-offset: 0;
+  border-color: #0066cc;
+}
+
+/* Button focus states */
+.btn:focus-visible,
+.btn-add-to-cart:focus-visible,
+.btn-buy-now:focus-visible,
+.merch-buy-btn:focus-visible {
+  outline: 3px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Menu toggle button focus */
+.menu-toggle:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Variant selector focus */
+.variant-selector:focus-visible {
+  outline: 3px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Ensure reduced motion is respected */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

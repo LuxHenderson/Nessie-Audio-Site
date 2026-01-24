@@ -108,18 +108,28 @@ function createProductHTML(product) {
     priceDisplay = `$${product.price.toFixed(2)}`;
   }
 
+  // Create alt text with product name and brief description for accessibility
+  const altText = product.description
+    ? `${product.name} - ${product.description.substring(0, 80)}`
+    : product.name;
+
+  // Use proper <a> link for keyboard accessibility
   return `
-    <article class="merch-item" onclick="navigateToProduct('${product.id}')" style="cursor: pointer;">
-      <div class="merch-image-container">
-        <img src="${product.image_url || product.imageUrl}"
-             alt="${product.name}"
-             class="merch-image"
-             loading="lazy">
-      </div>
-      <div class="merch-details">
-        <h3 class="merch-title">${product.name}</h3>
-        <p class="merch-price">${priceDisplay}</p>
-      </div>
+    <article class="merch-item">
+      <a href="product-detail.html?id=${product.id}"
+         class="merch-item-link"
+         aria-label="View details for ${product.name}, ${priceDisplay}">
+        <div class="merch-image-container">
+          <img src="${product.image_url || product.imageUrl}"
+               alt="${altText}"
+               class="merch-image"
+               loading="lazy">
+        </div>
+        <div class="merch-details">
+          <h3 class="merch-title">${product.name}</h3>
+          <p class="merch-price">${priceDisplay}</p>
+        </div>
+      </a>
     </article>
   `;
 }

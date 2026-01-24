@@ -137,11 +137,38 @@ class ShoppingCart {
   updateCartUI() {
     const cartCount = this.getItemCount();
     const badges = document.querySelectorAll('.cart-count');
-    
+
     badges.forEach(badge => {
       badge.textContent = cartCount;
       badge.style.display = cartCount > 0 ? 'inline-block' : 'none';
+      // Update aria-label for screen readers
+      badge.setAttribute('aria-label', `${cartCount} ${cartCount === 1 ? 'item' : 'items'} in cart`);
     });
+  }
+
+  /**
+   * Announce message to screen readers
+   * @param {string} message - Message to announce
+   */
+  announceToScreenReader(message) {
+    let announcement = document.getElementById('sr-announcement');
+
+    if (!announcement) {
+      announcement = document.createElement('div');
+      announcement.id = 'sr-announcement';
+      announcement.setAttribute('role', 'status');
+      announcement.setAttribute('aria-live', 'polite');
+      announcement.setAttribute('aria-atomic', 'true');
+      announcement.className = 'sr-only';
+      document.body.appendChild(announcement);
+    }
+
+    announcement.textContent = message;
+
+    // Clear after announcement to allow subsequent announcements
+    setTimeout(() => {
+      announcement.textContent = '';
+    }, 1000);
   }
 
   /**
@@ -149,9 +176,13 @@ class ShoppingCart {
    * @param {string} productName - Name of added product
    */
   showAddedNotification(productName) {
+    // Announce to screen readers
+    this.announceToScreenReader(`${productName} added to cart. ${this.getItemCount()} items in cart.`);
+
     // Create notification element
     const notification = document.createElement('div');
     notification.className = 'cart-notification';
+    notification.setAttribute('role', 'alert');
     notification.style.cssText = `
       position: fixed;
       top: 180px;
@@ -162,7 +193,7 @@ class ShoppingCart {
       <p>✓ ${productName} added to cart</p>
       <a href="cart.html">View Cart</a>
     `;
-    
+
     document.body.appendChild(notification);
 
     // Animate in

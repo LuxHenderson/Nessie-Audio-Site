@@ -156,7 +156,6 @@
       { page: 'Nævermore.html', section: 'Welcome to Nessie Audio', keywords: 'welcome about professional audio production services music recording mixing mastering' },
       { page: 'Nævermore.html', section: 'News', keywords: 'news updates announcements latest' },
       { page: 'Nævermore.html', section: 'Follow Us', keywords: 'follow social media instagram facebook youtube tiktok' },
-      { page: 'Nævermore.html', section: 'Get in Touch', keywords: 'booking contact hire message inquiry request audio production project deadline' },
       { page: 'music.html', section: 'Portfolio', keywords: 'portfolio music audio songs tracks production work catalogue bluegrass classical cinematic contemporary country edm indie metal punk rap rock' },
       { page: 'merch.html', section: 'Merch', keywords: 'merch merchandise store shop buy products' },
       { page: 'nessie-digital.html', section: 'Nessie Digital', keywords: 'nessie digital services' }
@@ -182,7 +181,7 @@
 
       // Search visible content on current page
       const currentPageResults = [];
-      const searchableElements = document.querySelectorAll('h1, h2, h3, h4, p, li, a, label');
+      const searchableElements = document.querySelectorAll('main h1, main h2, main h3, main h4, main p, main li:not(.main-nav li):not(.mobile-menu li), main a:not(.main-nav a):not(.mobile-menu a), main label');
 
       searchableElements.forEach(el=>{
         const text = el.innerText || el.textContent;

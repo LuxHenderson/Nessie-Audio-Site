@@ -1,32 +1,14 @@
-/**
- * product-detail.js
- * JavaScript module for Nessie Audio product detail page
- * 
- * Handles loading and displaying individual product details including
- * variants, pricing, images, and add-to-cart functionality.
- */
+// product-detail.js
+// Requires config.js to be loaded first
 
-// ========== CONFIGURATION ==========
-// NOTE: This file requires config.js to be loaded first in the HTML
 const API_BASE_URL = API_CONFIG.BASE_URL;
 const PRODUCTS_ENDPOINT = API_CONFIG.PRODUCTS_ENDPOINT;
 
-// ========== GET PRODUCT ID FROM URL ==========
-/**
- * Extract product ID from URL query parameters
- * @returns {string|null} Product ID or null if not found
- */
 function getProductIdFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('id');
 }
 
-// ========== FETCH PRODUCT DATA ==========
-/**
- * Fetch individual product details from backend
- * @param {string} productId - The product ID
- * @returns {Promise<Object|null>} Product object or null
- */
 async function fetchProduct(productId) {
   try {
     const response = await fetch(`${PRODUCTS_ENDPOINT}/${productId}`);
@@ -41,12 +23,7 @@ async function fetchProduct(productId) {
   }
 }
 
-/**
- * Fetch all products and find the one matching the ID
- * (Fallback if individual product endpoint doesn't exist)
- * @param {string} productId - The product ID
- * @returns {Promise<Object|null>} Product object or null
- */
+// Fallback when individual product endpoint doesn't exist
 async function fetchProductFromList(productId) {
   try {
     const response = await fetch(PRODUCTS_ENDPOINT);
@@ -62,30 +39,21 @@ async function fetchProductFromList(productId) {
   }
 }
 
-// ========== FORMAT DESCRIPTION ==========
-/**
- * Format product description by converting line breaks to paragraph tags
- * @param {string} description - Raw description text
- * @returns {string} HTML formatted description
- */
 function formatDescription(description) {
   if (!description) return '';
-  
-  // Split by double line breaks to create paragraphs
+
   const paragraphs = description.split('\n\n').filter(p => p.trim());
-  
+
   return paragraphs.map(p => {
     const trimmed = p.trim();
-    
-    // Check if paragraph contains bullet points (lines starting with -)
+
     if (trimmed.includes('\n-')) {
       const lines = trimmed.split('\n');
       const listItems = [];
       let regularText = [];
-      
+
       lines.forEach(line => {
         if (line.trim().startsWith('-')) {
-          // If we have regular text before bullets, add it as a paragraph
           if (regularText.length > 0) {
             listItems.push(`<p>${regularText.join(' ')}</p>`);
             regularText = [];
@@ -95,49 +63,39 @@ function formatDescription(description) {
           regularText.push(line.trim());
         }
       });
-      
-      // Add any remaining regular text
+
       if (regularText.length > 0) {
         listItems.push(`<p>${regularText.join(' ')}</p>`);
       }
-      
-      // Wrap list items in <ul> tags
+
       const listHTML = listItems.map(item => {
         if (item.startsWith('<li>')) {
           return item;
         }
         return item;
       }).join('');
-      
-      // Find where the list items start and wrap them
+
       const parts = listHTML.split('<li>');
       if (parts.length > 1) {
         return parts[0] + '<ul>' + parts.slice(1).map(p => '<li>' + p).join('') + '</ul>';
       }
       return listHTML;
     }
-    
+
     return `<p>${trimmed}</p>`;
   }).join('<br>');
 }
 
-// ========== RENDER PRODUCT DETAIL ==========
-/**
- * Render the complete product detail view
- * @param {Object} product - Product object with all details
- */
 function renderProductDetail(product) {
   const container = document.querySelector('.product-detail-container');
-  
+
   if (!container) {
     console.error('Product detail container not found');
     return;
   }
 
-  // Build the product detail HTML
   const html = `
     <div class="product-detail">
-      <!-- Product Image Section -->
       <div class="product-detail-image">
         <img src="${product.image_url || product.imageUrl}"
              alt="${product.name}"
@@ -145,30 +103,25 @@ function renderProductDetail(product) {
              loading="eager">
       </div>
 
-      <!-- Product Info Section -->
       <div class="product-detail-info">
         <h1 class="product-detail-title">${product.name}</h1>
-        
+
         <div class="product-detail-price">
           <span class="price-amount" id="current-price">$${parseFloat(product.price).toFixed(2)}</span>
           <span class="price-currency">${product.currency || 'USD'}</span>
         </div>
 
-        <!-- Variants Selection (if available) -->
         ${renderVariantsSection(product)}
 
-        <!-- Product Description -->
         <div class="product-detail-description">
           <h3>About this product</h3>
           <div>${formatDescription(product.description) || '<p>Premium Nessie Audio merchandise, crafted for creators and fans.</p>'}</div>
         </div>
 
-        <!-- Availability Status -->
         <div class="product-availability">
           <span class="availability-badge in-stock">In Stock</span>
         </div>
 
-        <!-- Add to Cart Section -->
         <div class="product-actions">
           <button class="btn-add-to-cart" id="add-to-cart-btn" data-product-id="${product.id}">
             Add to Cart
@@ -178,7 +131,6 @@ function renderProductDetail(product) {
           </button>
         </div>
 
-        <!-- Additional Info -->
         <div class="product-meta">
           <p><strong>Category:</strong> ${product.category || 'Merchandise'}</p>
           ${product.printful_id ? `<p><strong>SKU:</strong> ${product.printful_id}</p>` : ''}
@@ -188,59 +140,42 @@ function renderProductDetail(product) {
   `;
 
   container.innerHTML = html;
-
-  // Attach event listeners
   attachProductDetailListeners(product);
 }
 
-/**
- * Sort variants by size in logical order
- * @param {Array} variants - Array of variant objects with size property
- * @returns {Array} Sorted variants array
- */
 function sortVariantsBySize(variants) {
-  // Define size order for clothing
   const clothingSizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
-  
+
   return variants.sort((a, b) => {
     const sizeA = a.size.trim();
     const sizeB = b.size.trim();
-    
-    // Check if both are clothing sizes
+
     const aIsClothing = clothingSizeOrder.includes(sizeA);
     const bIsClothing = clothingSizeOrder.includes(sizeB);
-    
+
     if (aIsClothing && bIsClothing) {
       return clothingSizeOrder.indexOf(sizeA) - clothingSizeOrder.indexOf(sizeB);
     }
-    
-    // Check if both contain "oz" (mugs)
+
+    // Mugs use oz
     if (sizeA.includes('oz') && sizeB.includes('oz')) {
       const ozA = parseInt(sizeA.match(/(\d+)\s*oz/)[1]);
       const ozB = parseInt(sizeB.match(/(\d+)\s*oz/)[1]);
       return ozA - ozB;
     }
-    
-    // Check if both contain dimensions (stickers - e.g., "3″×3″")
+
+    // Stickers use dimensions
     if (sizeA.includes('″') && sizeB.includes('″')) {
-      // Extract first dimension for comparison
       const dimA = parseFloat(sizeA.match(/(\d+\.?\d*)″/)[1]);
       const dimB = parseFloat(sizeB.match(/(\d+\.?\d*)″/)[1]);
       return dimA - dimB;
     }
-    
-    // Default: alphabetical order
+
     return sizeA.localeCompare(sizeB);
   });
 }
 
-/**
- * Render variants selection section if product has variants
- * @param {Object} product - Product object
- * @returns {string} HTML string for variants section
- */
 function renderVariantsSection(product) {
-  // Check if product has variants
   if (!product.variants || product.variants.length === 0) {
     return `
       <div class="product-variants">
@@ -252,15 +187,14 @@ function renderVariantsSection(product) {
     `;
   }
 
-  // Determine if this is a notebook or tote bag (color variants) or other product (size variants)
-  const hasColorVariants = product.name.toLowerCase().includes('notebook') || 
+  // Notebooks and totes use color variants; other products use size
+  const hasColorVariants = product.name.toLowerCase().includes('notebook') ||
                            product.name.toLowerCase().includes('tote') ||
                            product.name.toLowerCase().includes('bag');
   const variantLabel = hasColorVariants ? 'Color:' : 'Size:';
 
-  // Extract unique sizes from variants
   const sizeOptions = product.variants.map(v => {
-    // Extract size from variant name (e.g., "Nessie Audio Unisex t-shirt / XS" -> "XS")
+    // Variant names follow pattern "Product Name / Size"
     const size = v.name.split(' / ')[1] || v.size || v.name;
     return {
       size: size,
@@ -270,10 +204,9 @@ function renderVariantsSection(product) {
     };
   });
 
-  // Sort variants by size
   const sortedOptions = sortVariantsBySize(sizeOptions);
 
-  const optionsHTML = sortedOptions.map(opt => 
+  const optionsHTML = sortedOptions.map(opt =>
     `<option value="${opt.id}" data-price="${opt.price}">${opt.size} - $${parseFloat(opt.price).toFixed(2)}</option>`
   ).join('');
 
@@ -287,12 +220,7 @@ function renderVariantsSection(product) {
   `;
 }
 
-/**
- * Attach event listeners for product detail page interactions
- * @param {Object} product - Product object
- */
 function attachProductDetailListeners(product) {
-  // Add to Cart button
   const addToCartBtn = document.getElementById('add-to-cart-btn');
   if (addToCartBtn) {
     addToCartBtn.addEventListener('click', () => {
@@ -300,7 +228,6 @@ function attachProductDetailListeners(product) {
     });
   }
 
-  // Buy Now button
   const buyNowBtn = document.getElementById('buy-now-btn');
   if (buyNowBtn) {
     buyNowBtn.addEventListener('click', () => {
@@ -308,15 +235,13 @@ function attachProductDetailListeners(product) {
     });
   }
 
-  // Variant selector - update price when size changes
   const variantSelect = document.getElementById('variant-select');
   if (variantSelect) {
     variantSelect.addEventListener('change', (e) => {
       const selectedOption = e.target.options[e.target.selectedIndex];
       const newPrice = selectedOption.getAttribute('data-price');
-      
+
       if (newPrice) {
-        // Update the displayed price
         const priceElement = document.getElementById('current-price');
         if (priceElement) {
           priceElement.textContent = `$${parseFloat(newPrice).toFixed(2)}`;
@@ -327,13 +252,7 @@ function attachProductDetailListeners(product) {
   }
 }
 
-// ========== CART ACTIONS (STUBBED) ==========
-/**
- * Handle add to cart action
- * @param {Object} product - Product object
- */
 function handleAddToCart(product) {
-  // Get selected variant
   const variantSelect = document.getElementById('variant-select');
   if (!variantSelect) {
     showNotification('Please select a size', 'error');
@@ -342,7 +261,7 @@ function handleAddToCart(product) {
 
   const selectedVariantId = variantSelect.value;
   const selectedVariant = product.variants.find(v => v.id === selectedVariantId);
-  
+
   if (!selectedVariant) {
     console.error('Selected variant not found:', {
       selectedVariantId,
@@ -352,14 +271,12 @@ function handleAddToCart(product) {
     return;
   }
 
-  // Get quantity
   const quantityInput = document.getElementById('quantity-input');
   const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
 
-  // Use image_url or imageUrl from product
+  // API returns either image_url or imageUrl depending on source
   const productImage = product.image_url || product.imageUrl || (product.images && product.images[0]) || '';
 
-  // Add to cart using the global cart object
   if (window.cart) {
     cart.addItem({
       productId: product.id,
@@ -370,7 +287,7 @@ function handleAddToCart(product) {
       image: productImage,
       quantity: quantity
     });
-    
+
     showNotification(`${product.name} added to cart!`, 'success');
   } else {
     console.error('Cart not initialized');
@@ -378,12 +295,7 @@ function handleAddToCart(product) {
   }
 }
 
-/**
- * Handle buy now action
- * @param {Object} product - Product object
- */
 function handleBuyNow(product) {
-  // Get selected variant
   const variantSelect = document.getElementById('variant-select');
   if (!variantSelect) {
     showNotification('Please select a size', 'error');
@@ -398,14 +310,13 @@ function handleBuyNow(product) {
     return;
   }
 
-  // Get quantity
   const quantityInput = document.getElementById('quantity-input');
   const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
 
-  // Use image_url or imageUrl from product
+  // API returns either image_url or imageUrl depending on source
   const productImage = product.image_url || product.imageUrl || (product.images && product.images[0]) || '';
 
-  // Add to cart silently (no notification)
+  // Skip notification since redirect provides immediate feedback
   if (window.cart) {
     cart.addItem({
       productId: product.id,
@@ -417,7 +328,6 @@ function handleBuyNow(product) {
       quantity: quantity
     });
 
-    // Immediately redirect to cart page (no notification)
     window.location.href = 'cart.html';
   } else {
     console.error('Cart not initialized');
@@ -425,16 +335,9 @@ function handleBuyNow(product) {
   }
 }
 
-// ========== NOTIFICATION SYSTEM ==========
-/**
- * Display notification message to user
- * @param {string} message - Notification message
- * @param {string} type - Notification type ('success' or 'error')
- */
 function showNotification(message, type = 'success') {
-  // Check if notification container exists, create if not
   let notificationContainer = document.querySelector('.notification-container');
-  
+
   if (!notificationContainer) {
     notificationContainer = document.createElement('div');
     notificationContainer.className = 'notification-container';
@@ -450,7 +353,6 @@ function showNotification(message, type = 'success') {
     document.body.appendChild(notificationContainer);
   }
 
-  // Create notification element
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.textContent = message;
@@ -465,7 +367,7 @@ function showNotification(message, type = 'success') {
     animation: slideIn 0.3s ease;
   `;
 
-  // Add CSS animation
+  // Inject animation keyframes once
   if (!document.querySelector('#notification-styles')) {
     const style = document.createElement('style');
     style.id = 'notification-styles';
@@ -486,16 +388,13 @@ function showNotification(message, type = 'success') {
 
   notificationContainer.appendChild(notification);
 
-  // Auto-remove notification after 3 seconds
+  // Auto-dismiss after 3s
   setTimeout(() => {
     notification.style.animation = 'slideIn 0.3s ease reverse';
     setTimeout(() => notification.remove(), 300);
   }, 3000);
 }
 
-/**
- * Show error state when product not found
- */
 function showProductNotFound() {
   const container = document.querySelector('.product-detail-container');
   if (container) {
@@ -509,16 +408,11 @@ function showProductNotFound() {
   }
 }
 
-// ========== INITIALIZE PAGE ==========
-/**
- * Initialize the product detail page
- */
 async function initProductDetailPage() {
   console.log('Initializing Product Detail page...');
-  
-  // Get product ID from URL
+
   const productId = getProductIdFromURL();
-  
+
   if (!productId) {
     console.error('No product ID provided');
     showProductNotFound();
@@ -526,16 +420,15 @@ async function initProductDetailPage() {
   }
 
   console.log('Loading product:', productId);
-  
-  // Try to fetch individual product first
+
+  // Try direct fetch first, fall back to list search
   let product = await fetchProduct(productId);
-  
-  // If that fails, fetch from list (fallback)
+
   if (!product) {
     console.log('Trying fallback method...');
     product = await fetchProductFromList(productId);
   }
-  
+
   if (!product) {
     console.error('Product not found:', productId);
     showProductNotFound();
@@ -544,23 +437,13 @@ async function initProductDetailPage() {
 
   console.log('Product loaded:', product);
 
-  // Render the product detail view
   renderProductDetail(product);
-
-  // Update page title
   document.title = `${product.name} - Nessie Audio`;
-
-  // Update meta tags for SEO and social sharing
   updateMetaTags(product);
 
   console.log('Product Detail page initialized');
 }
 
-// ========== UPDATE META TAGS ==========
-/**
- * Update meta tags dynamically for SEO and social sharing
- * @param {Object} product - Product object
- */
 function updateMetaTags(product) {
   const productUrl = `https://nessieaudio.com/product-detail.html?id=${product.id}`;
   const productImage = product.image_url || product.imageUrl || 'https://nessieaudio.com/Nessie Audio 2026.jpg';
@@ -568,16 +451,11 @@ function updateMetaTags(product) {
     ? product.description.substring(0, 150).replace(/\n/g, ' ').trim() + '...'
     : `Shop ${product.name} at Nessie Audio - Premium merchandise with unique designs.`;
 
-  // Update standard meta description
   updateMetaTag('name', 'description', productDescription);
-
-  // Update Open Graph tags
   updateMetaTag('property', 'og:url', productUrl);
   updateMetaTag('property', 'og:title', `${product.name} - Nessie Audio Merch`);
   updateMetaTag('property', 'og:description', productDescription);
   updateMetaTag('property', 'og:image', productImage);
-
-  // Update Twitter Card tags
   updateMetaTag('property', 'twitter:url', productUrl);
   updateMetaTag('property', 'twitter:title', `${product.name} - Nessie Audio Merch`);
   updateMetaTag('property', 'twitter:description', productDescription);
@@ -586,19 +464,12 @@ function updateMetaTags(product) {
   console.log('Meta tags updated for product:', product.name);
 }
 
-/**
- * Helper function to update a specific meta tag
- * @param {string} attribute - The attribute to match ('name' or 'property')
- * @param {string} value - The value of the attribute
- * @param {string} content - The new content for the meta tag
- */
 function updateMetaTag(attribute, value, content) {
   let tag = document.querySelector(`meta[${attribute}="${value}"]`);
 
   if (tag) {
     tag.setAttribute('content', content);
   } else {
-    // Create the tag if it doesn't exist
     tag = document.createElement('meta');
     tag.setAttribute(attribute, value);
     tag.setAttribute('content', content);
@@ -606,11 +477,9 @@ function updateMetaTag(attribute, value, content) {
   }
 }
 
-// ========== EVENT LISTENERS ==========
-// Wait for DOM to be fully loaded before initializing
+// Wait for DOM before initializing
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initProductDetailPage);
 } else {
-  // DOM is already loaded
   initProductDetailPage();
 }

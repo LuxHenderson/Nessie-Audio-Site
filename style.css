@@ -403,7 +403,6 @@ select, input[type="checkbox"], input[type="radio"] {
 
 /* Sections */
 section{padding:3rem 0}
-.section--muted{background:var(--panel)}
 
 .lead{color:var(--muted);max-width:70ch}
 
@@ -518,68 +517,18 @@ section{padding:3rem 0}
   transition: transform 180ms ease;
 }
 
-/* Legacy promo gallery CSS - kept for backwards compatibility but no longer used on homepage */
-.promo-gallery{
-  grid-column: 1 / -1;
-  grid-row: 2 / 3;
-  display: none; /* Hidden as images are now inline with show items */
-}
-
-.promo-gallery .promo-item{
-  position: relative;
-  flex-shrink: 0;
-}
-
-.promo-item--1,
-.promo-item--2,
-.promo-item--3{
-  width: 13%;
-  min-width: 100px;
-  max-width: 150px;
-}
-
-.promo-gallery .promo-item img{
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: var(--promo-gallery-img-radius);
-  transition: transform 180ms ease;
-}
-
-.promo-item--1 img,
-.promo-item--2 img,
-.promo-item--3 img{
-  object-position: center;
-}
-
 @media (max-width:900px){
   .show-promo-row{
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     gap: 1.5rem;
   }
-  
+
   .show-promo-row .next-show{
     grid-column: 1;
     grid-row: auto;
   }
-  
-  .promo-gallery{
-    grid-column: 1;
-    grid-row: 2; /* Move images below on mobile */
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .promo-item--1,
-  .promo-item--2,
-  .promo-item--3{
-    width: 30%;
-    min-width: 120px;
-    max-width: 200px;
-  }
-  
+
   .show-promo-row .news-section,
   .show-promo-row .box-socials,
   .show-promo-row .box-booking{
@@ -862,11 +811,6 @@ section{padding:3rem 0}
 .member{background:var(--panel);padding:1rem;border-radius:0.625rem; text-align:center}
 .member img{width:100%;height:auto;border-radius:0.5rem}
 .role{color:var(--muted);margin-top:0.5rem}
-
-/* Release layout */
-.release{display:flex;gap:1rem;align-items:center}
-.album-art{width:clamp(120px, 12vw, 180px);border-radius:0.5rem}
-.release-info{flex:1}
 
 /* Events */
 .events-list{list-style:none;padding:0;margin:0}

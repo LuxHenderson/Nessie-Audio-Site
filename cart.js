@@ -1,20 +1,12 @@
-/**
- * cart.js
- * Shopping cart management for Nessie Audio merch store
- * Handles cart state, localStorage persistence, and cart operations
- */
+// cart.js
+// Shopping cart with localStorage persistence
 
-// ========== CART STATE MANAGEMENT ==========
 class ShoppingCart {
   constructor() {
     this.storageKey = 'nessie_audio_cart';
     this.items = this.loadCart();
   }
 
-  /**
-   * Load cart from localStorage
-   * @returns {Array} Cart items
-   */
   loadCart() {
     try {
       const saved = localStorage.getItem(this.storageKey);
@@ -25,9 +17,6 @@ class ShoppingCart {
     }
   }
 
-  /**
-   * Save cart to localStorage
-   */
   saveCart() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.items));
@@ -37,12 +26,7 @@ class ShoppingCart {
     }
   }
 
-  /**
-   * Add item to cart
-   * @param {Object} item - Item object with productId, variantId, productName, variantName, price, image, quantity
-   */
   addItem(item) {
-    // Check if item already exists in cart
     const existingItem = this.items.find(
       i => i.productId === item.productId && i.variantId === item.variantId
     );
@@ -63,15 +47,8 @@ class ShoppingCart {
 
     this.saveCart();
     this.updateCartUI();
-    // Notification is handled by product-detail.js
   }
 
-  /**
-   * Update item quantity
-   * @param {string} productId - Product ID
-   * @param {string} variantId - Variant ID
-   * @param {number} quantity - New quantity
-   */
   updateQuantity(productId, variantId, quantity) {
     const item = this.items.find(
       item => item.productId === productId && item.variantId === variantId
@@ -87,11 +64,6 @@ class ShoppingCart {
     }
   }
 
-  /**
-   * Remove item from cart
-   * @param {string} productId - Product ID
-   * @param {string} variantId - Variant ID
-   */
   removeItem(productId, variantId) {
     this.items = this.items.filter(
       item => !(item.productId === productId && item.variantId === variantId)
@@ -99,41 +71,23 @@ class ShoppingCart {
     this.saveCart();
   }
 
-  /**
-   * Clear entire cart
-   */
   clearCart() {
     this.items = [];
     this.saveCart();
   }
 
-  /**
-   * Get total item count
-   * @returns {number} Total number of items
-   */
   getItemCount() {
     return this.items.reduce((total, item) => total + item.quantity, 0);
   }
 
-  /**
-   * Get cart subtotal
-   * @returns {number} Subtotal amount
-   */
   getSubtotal() {
     return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
   }
 
-  /**
-   * Get all cart items
-   * @returns {Array} Cart items
-   */
   getItems() {
     return this.items;
   }
 
-  /**
-   * Update cart UI elements (badge count)
-   */
   updateCartUI() {
     const cartCount = this.getItemCount();
     const badges = document.querySelectorAll('.cart-count');
@@ -141,15 +95,10 @@ class ShoppingCart {
     badges.forEach(badge => {
       badge.textContent = cartCount;
       badge.style.display = cartCount > 0 ? 'inline-block' : 'none';
-      // Update aria-label for screen readers
       badge.setAttribute('aria-label', `${cartCount} ${cartCount === 1 ? 'item' : 'items'} in cart`);
     });
   }
 
-  /**
-   * Announce message to screen readers
-   * @param {string} message - Message to announce
-   */
   announceToScreenReader(message) {
     let announcement = document.getElementById('sr-announcement');
 
@@ -165,21 +114,15 @@ class ShoppingCart {
 
     announcement.textContent = message;
 
-    // Clear after announcement to allow subsequent announcements
+    // Clear to allow subsequent announcements to trigger
     setTimeout(() => {
       announcement.textContent = '';
     }, 1000);
   }
 
-  /**
-   * Show notification when item added
-   * @param {string} productName - Name of added product
-   */
   showAddedNotification(productName) {
-    // Announce to screen readers
     this.announceToScreenReader(`${productName} added to cart. ${this.getItemCount()} items in cart.`);
 
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = 'cart-notification';
     notification.setAttribute('role', 'alert');
@@ -196,10 +139,8 @@ class ShoppingCart {
 
     document.body.appendChild(notification);
 
-    // Animate in
     setTimeout(() => notification.classList.add('show'), 10);
 
-    // Remove after 3 seconds
     setTimeout(() => {
       notification.classList.remove('show');
       setTimeout(() => notification.remove(), 300);
@@ -207,16 +148,13 @@ class ShoppingCart {
   }
 }
 
-// ========== INITIALIZE GLOBAL CART ==========
 const cart = new ShoppingCart();
-window.cart = cart; // Make globally accessible
+window.cart = cart;
 
-// Update cart UI on page load
 document.addEventListener('DOMContentLoaded', () => {
   cart.updateCartUI();
 });
 
-// Export for use in other modules (if using modules)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { cart, ShoppingCart };
 }

@@ -1,16 +1,12 @@
 // script.js
-// Site behaviors: smooth scroll, mobile menu, dark mode, lightbox, contact form,
-// and local <video> initialization. This file intentionally avoids UI changes and
-// focuses on progressive enhancement of existing markup.
+// Progressive enhancement for site interactions. Does not modify markup structure.
 
 (function(){
   'use strict';
 
-  // Helper: select single or multiple elements
   const $ = (sel, all=false) => all ? Array.from(document.querySelectorAll(sel)) : document.querySelector(sel);
 
-  // ---- Smooth scroll for internal links ----
-  // Uses native scroll behavior; anchors with href starting with '#' will smoothly scroll.
+  // Smooth scroll for anchor links
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a');
     if(!a) return;
@@ -21,13 +17,13 @@
       if(target){
         e.preventDefault();
         target.scrollIntoView({behavior:'smooth', block:'start'});
-        // Update history without jumping
+        // Preserve back button functionality
         if(history.pushState) history.pushState(null, '', '#'+id);
       }
     }
   });
 
-  // ---- Mobile menu toggle ----
+  // Mobile menu
   const menuToggle = $('.menu-toggle');
   const mobileMenu = $('#mobile-menu');
   if(menuToggle && mobileMenu){
@@ -44,7 +40,7 @@
     });
   }
 
-  // Close mobile menu when clicking a link inside it
+  // Auto-close menu after navigation
   if(mobileMenu){
     mobileMenu.addEventListener('click', (e)=>{
       const a = e.target.closest('a');
@@ -56,15 +52,13 @@
     });
   }
 
-  // ---- Theme / Dark mode toggle ----
+  // Theme toggle with localStorage persistence
   const themeToggle = $('#theme-toggle');
   const root = document.documentElement;
   const savedTheme = localStorage.getItem('naevermore-theme');
 
-  // Apply saved theme (if any) on load
   if(savedTheme) root.setAttribute('data-theme', savedTheme);
 
-  // Update toggle label on load
   if(themeToggle){
     const isDark = (root.getAttribute('data-theme') === 'dark');
     themeToggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
@@ -80,8 +74,7 @@
     });
   }
 
-  // ---- Simple gallery lightbox ----
-  // Opens a basic overlay with the full-size image. Closes on click/ESC.
+  // Gallery lightbox
   const thumbs = $('.thumb', true);
   const lightbox = $('#lightbox');
   const lightboxImg = $('#lightbox-img');
@@ -110,12 +103,10 @@
   });
 
   if(lbClose) lbClose.addEventListener('click', closeLightbox);
-  // close on backdrop click
   if(lightbox) lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
-  // close on ESC
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLightbox(); });
 
-  // ---- Contact form: simple client-side validation/demo ----
+  // Contact form (demo only - no backend submission)
   const form = $('#contact-form');
   const formMsg = $('#form-msg');
   if(form){
@@ -126,29 +117,24 @@
       const email = data.get('email')?.toString().trim();
       const message = data.get('message')?.toString().trim();
 
-      // Basic checks; server-side required for real forms
       if(!name || !email || !message){
         formMsg.textContent = 'Please complete all fields.';
         formMsg.style.color = 'var(--accent)';
         return;
       }
 
-      // Here you'd normally POST to your server or an email endpoint.
-      // For this scaffold, we just show a success message and reset.
       formMsg.textContent = 'Thanks — your message has been queued (demo only).';
       formMsg.style.color = 'var(--muted)';
       form.reset();
     });
   }
 
-  // ---- Booking form: Let Formspree handle submission directly (removed custom JS handler) ----
-  // Form now submits naturally to Formspree without JavaScript intervention
+  // Booking form submits directly to Formspree (no JS intervention needed)
 
-  // ---- Small niceties ----
-  // Keep copyright year up to date
+  // Auto-update copyright year
   const year = $('#year'); if(year) year.textContent = new Date().getFullYear();
 
-  // Scroll hint arrow: hide when user starts scrolling
+  // Hide scroll hint after user scrolls
   const scrollArrow = document.querySelector('.scroll-down-arrow');
   if(scrollArrow){
     function toggleArrow(){
@@ -156,16 +142,15 @@
       if(y > 20){ scrollArrow.classList.add('is-hidden'); }
       else{ scrollArrow.classList.remove('is-hidden'); }
     }
-    // Initial check and on scroll/resize
     toggleArrow();
     window.addEventListener('scroll', toggleArrow, { passive: true });
     window.addEventListener('resize', toggleArrow);
   }
 
-  // Enhanced search with dropdown results and cross-page navigation
+  // Site search with cross-page navigation
   const search = $('#site-search');
   if(search){
-    // Site-wide content map for search
+    // Static content map enables searching pages before they're loaded
     const siteContent = [
       { page: 'Nævermore.html', section: 'Home', keywords: 'home landing main page nessie audio' },
       { page: 'Nævermore.html', section: 'Welcome to Nessie Audio', keywords: 'welcome about professional audio production services music recording mixing mastering' },
@@ -177,7 +162,6 @@
       { page: 'nessie-digital.html', section: 'Nessie Digital', keywords: 'nessie digital services' }
     ];
 
-    // Create dropdown container
     let dropdown = document.querySelector('.search-dropdown');
     if(!dropdown){
       dropdown = document.createElement('div');
@@ -189,18 +173,17 @@
 
     search.addEventListener('input', ()=>{
       const q = search.value.trim().toLowerCase();
-      
-      // Clear dropdown if search is empty
-      if(q === ''){ 
+
+      if(q === ''){
         dropdown.innerHTML = '';
         dropdown.style.display = 'none';
-        return; 
+        return;
       }
-      
-      // Search current page content
+
+      // Search visible content on current page
       const currentPageResults = [];
       const searchableElements = document.querySelectorAll('h1, h2, h3, h4, p, li, a, label');
-      
+
       searchableElements.forEach(el=>{
         const text = el.innerText || el.textContent;
         if(text && text.toLowerCase().includes(q)){
@@ -210,8 +193,7 @@
             const heading = section.querySelector('h1, h2, h3');
             if(heading) sectionTitle = heading.innerText.trim();
           }
-          
-          // Only add results that have a proper section title (skip generic "Page Content")
+
           if(sectionTitle){
             currentPageResults.push({
               section: sectionTitle,
@@ -221,17 +203,16 @@
           }
         }
       });
-      
-      // Search site-wide content map
+
+      // Search static content map for other pages
       const siteResults = siteContent.filter(item=>{
         return item.section.toLowerCase().includes(q) || item.keywords.toLowerCase().includes(q);
       });
-      
-      // Combine and deduplicate results
+
+      // Deduplicate results
       const allResults = [];
       const seen = new Set();
-      
-      // Add current page results first
+
       currentPageResults.forEach(r=>{
         const key = r.section;
         if(!seen.has(key)){
@@ -239,8 +220,7 @@
           allResults.push(r);
         }
       });
-      
-      // Add site-wide results
+
       siteResults.forEach(r=>{
         const key = r.section + r.page;
         if(!seen.has(key)){
@@ -248,8 +228,7 @@
           allResults.push(r);
         }
       });
-      
-      // Display results in dropdown - only show section titles (gold text)
+
       if(allResults.length > 0){
         dropdown.innerHTML = allResults.slice(0, 8).map((result, i)=>{
           return `<div class="search-result-item" data-index="${i}">
@@ -257,21 +236,19 @@
           </div>`;
         }).join('');
         dropdown.style.display = 'block';
-        
-        // Add click handlers to scroll to results or navigate to page
+
         dropdown.querySelectorAll('.search-result-item').forEach((item, i)=>{
           item.addEventListener('click', ()=>{
             const result = allResults[i];
             dropdown.style.display = 'none';
             search.value = '';
-            
+
             if(result.isCurrentPage){
-              // Scroll to element on current page
               result.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              // Brief highlight to show location
               result.element.style.backgroundColor = 'rgba(192, 192, 192, 0.3)';
               setTimeout(()=> result.element.style.backgroundColor = '', 2000);
             } else {
-              // Navigate to different page
               window.location.href = result.page;
             }
           });
@@ -281,22 +258,18 @@
         dropdown.style.display = 'block';
       }
     });
-    
-    // Close dropdown when clicking outside
+
     document.addEventListener('click', (e)=>{
       if(!search.contains(e.target) && !dropdown.contains(e.target)){
         dropdown.style.display = 'none';
       }
     });
-    
-    // Handle Enter key to navigate to first result
+
     search.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter'){
         e.preventDefault();
         const firstResult = dropdown.querySelector('.search-result-item');
-        if(firstResult){
-          firstResult.click(); // Trigger click on first result
-        }
+        if(firstResult) firstResult.click();
       }
       if(e.key === 'Escape'){
         dropdown.style.display = 'none';
@@ -305,10 +278,7 @@
     });
   }
 
-  // ---- Local <video> loader ----
-  // Finds elements with `data-video` and populates the <video> element. If no
-  // `data-video` is present the section is hidden. Optional `data-poster`
-  // provides a poster image. Keeps UI identical; only manages sources and fallback.
+  // Video loader - populates <video> from data-video attribute, with fallback for unsupported browsers
   Array.from(document.querySelectorAll('.video-wrap')).forEach(el=>{
     const file = (el.getAttribute('data-video') || '').trim();
     const poster = (el.getAttribute('data-poster') || '').trim();
@@ -325,13 +295,12 @@
       el.insertBefore(video, el.firstChild);
     }
 
-    // Populate source element (replace if present)
     let source = video.querySelector('source');
     if(source){ source.src = file; }
     else{
       source = document.createElement('source');
       source.src = file;
-      // attempt to set type by extension (helps some browsers)
+      // MIME type helps browsers decide if they can play before downloading
       const ext = file.split('.').pop().toLowerCase();
       if(ext === 'mp4') source.type = 'video/mp4';
       if(ext === 'webm') source.type = 'video/webm';
@@ -339,7 +308,6 @@
     }
 
     if(poster) video.poster = poster;
-    // show video once it can play, otherwise reveal fallback
     const fallback = el.querySelector('.video-fallback');
     const fallbackLink = el.querySelector('#video-fallback-link');
     if(fallbackLink){
@@ -350,7 +318,6 @@
 
     function showFallback(){
       if(!fallback) return;
-      // If a poster exists, show it as a linked thumbnail
       if(!el.querySelector('.video-thumb') && video.poster){
         const a = document.createElement('a');
         a.className = 'video-thumb';
@@ -367,12 +334,9 @@
       video.hidden = true;
     }
 
-    // When the video can play, show it and hide fallback
     video.addEventListener('canplay', ()=>{ if(fallback) fallback.hidden = true; video.hidden = false; });
-    // If the browser fails to play, show fallback
     video.addEventListener('error', ()=>{ showFallback(); });
 
-    // Attempt to load the media to trigger canplay/error
     try{ video.load(); }
     catch(e){ showFallback(); }
   });

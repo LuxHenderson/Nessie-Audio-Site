@@ -4,6 +4,9 @@
   gap: 1rem;
   width: 100%;
 }
+.cart-actions > * + * {
+  margin-top: 1rem;
+}
 /*
   style.css
   Main stylesheet for Nævermore band site.
@@ -123,6 +126,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Three.js fog canvas container - fixed background layer */
@@ -241,8 +246,18 @@ select, input[type="checkbox"], input[type="radio"] {
 }
 @media (max-width:900px){
   .brand .logo{ font-size:1.25rem; }
-  .header-inner{ padding:0.8rem 0; gap: 0.5rem; }
+  .header-inner{ padding:0.8rem 16px; gap: 0.5rem; }
   .brand { flex-shrink: 0; }
+  body::before{ top: 0; height: 100vh; background-size: contain; background-position: center center; }
+}
+/* Tablet-specific: iPad portrait and smaller tablets */
+@media (min-width:601px) and (max-width:900px){
+  body::before{ left: -15px; }
+  .scroll-down-arrow{ width: 60px; height: 60px; bottom: 20px; }
+}
+/* Phone-specific: narrow screens need the left nudge */
+@media (max-width:600px){
+  body::before{ left: -10px; }
 }
 
 .main-nav ul{
@@ -270,7 +285,47 @@ select, input[type="checkbox"], input[type="radio"] {
 }
 .main-nav a:hover{background:rgba(192, 192, 192, 0.2); color:#ffffff;}
 
-.menu-toggle{display:none;background:none;border:1px solid rgba(0,0,0,0.06);padding:0.4rem 0.6rem;border-radius:6px}
+.menu-toggle{display:none;background:none;border:1px solid rgba(192, 192, 192, 0.3);padding:6px 10px;border-radius:6px;color:#c0c0c0;font-family:'Montserrat', sans-serif;font-size:16px;font-weight:700;letter-spacing:0.05em;line-height:1;cursor:pointer}
+
+.mobile-menu{
+  padding:0.5rem 16px 1rem;
+}
+.mobile-menu ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.mobile-menu a{
+  color:#c0c0c0;
+  text-decoration:none;
+  font-family:'Montserrat', sans-serif;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:0.05em;
+  line-height:1;
+  padding:8px 10px;
+  border-radius:6px;
+  display:block;
+}
+.mobile-menu a:hover{background:rgba(192, 192, 192, 0.2);color:#ffffff;}
+.mobile-socials{
+  display:flex;
+  gap:12px;
+  padding:8px 10px 0;
+  margin-top:4px;
+}
+.mobile-socials a{
+  color:#c0c0c0;
+  text-decoration:none;
+  font-family:'Montserrat', sans-serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:0.05em;
+}
+.mobile-socials a:hover{color:#ffffff;}
 
 .search-wrap{
   flex: 0 1 auto;
@@ -695,7 +750,7 @@ section{padding:3rem 0}
 
 /* Reduce prominence on small screens to avoid overlap */
 @media (max-width:600px){
-  .scroll-down-arrow{ opacity: 0.6; bottom: 10px; width: 30px; height: 30px; }
+  .scroll-down-arrow{ opacity: 0.6; bottom: 40px; width: 45px; height: 45px; }
 }
 
 /* ========== Video Section (Music Page) ========== */
@@ -1013,7 +1068,6 @@ section{padding:3rem 0}
 /* Backend integration: Replace placeholder images with actual product photos */
 .merch-image-container {
   width: 100%;
-  height: 600px;
   overflow: hidden;
   background: #1a1a1a;
   display: flex;
@@ -1024,7 +1078,7 @@ section{padding:3rem 0}
 .merch-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.4s ease;
 }
 
@@ -1128,9 +1182,6 @@ section{padding:3rem 0}
     margin-bottom: 2rem;
   }
 
-  .merch-image-container {
-    height: 250px;
-  }
 }
 
 /* Responsive adjustments for mobile */
@@ -1147,10 +1198,6 @@ section{padding:3rem 0}
   .merch-intro {
     font-size: 1rem;
     padding: 0 1rem;
-  }
-
-  .merch-image-container {
-    height: 280px;
   }
 
   .merch-details {
@@ -1258,8 +1305,11 @@ section{padding:3rem 0}
 .product-detail-info {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
   height: 100%;
+}
+.product-detail-info > * + * {
+  margin-top: 2rem;
 }
 
 .product-detail-title {
@@ -1369,8 +1419,8 @@ section{padding:3rem 0}
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: auto;
-  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
 }
 
 .availability-badge {
@@ -1398,7 +1448,11 @@ section{padding:3rem 0}
 /* Product actions - buttons */
 .product-actions {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
+  margin-top: -1rem;
+}
+.product-actions > * + * {
+  margin-left: 2rem;
 }
 
 .btn-add-to-cart,
@@ -1438,6 +1492,51 @@ section{padding:3rem 0}
   background: transparent;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .btn-buy-now {
+  background: #0f1013;
+  color: #c0c0c0;
+  border: 1px solid rgba(192, 192, 192, 0.2);
+}
+:root[data-theme="dark"] .btn-buy-now:hover {
+  background: rgba(16, 16, 18, 0.8);
+  color: #ffffff;
+  border-color: rgba(192, 192, 192, 0.4);
+}
+
+:root[data-theme="dark"] .btn-add-to-cart:hover {
+  background: #0f1013;
+  color: #ffffff;
+  border-color: rgba(192, 192, 192, 0.4);
+}
+
+:root[data-theme="dark"] .btn-checkout {
+  background: #0f1013;
+  color: #c0c0c0;
+  border: 1px solid rgba(192, 192, 192, 0.2);
+}
+:root[data-theme="dark"] .btn-checkout:hover:not(:disabled) {
+  background: rgba(16, 16, 18, 0.8);
+  color: #ffffff;
+  border-color: rgba(192, 192, 192, 0.4);
+}
+
+:root[data-theme="dark"] .btn-continue-shopping {
+  background: #0f1013;
+  color: #c0c0c0;
+  border: 1px solid rgba(192, 192, 192, 0.2);
+}
+:root[data-theme="dark"] .btn-continue-shopping:hover {
+  background: rgba(16, 16, 18, 0.8);
+  color: #ffffff;
+  border-color: rgba(192, 192, 192, 0.4);
+}
+
+:root[data-theme="dark"] .cart-count {
+  background: #0f1013;
+  color: #c0c0c0;
+  border: 1px solid rgba(192, 192, 192, 0.2);
 }
 
 /* Product metadata */
@@ -1507,6 +1606,11 @@ section{padding:3rem 0}
 
   .product-actions {
     flex-direction: column;
+    gap: 2rem;
+  }
+  .product-actions > * + * {
+    margin-left: 0;
+    margin-top: 2rem;
   }
 
   .btn-add-to-cart,
@@ -1855,7 +1959,7 @@ section{padding:3rem 0}
   text-align: center;
   text-decoration: none;
   transition: all 0.2s;
-  margin-top: 0;
+  margin-top: 1rem;
   line-height: 1.1;
 }
 

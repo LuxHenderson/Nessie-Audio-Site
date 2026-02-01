@@ -3,6 +3,7 @@
 
 (function(){
   'use strict';
+  window.__scriptJsLoaded = true;
 
   const $ = (sel, all=false) => all ? Array.from(document.querySelectorAll(sel)) : document.querySelector(sel);
 

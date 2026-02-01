@@ -97,7 +97,7 @@ function renderProductDetail(product) {
   const html = `
     <div class="product-detail">
       <div class="product-detail-image">
-        <img src="${product.image_url || product.imageUrl}"
+        <img src="${resolveAssetUrl(product.image_url || product.imageUrl)}"
              alt="${product.name}"
              class="product-main-image"
              loading="eager">
@@ -275,7 +275,7 @@ function handleAddToCart(product) {
   const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
 
   // API returns either image_url or imageUrl depending on source
-  const productImage = product.image_url || product.imageUrl || (product.images && product.images[0]) || '';
+  const productImage = resolveAssetUrl(product.image_url || product.imageUrl || (product.images && product.images[0]) || '');
 
   if (window.cart) {
     cart.addItem({
@@ -314,7 +314,7 @@ function handleBuyNow(product) {
   const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
 
   // API returns either image_url or imageUrl depending on source
-  const productImage = product.image_url || product.imageUrl || (product.images && product.images[0]) || '';
+  const productImage = resolveAssetUrl(product.image_url || product.imageUrl || (product.images && product.images[0]) || '');
 
   // Skip notification since redirect provides immediate feedback
   if (window.cart) {

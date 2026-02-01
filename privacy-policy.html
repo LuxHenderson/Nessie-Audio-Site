@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Privacy Policy - Nessie Audio</title>
 
   <!-- Meta Description for SEO -->
@@ -72,15 +72,44 @@
     </div>
 
     <div id="mobile-menu" class="mobile-menu" hidden>
-          <ul>
+      <ul>
         <li><a href="Nævermore.html">Home</a></li>
         <li><a href="music.html">Portfolio</a></li>
         <li><a href="merch.html">Merch</a></li>
         <li><a href="nessie-digital.html">Nessie Digital</a></li>
-        <li><a href="cart.html">Cart 🛒 <span class="cart-count">0</span></a></li>
-          </ul>
+        <li><a href="cart.html">Cart <span class="cart-emoji">🛒</span> <span class="cart-count">0</span></a></li>
+      </ul>
     </div>
   </header>
+  <!-- ES5 fallback for mobile menu toggle (older browsers) -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if(window.__scriptJsLoaded) return;
+    var btn = document.querySelector('.menu-toggle');
+    var menu = document.getElementById('mobile-menu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', function(){
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      if(menu.hasAttribute('hidden')){
+        menu.removeAttribute('hidden');
+        btn.textContent = 'Close';
+      } else {
+        menu.setAttribute('hidden','');
+        btn.textContent = 'Menu';
+      }
+    });
+    menu.addEventListener('click', function(e){
+      var a = e.target;
+      while(a && a.tagName !== 'A') a = a.parentElement;
+      if(a){
+        menu.setAttribute('hidden','');
+        btn.setAttribute('aria-expanded','false');
+        btn.textContent = 'Menu';
+      }
+    });
+  });
+  </script>
 
   <main id="main-content">
     <section class="home-content container">
@@ -180,5 +209,28 @@
   <script src="script.js" defer></script>
   <script src="fogEffect.js" defer></script>
   <script src="cart.js" defer></script>
+  <!-- ES5 fallback for dark mode toggle (older browsers) -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if(window.__scriptJsLoaded) return;
+    var toggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var saved = localStorage.getItem('naevermore-theme');
+    if(saved) root.setAttribute('data-theme', saved);
+    if(!toggle) return;
+    var isDark = (root.getAttribute('data-theme') === 'dark');
+    toggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    toggle.setAttribute('aria-pressed', String(isDark));
+    toggle.addEventListener('click', function(){
+      var current = root.getAttribute('data-theme');
+      var next = (current === 'dark') ? '' : 'dark';
+      if(next){ root.setAttribute('data-theme', next); } else { root.removeAttribute('data-theme'); }
+      localStorage.setItem('naevermore-theme', next);
+      var isNowDark = (next === 'dark');
+      toggle.textContent = isNowDark ? 'Light Mode' : 'Dark Mode';
+      toggle.setAttribute('aria-pressed', String(isNowDark));
+    });
+  });
+  </script>
 </body>
 </html>

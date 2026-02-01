@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Nessie Audio - Music</title>
 
   <!-- Meta Description for SEO -->
@@ -68,6 +68,35 @@
       </ul>
     </div>
   </header>
+  <!-- ES5 fallback for mobile menu toggle (older browsers) -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if(window.__scriptJsLoaded) return;
+    var btn = document.querySelector('.menu-toggle');
+    var menu = document.getElementById('mobile-menu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', function(){
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      if(menu.hasAttribute('hidden')){
+        menu.removeAttribute('hidden');
+        btn.textContent = 'Close';
+      } else {
+        menu.setAttribute('hidden','');
+        btn.textContent = 'Menu';
+      }
+    });
+    menu.addEventListener('click', function(e){
+      var a = e.target;
+      while(a && a.tagName !== 'A') a = a.parentElement;
+      if(a){
+        menu.setAttribute('hidden','');
+        btn.setAttribute('aria-expanded','false');
+        btn.textContent = 'Menu';
+      }
+    });
+  });
+  </script>
 
   <main id="main-content">
     <section class="home-content container">
@@ -109,14 +138,14 @@
             <!-- BLUEGRASS -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Bluegrass
+                ▶︎ Bluegrass
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Barnstar! -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Barnstar!
+                    ▶︎ Barnstar!
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Bluegrass/Barnstar!/MP3 Files/Barnstar! - Believer.mp3" data-title="Believer" data-role="Barnstar! • Bluegrass" data-artist="Barnstar!" data-genre="Bluegrass">
@@ -133,14 +162,14 @@
             <!-- CLASSICAL/CINEMATIC -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Classical / Cinematic
+                ▶︎ Classical / Cinematic
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Joey Leal -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Joey Leal
+                    ▶︎ Joey Leal
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Clasical:Cinematic/Joey Leal/MP3 Files/Score 001.mp3" data-title="Score 001" data-role="Joey Leal • Classical/Cinematic" data-artist="Joey Leal" data-genre="Classical/Cinematic">
@@ -152,7 +181,7 @@
                 <!-- Nessie Audio -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Nessie Audio
+                    ▶︎ Nessie Audio
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Clasical:Cinematic/Nessie Audio/MP3 Files/Score 001.mp3" data-title="Score 001" data-role="Nessie Audio • Classical/Cinematic" data-artist="Nessie Audio" data-genre="Classical/Cinematic">
@@ -166,14 +195,14 @@
             <!-- CONTEMPORARY -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Contemporary
+                ▶︎ Contemporary
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Inka Land -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Inka Land
+                    ▶︎ Inka Land
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Contemporary/Inka Land/MP3 Files/Inka Land - Audio 001.mp3" data-title="Audio 001" data-role="Inka Land • Contemporary" data-artist="Inka Land" data-genre="Contemporary">
@@ -185,7 +214,7 @@
                 <!-- Nessie Audio -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Nessie Audio
+                    ▶︎ Nessie Audio
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Contemporary/Nessie Audio/MP3 Files/Nessie Audio - Caves And Crickets.mp3" data-title="Caves And Crickets" data-role="Nessie Audio • Contemporary" data-artist="Nessie Audio" data-genre="Contemporary">
@@ -199,14 +228,14 @@
             <!-- COUNTRY -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Country
+                ▶︎ Country
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Angela Thomas Wade -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Angela Thomas Wade
+                    ▶︎ Angela Thomas Wade
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Country/Angela Thomas Wade/MP3 Files/Angela Thomas Wade - Milk Cow Blues.mp3" data-title="Milk Cow Blues" data-role="Angela Thomas Wade • Country" data-artist="Angela Thomas Wade" data-genre="Country">
@@ -218,7 +247,7 @@
                 <!-- Bobby Corbett -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Bobby Corbett
+                    ▶︎ Bobby Corbett
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Country/Bobby Corbett/MP3 Files/Bobby Corbett - Way Back When.mp3" data-title="Way Back When" data-role="Bobby Corbett • Country" data-artist="Bobby Corbett" data-genre="Country">
@@ -232,14 +261,14 @@
             <!-- EDM -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ EDM
+                ▶︎ EDM
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Laura Schaeffer -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Laura Schaeffer
+                    ▶︎ Laura Schaeffer
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/EDM/Laura Schaeffer/MP3 Files/Laura Schaeffer - Soup.mp3" data-title="Soup" data-role="Laura Schaeffer • EDM" data-artist="Laura Schaeffer" data-genre="EDM">
@@ -253,14 +282,14 @@
             <!-- INDIE -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Indie
+                ▶︎ Indie
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Chase Jack -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Chase Jack
+                    ▶︎ Chase Jack
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Indie/Chase Jack/MP3 Files/A Reptile Dysfunction.mp3" data-title="A Reptile Dysfunction" data-role="Chase Jack • Indie" data-artist="Chase Jack" data-genre="Indie">
@@ -313,14 +342,14 @@
             <!-- METAL -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Metal
+                ▶︎ Metal
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Cosmic Lung -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Cosmic Lung
+                    ▶︎ Cosmic Lung
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Metal/Cosmic Lung/MP3 Files/Above.mp3" data-title="Above" data-role="Cosmic Lung • Metal" data-artist="Cosmic Lung" data-genre="Metal">
@@ -362,7 +391,7 @@
                 <!-- Ortus Lux -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Ortus Lux
+                    ▶︎ Ortus Lux
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Metal/Ortus Lux/Keeper of Crows/MP3 Files/Despise.mp3" data-title="Despise" data-role="Ortus Lux • Metal" data-artist="Ortus Lux" data-genre="Metal">
@@ -388,14 +417,14 @@
             <!-- PUNK -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Punk
+                ▶︎ Punk
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Glampire -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Glampire
+                    ▶︎ Glampire
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Punk/Glampire/MP3 Files/Glampire - New York Nosferatu.mp3" data-title="New York Nosferatu" data-role="Glampire • Punk" data-artist="Glampire" data-genre="Punk">
@@ -409,14 +438,14 @@
             <!-- RAP -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Rap
+                ▶︎ Rap
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- G.O.D. -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ G.O.D.
+                    ▶︎ G.O.D.
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Rap/G.O.D./MP3 Files/I Been The Man.mp3" data-title="I Been The Man" data-role="G.O.D. • Rap" data-artist="G.O.D." data-genre="Rap">
@@ -466,14 +495,14 @@
             <!-- ROCK -->
             <div class="genre-section" style="margin-bottom: 1.5rem;">
               <h3 class="genre-header" style="padding: 1rem; background: rgba(192,192,192,0.1); border: 1px solid rgba(192,192,192,0.3); border-radius: 8px; cursor: pointer; margin: 0;">
-                ▶ Rock
+                ▶︎ Rock
               </h3>
               <div class="genre-content" style="display: none; padding: 1rem 0;">
                 
                 <!-- Dahlia Boyer -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Dahlia Boyer
+                    ▶︎ Dahlia Boyer
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Rock/Dahlia Boyer/MP3 Files/Dahlia Boyer - Call Me When You_re Sober.mp3" data-title="Call Me When You're Sober" data-role="Dahlia Boyer • Rock" data-artist="Dahlia Boyer" data-genre="Rock">
@@ -485,7 +514,7 @@
                 <!-- Daimon B -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Daimon B
+                    ▶︎ Daimon B
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Rock/Daimon B/MP3 Files/Daimon B - Pain Remains.mp3" data-title="Pain Remains" data-role="Daimon B • Rock" data-artist="Daimon B" data-genre="Rock">
@@ -497,7 +526,7 @@
                 <!-- Nessie Audio -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Nessie Audio
+                    ▶︎ Nessie Audio
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Rock/Nessie Audio/MP3 Files/Nessie Audio - Fine Again.mp3" data-title="Fine Again" data-role="Nessie Audio • Rock" data-artist="Nessie Audio" data-genre="Rock">
@@ -515,7 +544,7 @@
                 <!-- Tyler Brundridge -->
                 <div class="artist-section" style="margin-bottom: 1rem;">
                   <h4 class="artist-header" style="padding: 0.75rem 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(192,192,192,0.2); border-radius: 8px; cursor: pointer; margin: 0 0 0.5rem 1rem;">
-                    ▶ Tyler Brundridge
+                    ▶︎ Tyler Brundridge
                   </h4>
                   <ul class="track-list" style="display: none; list-style: none; padding: 0; margin: 0 0 0 2rem;">
                     <li class="catalogue-item" data-src="Music/Rock/Tyler Brundridge/MP3 Files/Tyler Brundridge - Still Holding On.mp3" data-title="Still Holding On" data-role="Tyler Brundridge • Rock" data-artist="Tyler Brundridge" data-genre="Rock">
@@ -634,19 +663,19 @@
             const content = this.nextElementSibling;
             const isOpen = content.style.display === 'block';
             
-            // Get current text, removing any arrows
+            // Get current text, removing any arrows and variation selectors
             let text = this.textContent.trim();
-            // Remove all arrow characters from the beginning
-            while (text.startsWith('▶') || text.startsWith('▼')) {
+            // Remove all arrow characters and variation selectors from the beginning
+            while (text.startsWith('▶') || text.startsWith('▼') || text.startsWith('\uFE0E')) {
               text = text.substring(1).trim();
             }
-            
+
             if (isOpen) {
               content.style.display = 'none';
-              this.textContent = '▶ ' + text;
+              this.textContent = '▶\uFE0E ' + text;
             } else {
               content.style.display = 'block';
-              this.textContent = '▼ ' + text;
+              this.textContent = '▼\uFE0E ' + text;
             }
           });
         });
@@ -657,19 +686,19 @@
             const trackList = this.nextElementSibling;
             const isOpen = trackList.style.display === 'block';
             
-            // Get current text, removing any arrows
+            // Get current text, removing any arrows and variation selectors
             let text = this.textContent.trim();
-            // Remove all arrow characters from the beginning
-            while (text.startsWith('▶') || text.startsWith('▼')) {
+            // Remove all arrow characters and variation selectors from the beginning
+            while (text.startsWith('▶') || text.startsWith('▼') || text.startsWith('\uFE0E')) {
               text = text.substring(1).trim();
             }
-            
+
             if (isOpen) {
               trackList.style.display = 'none';
-              this.textContent = '▶ ' + text;
+              this.textContent = '▶\uFE0E ' + text;
             } else {
               trackList.style.display = 'block';
-              this.textContent = '▼ ' + text;
+              this.textContent = '▼\uFE0E ' + text;
             }
           });
         });
@@ -756,6 +785,29 @@
         });
       });
     })();
+  </script>
+  <!-- ES5 fallback for dark mode toggle (older browsers) -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if(window.__scriptJsLoaded) return;
+    var toggle = document.getElementById('theme-toggle');
+    var root = document.documentElement;
+    var saved = localStorage.getItem('naevermore-theme');
+    if(saved) root.setAttribute('data-theme', saved);
+    if(!toggle) return;
+    var isDark = (root.getAttribute('data-theme') === 'dark');
+    toggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    toggle.setAttribute('aria-pressed', String(isDark));
+    toggle.addEventListener('click', function(){
+      var current = root.getAttribute('data-theme');
+      var next = (current === 'dark') ? '' : 'dark';
+      if(next){ root.setAttribute('data-theme', next); } else { root.removeAttribute('data-theme'); }
+      localStorage.setItem('naevermore-theme', next);
+      var isNowDark = (next === 'dark');
+      toggle.textContent = isNowDark ? 'Light Mode' : 'Dark Mode';
+      toggle.setAttribute('aria-pressed', String(isNowDark));
+    });
+  });
   </script>
 </body>
 </html>

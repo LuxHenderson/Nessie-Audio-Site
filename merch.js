@@ -37,7 +37,7 @@ function createProductHTML(product) {
          class="merch-item-link"
          aria-label="View details for ${product.name}, ${priceDisplay}">
         <div class="merch-image-container">
-          <img src="${product.image_url || product.imageUrl}"
+          <img src="${resolveAssetUrl(product.image_url || product.imageUrl)}"
                alt="${altText}"
                class="merch-image"
                loading="lazy">

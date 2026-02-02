@@ -36,8 +36,8 @@ COPY *.js ./static/
 COPY *.png ./static/
 COPY *.txt ./static/
 COPY *.webmanifest ./static/
-COPY "Nessie Audio 2026.jpg" "./static/Nessie Audio 2026.jpg"
-COPY "Product Photos" "./static/Product Photos"
+COPY ["Nessie Audio 2026.jpg", "./static/Nessie Audio 2026.jpg"]
+COPY ["Product Photos", "./static/Product Photos"]
 COPY Music ./static/Music
 
 # Create runtime directories

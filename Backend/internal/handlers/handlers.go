@@ -224,7 +224,7 @@ func (h *Handler) checkStripeConfig() ComponentHealth {
 	}
 
 	return ComponentHealth{
-		Status:  "hwarning
+		Status:  "healthy",
 		Message: "stripe configured",
 	}
 }

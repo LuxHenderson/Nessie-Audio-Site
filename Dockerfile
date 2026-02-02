@@ -1,6 +1,9 @@
 # ===== Build stage =====
 FROM golang:1.23-bookworm AS builder
 
+# Set Go toolchain to auto to allow downloading required versions
+ENV GOTOOLCHAIN=auto
+
 # Install C compiler for CGO (required by go-sqlite3)
 RUN apt-get update && apt-get install -y gcc libc6-dev && rm -rf /var/lib/apt/lists/*
 
@@ -8,13 +11,11 @@ WORKDIR /build/Backend
 
 # Copy Go module files first for Docker layer caching
 COPY Backend/go.mod Backend/go.sum ./
-ENV GOTOOLCHAIN=auto
 RUN go mod download
 
 # Copy full Backend source and build
 COPY Backend/ ./
 ENV CGO_ENABLED=1
-ENV GOTOOLCHAIN=auto
 RUN go build -o /build/server ./cmd/server
 
 # ===== Runtime stage =====

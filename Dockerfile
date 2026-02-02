@@ -26,9 +26,6 @@ WORKDIR /app
 # Copy compiled binary
 COPY --from=builder /build/server ./server
 
-# Copy seed database (will use Railway volume in production)
-COPY Backend/nessie_store.db ./nessie_store.db
-
 # Copy frontend static files
 COPY *.html ./static/
 COPY *.css ./static/
@@ -45,5 +42,5 @@ RUN mkdir -p /app/logs /app/backups
 
 EXPOSE 8080
 
-# On first boot, copy seed DB to volume if not already present, then start server
-CMD ["/bin/sh", "-c", "if [ ! -f /data/nessie_store.db ] && [ -d /data ]; then cp /app/nessie_store.db /data/nessie_store.db; echo 'Initialized database from seed'; fi && exec ./server"]
+# Database will be created by migrations on first boot
+CMD ["./server"]

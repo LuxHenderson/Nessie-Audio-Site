@@ -8,6 +8,7 @@ WORKDIR /build/Backend
 
 # Copy Go module files first for Docker layer caching
 COPY Backend/go.mod Backend/go.sum ./
+ENV GOTOOLCHAIN=auto
 RUN go mod download
 
 # Copy full Backend source and build

@@ -14,6 +14,7 @@ RUN go mod download
 # Copy full Backend source and build
 COPY Backend/ ./
 ENV CGO_ENABLED=1
+ENV GOTOOLCHAIN=auto
 RUN go build -o /build/server ./cmd/server
 
 # ===== Runtime stage =====

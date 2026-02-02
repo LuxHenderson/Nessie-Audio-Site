@@ -1,0 +1,33 @@
+.git
+.gitignore
+.vscode
+.DS_Store
+*.md
+
+# Backend dev artifacts
+Backend/.env
+Backend/.env.*
+Backend/bin/
+Backend/logs/
+Backend/backups/
+Backend/test-*
+Backend/server
+
+# Large media files
+*.mp4
+*.mov
+*.wav
+*.zip
+*.psd
+*.ai
+*.blend
+*.avi
+*.mkv
+*.flac
+
+# Dev tooling
+node_modules/
+dist/
+build/
+.next/
+cmd/

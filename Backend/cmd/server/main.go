@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -104,18 +106,56 @@ func main() {
 	router.Use(middleware.Logging)
 	router.Use(middleware.CORS(cfg.AllowedOrigins))
 
-	// Serve static files from Product Photos directory BEFORE registering API routes
-	// This allows the frontend to load local product images
-	productPhotosPath := "../Product Photos"
-	if _, err := os.Stat(productPhotosPath); err == nil {
-		fs := http.FileServer(http.Dir(".."))
+	// Determine static files directory
+	// In Docker (production): /app/static
+	// In local dev (CWD is Backend/): ../
+	staticDir := "/app/static"
+	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+		staticDir = ".."
+	}
+	log.Printf("Serving static files from: %s", staticDir)
+
+	// Serve Product Photos BEFORE registering API routes
+	productPhotosDir := filepath.Join(staticDir, "Product Photos")
+	if _, err := os.Stat(productPhotosDir); err == nil {
+		fs := http.FileServer(http.Dir(staticDir))
 		router.PathPrefix("/Product Photos/").Handler(fs)
-		log.Println("Serving product images from local Product Photos directory")
+		log.Println("Serving product images from", productPhotosDir)
 	} else {
-		log.Println("⚠️  WARNING: Product Photos directory not found at", productPhotosPath)
+		log.Println("⚠️  WARNING: Product Photos directory not found at", productPhotosDir)
 	}
 
 	handler.RegisterRoutes(router)
+
+	// Serve frontend static files as catch-all AFTER API routes
+	// gorilla/mux matches in registration order, so API routes take priority
+	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		urlPath := r.URL.Path
+
+		// Serve homepage
+		if urlPath == "/" {
+			http.ServeFile(w, r, filepath.Join(staticDir, "Nævermore.html"))
+			return
+		}
+
+		// Resolve and validate the file path (prevent directory traversal)
+		filePath := filepath.Join(staticDir, filepath.Clean(urlPath))
+		absStaticDir, _ := filepath.Abs(staticDir)
+		absFilePath, _ := filepath.Abs(filePath)
+		if !strings.HasPrefix(absFilePath, absStaticDir) {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Serve the file if it exists
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			http.ServeFile(w, r, filePath)
+			return
+		}
+
+		// Unknown path — serve homepage
+		http.ServeFile(w, r, filepath.Join(staticDir, "Nævermore.html"))
+	})
 
 	// Create HTTP server
 	server := &http.Server{

@@ -150,39 +150,33 @@ type ComponentHealth struct {
 // checkSystemHealth performs comprehensive health checks
 func (h *Handler) checkSystemHealth() HealthStatus {
 	checks := make(map[string]ComponentHealth)
-	allHealthy := true
+	criticalFailure := false
 
-	// 1. Database connectivity check
+	// 1. Database connectivity check (CRITICAL)
 	dbHealth := h.checkDatabase()
 	checks["database"] = dbHealth
 	if dbHealth.Status != "healthy" {
-		allHealthy = false
+		criticalFailure = true
 	}
 
-	// 2. Stripe API check (lightweight - just verify credentials are set)
+	// 2. Stripe API check (NON-CRITICAL - just informational)
 	stripeHealth := h.checkStripeConfig()
 	checks["stripe"] = stripeHealth
-	if stripeHealth.Status != "healthy" {
-		allHealthy = false
-	}
+	// Don't mark as critical failure - just log warning
 
-	// 3. Printful API check (lightweight - just verify credentials are set)
+	// 3. Printful API check (NON-CRITICAL - just informational)
 	printfulHealth := h.checkPrintfulConfig()
 	checks["printful"] = printfulHealth
-	if printfulHealth.Status != "healthy" {
-		allHealthy = false
-	}
+	// Don't mark as critical failure - just log warning
 
-	// 4. Email service check (verify SMTP config)
+	// 4. Email service check (NON-CRITICAL - just informational)
 	emailHealth := h.checkEmailConfig()
 	checks["email"] = emailHealth
-	if emailHealth.Status != "healthy" {
-		allHealthy = false
-	}
+	// Don't mark as critical failure - just log warning
 
-	// Determine overall status
+	// Determine overall status - only fail if critical components are down
 	overallStatus := "healthy"
-	if !allHealthy {
+	if criticalFailure {
 		overallStatus = "unhealthy"
 	}
 
@@ -230,7 +224,7 @@ func (h *Handler) checkStripeConfig() ComponentHealth {
 	}
 
 	return ComponentHealth{
-		Status:  "healthy",
+		Status:  "hwarning
 		Message: "stripe configured",
 	}
 }
@@ -239,7 +233,7 @@ func (h *Handler) checkStripeConfig() ComponentHealth {
 func (h *Handler) checkPrintfulConfig() ComponentHealth {
 	if h.config.PrintfulAPIKey == "" {
 		return ComponentHealth{
-			Status:  "unhealthy",
+			Status:  "warning",
 			Message: "printful credentials not configured",
 		}
 	}
@@ -254,7 +248,7 @@ func (h *Handler) checkPrintfulConfig() ComponentHealth {
 func (h *Handler) checkEmailConfig() ComponentHealth {
 	if h.config.SMTPHost == "" || h.config.SMTPUsername == "" || h.config.SMTPPassword == "" {
 		return ComponentHealth{
-			Status:  "unhealthy",
+			Status:  "warning",
 			Message: "email service not configured",
 		}
 	}

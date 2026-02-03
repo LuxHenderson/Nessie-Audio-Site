@@ -134,7 +134,7 @@ func main() {
 
 		// Serve homepage
 		if urlPath == "/" {
-			http.ServeFile(w, r, filepath.Join(staticDir, "Nævermore.html"))
+			http.ServeFile(w, r, filepath.Join(staticDir, "home.html"))
 			return
 		}
 
@@ -163,7 +163,7 @@ func main() {
 		}
 
 		// Unknown path — serve homepage
-		http.ServeFile(w, r, filepath.Join(staticDir, "Nævermore.html"))
+		http.ServeFile(w, r, filepath.Join(staticDir, "home.html"))
 	})
 
 	// Create HTTP server

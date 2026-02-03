@@ -147,10 +147,19 @@ func main() {
 			return
 		}
 
-		// Serve the file if it exists
+		// Try exact file path first
 		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
 			http.ServeFile(w, r, filePath)
 			return
+		}
+
+		// If path doesn't end with .html, try adding .html extension
+		if !strings.HasSuffix(urlPath, ".html") {
+			htmlPath := filePath + ".html"
+			if info, err := os.Stat(htmlPath); err == nil && !info.IsDir() {
+				http.ServeFile(w, r, htmlPath)
+				return
+			}
 		}
 
 		// Unknown path — serve homepage

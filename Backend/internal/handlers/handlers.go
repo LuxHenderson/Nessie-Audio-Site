@@ -19,8 +19,8 @@ import (
 
 // Handler holds all dependencies for HTTP handlers
 type Handler struct {
-	db            *sql.DB
-	config        *config.Config
+	db             *sql.DB
+	config         *config.Config
 	printfulClient *printful.Client
 	stripeClient   *stripe.Client
 	orderService   *order.Service
@@ -135,9 +135,9 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 
 // HealthStatus represents the health check response
 type HealthStatus struct {
-	Status    string                  `json:"status"`
-	Service   string                  `json:"service"`
-	Timestamp string                  `json:"timestamp"`
+	Status    string                     `json:"status"`
+	Service   string                     `json:"service"`
+	Timestamp string                     `json:"timestamp"`
 	Checks    map[string]ComponentHealth `json:"checks"`
 }
 

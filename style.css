@@ -137,7 +137,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0; /* Safari doesn't reliably render fixed elements with negative z-index */
+  z-index: -1; /* In front of background image but behind all content */
   pointer-events: none; /* Allow interaction with content above */
   overflow: hidden;
 }
@@ -146,12 +146,6 @@ body {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-/* Ensure page content renders above the fog canvas (z-index: 0) */
-main, .site-footer {
-  position: relative;
-  z-index: 1;
 }
 
 /* Fixed background image layer using pseudo-element for cross-browser compatibility */

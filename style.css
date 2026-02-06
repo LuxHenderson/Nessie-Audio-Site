@@ -178,6 +178,9 @@ body{
   font-weight: 400;
   /* Background now handled by ::before pseudo-element for Safari compatibility */
   background-color: var(--page-backdrop, #000);
+  /* Creates stacking context so negative z-index children (fog, background image)
+     render above body's background in Safari */
+  isolation: isolate;
   color:var(--text);
   line-height:1.45;
   /* Cross-browser font smoothing */

@@ -36,7 +36,7 @@ func SecurityHeaders() func(http.Handler) http.Handler {
 			// This is a balanced policy for an eCommerce site
 			csp := strings.Join([]string{
 				"default-src 'self'",                          // Only load from same origin by default
-				"script-src 'self' 'unsafe-inline' https://js.stripe.com", // Allow scripts from self and Stripe
+				"script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net", // Allow scripts from self, Stripe, and Three.js CDN
 				"style-src 'self' 'unsafe-inline'",            // Allow inline styles (needed for some frameworks)
 				"img-src 'self' data: https:",                 // Allow images from self, data URIs, and HTTPS
 				"font-src 'self' data:",                       // Allow fonts from self and data URIs

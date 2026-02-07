@@ -165,15 +165,25 @@
 
   function showBookingNotification(text, isError){
     const notification = document.createElement('div');
-    notification.className = 'cart-notification';
     notification.setAttribute('role', 'alert');
-    notification.style.cssText = 'position:fixed;top:180px;right:20px;z-index:2001;';
-    notification.innerHTML = '<p>' + text + '</p>';
-    if(isError) notification.querySelector('p').style.color = '#ff6b6b';
+    notification.textContent = text;
+    notification.style.cssText =
+      'position:fixed;top:100px;right:20px;z-index:2000;' +
+      'background:' + (isError ? 'rgba(200,100,100,0.9)' : 'rgba(100,200,100,0.9)') + ';' +
+      'color:white;padding:1rem 1.5rem;border-radius:8px;' +
+      'box-shadow:0 4px 12px rgba(0,0,0,0.3);font-size:0.95rem;font-weight:600;' +
+      'animation:slideIn 0.3s ease;';
+
+    if(!document.querySelector('#notification-styles')){
+      const s = document.createElement('style');
+      s.id = 'notification-styles';
+      s.textContent = '@keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}';
+      document.head.appendChild(s);
+    }
+
     document.body.appendChild(notification);
-    setTimeout(()=> notification.classList.add('show'), 10);
     setTimeout(()=>{
-      notification.classList.remove('show');
+      notification.style.animation = 'slideIn 0.3s ease reverse';
       setTimeout(()=> notification.remove(), 300);
     }, 3000);
   }

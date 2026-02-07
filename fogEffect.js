@@ -5,10 +5,17 @@
 (function() {
   'use strict';
 
-  // Wait for DOM and Three.js to be ready
-  if (typeof THREE === 'undefined') {
-    console.warn('Three.js not loaded. Fog effect will not initialize.');
-    return;
+  // Wait for Three.js to load (may still be downloading from CDN on first visit)
+  function waitForThree(callback, attempts) {
+    if (typeof THREE !== 'undefined') {
+      callback();
+      return;
+    }
+    if (attempts <= 0) {
+      console.warn('Three.js failed to load. Fog effect will not initialize.');
+      return;
+    }
+    setTimeout(function() { waitForThree(callback, attempts - 1); }, 100);
   }
 
   // Configuration
@@ -351,11 +358,15 @@
     }
   }
 
-  // Initialize when DOM is ready
+  // Initialize when DOM is ready, waiting for Three.js if needed
+  function start() {
+    waitForThree(init, 50); // Retry up to 50 times (5 seconds)
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', start);
   } else {
-    init();
+    start();
   }
 
   // Expose destroy for cleanup if needed

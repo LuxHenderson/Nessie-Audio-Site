@@ -44,7 +44,7 @@ func SecurityHeaders() func(http.Handler) http.Handler {
 				"frame-src https://js.stripe.com",             // Allow Stripe iframe for payment
 				"object-src 'none'",                           // Block Flash, Java, etc.
 				"base-uri 'self'",                             // Restrict <base> tag
-				"form-action 'self'",                          // Only submit forms to same origin
+				"form-action 'self' https://formspree.io",     // Allow form submissions to same origin and Formspree
 				"frame-ancestors 'self'",                      // Only allow framing by same origin
 				"upgrade-insecure-requests",                   // Upgrade HTTP requests to HTTPS
 			}, "; ")

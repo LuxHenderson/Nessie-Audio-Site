@@ -56,7 +56,13 @@ func detectEnvironment() string {
 		return env
 	}
 
-	// Priority 2: Check hostname for auto-detection
+	// Priority 2: Check for Railway environment
+	if os.Getenv("RAILWAY_ENVIRONMENT") != "" {
+		log.Println("Environment auto-detected: production (Railway detected)")
+		return "production"
+	}
+
+	// Priority 3: Check hostname for auto-detection
 	hostname, err := os.Hostname()
 	if err == nil {
 		hostname = strings.ToLower(hostname)
@@ -78,7 +84,7 @@ func detectEnvironment() string {
 		}
 	}
 
-	// Priority 3: Check for environment marker files
+	// Priority 4: Check for environment marker files
 	if _, err := os.Stat(".production"); err == nil {
 		log.Println("Environment auto-detected: production (found .production marker)")
 		return "production"

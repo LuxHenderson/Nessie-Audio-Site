@@ -20,12 +20,12 @@ type PrintfulProduct struct {
 }
 
 type PrintfulVariant struct {
-	ID            int     `json:"id"`
-	SyncVariantID int     `json:"sync_variant_id"`
-	Name          string  `json:"name"`
-	Price         string  `json:"retail_price"`
-	Currency      string  `json:"currency"`
-	ProductID     int     `json:"product_id"`
+	ID            int    `json:"id"`
+	SyncVariantID int    `json:"sync_variant_id"`
+	Name          string `json:"name"`
+	Price         string `json:"retail_price"`
+	Currency      string `json:"currency"`
+	ProductID     int    `json:"product_id"`
 	Files         []struct {
 		Type string `json:"type"`
 	} `json:"files"`
@@ -42,21 +42,21 @@ type PrintfulListResponse struct {
 }
 
 type PrintfulDetailResponse struct {
-	Code   int                    `json:"code"`
+	Code   int                   `json:"code"`
 	Result PrintfulProductDetail `json:"result"`
 }
 
 // Local product image mapping
 func getLocalImagePath(productName string) string {
 	imageMap := map[string]string{
-		"Nessie Audio Unisex t-shirt":          "http://localhost:8080/Product Photos/Nessie Audio Unisex t-shirt/unisex-staple-t-shirt-black-back-6947058beaf9f.jpg",
-		"Nessie Audio Unisex Champion hoodie":  "http://localhost:8080/Product Photos/Nessie Audio Unisex Champion hoodie/unisex-champion-hoodie-black-back-694705e44574e.png",
-		"Nessie Audio Black Glossy Mug":        "http://localhost:8080/Product Photos/Nessie Audio Black Glossy Mug/black-glossy-mug-black-11-oz-handle-on-right-694706e20d560.jpg",
-		"Hardcover bound Nessie Audio notebook": "http://localhost:8080/Product Photos/Hardcover bound Nessie Audio notebook/hardcover-bound-notebook-black-front-6947075450efd.jpg",
-		"Nessie Audio Eco Tote Bag":            "http://localhost:8080/Product Photos/Nessie Audio Eco Tote Bag/eco-tote-bag-black-front-694707a54ec5c.jpg",
-		"Nessie Audio Bubble-free stickers":    "http://localhost:8080/Product Photos/Nessie Audio Bubble-free stickers/kiss-cut-stickers-white-3x3-default-6947069ac72f0.jpg",
+		"Nessie Audio Unisex t-shirt":           "/Product Photos/Nessie Audio Unisex t-shirt/unisex-staple-t-shirt-black-back-6947058beaf9f.jpg",
+		"Nessie Audio Unisex Champion hoodie":   "/Product Photos/Nessie Audio Unisex Champion hoodie/unisex-champion-hoodie-black-back-694705e44574e.png",
+		"Nessie Audio Black Glossy Mug":         "/Product Photos/Nessie Audio Black Glossy Mug/black-glossy-mug-black-11-oz-handle-on-right-694706e20d560.jpg",
+		"Hardcover bound Nessie Audio notebook": "/Product Photos/Hardcover bound Nessie Audio notebook/hardcover-bound-notebook-black-front-6947075450efd.jpg",
+		"Nessie Audio Eco Tote Bag":             "/Product Photos/Nessie Audio Eco Tote Bag/eco-tote-bag-black-front-694707a54ec5c.jpg",
+		"Nessie Audio Bubble-free stickers":     "/Product Photos/Nessie Audio Bubble-free stickers/kiss-cut-stickers-white-3x3-default-6947069ac72f0.jpg",
 	}
-	
+
 	if path, ok := imageMap[productName]; ok {
 		return path
 	}
@@ -104,7 +104,7 @@ Disclaimer: Size up for a looser fit.`,
 - 95µ thickness
 - Fast and easy bubble-free application`,
 	}
-	
+
 	if desc, ok := descriptionMap[productName]; ok {
 		return desc
 	}
@@ -176,13 +176,13 @@ func main() {
 		}
 
 		item := detail.Result
-		
+
 		// Generate UUID for product
 		productID := uuid.New().String()
 
 		// Determine category from product name (simple heuristic)
 		category := "merch"
-		
+
 		// Calculate base price from first variant
 		price := "0.00"
 		currency := "USD"
@@ -296,7 +296,7 @@ func main() {
 	// Show summary
 	var productCount int
 	db.QueryRow("SELECT COUNT(*) FROM products").Scan(&productCount)
-	
+
 	var variantCount int
 	db.QueryRow("SELECT COUNT(*) FROM variants").Scan(&variantCount)
 

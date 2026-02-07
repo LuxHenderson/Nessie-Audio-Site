@@ -140,14 +140,6 @@
       btn.textContent = 'Sending...';
       btn.disabled = true;
 
-      let msg = bookingForm.querySelector('.booking-msg');
-      if(!msg){
-        msg = document.createElement('span');
-        msg.className = 'booking-msg';
-        btn.parentElement.appendChild(msg);
-      }
-      msg.textContent = '';
-
       fetch(bookingForm.action, {
         method: 'POST',
         body: new FormData(bookingForm),
@@ -155,23 +147,35 @@
       })
       .then(res => {
         if(res.ok){
-          msg.textContent = 'Message sent!';
-          msg.style.color = 'var(--accent, #90ee90)';
+          showBookingNotification('✓ Message sent!');
           bookingForm.reset();
         } else {
-          msg.textContent = 'Something went wrong. Please try again.';
-          msg.style.color = 'var(--accent, #ff6b6b)';
+          showBookingNotification('Something went wrong. Please try again.', true);
         }
       })
       .catch(()=>{
-        msg.textContent = 'Network error. Please try again.';
-        msg.style.color = 'var(--accent, #ff6b6b)';
+        showBookingNotification('Network error. Please try again.', true);
       })
       .finally(()=>{
         btn.textContent = origText;
         btn.disabled = false;
       });
     });
+  }
+
+  function showBookingNotification(text, isError){
+    const notification = document.createElement('div');
+    notification.className = 'cart-notification';
+    notification.setAttribute('role', 'alert');
+    notification.style.cssText = 'position:fixed;top:180px;right:20px;z-index:2001;';
+    notification.innerHTML = '<p>' + text + '</p>';
+    if(isError) notification.querySelector('p').style.color = '#ff6b6b';
+    document.body.appendChild(notification);
+    setTimeout(()=> notification.classList.add('show'), 10);
+    setTimeout(()=>{
+      notification.classList.remove('show');
+      setTimeout(()=> notification.remove(), 300);
+    }, 3000);
   }
 
   // Auto-update copyright year

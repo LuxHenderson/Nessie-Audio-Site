@@ -895,7 +895,6 @@ section{padding:3rem 0}
 .contact-form input,.contact-form textarea{width:100%;padding:0.6rem;border-radius:0.5rem;border:1px solid rgba(0,0,0,0.08);background:var(--panel);color:var(--text)}
 .form-actions{display:flex;gap:0.5rem;align-items:center}
 .form-msg{color:var(--muted);margin-top:0.5rem}
-.booking-msg{margin-left:0.75rem;font-size:0.9rem}
 
 /* ========== Footer ========== */
 /* Footer - matches nav bar style, follows natural page flow */

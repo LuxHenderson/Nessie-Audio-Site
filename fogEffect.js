@@ -360,6 +360,8 @@
 
   // Initialize when DOM is ready, waiting for Three.js if needed
   function start() {
+    // Guard against double-initialization
+    if (animationId) return;
     waitForThree(init, 50); // Retry up to 50 times (5 seconds)
   }
 
@@ -368,6 +370,21 @@
   } else {
     start();
   }
+
+  // Fallback: if defer script timing was disrupted (e.g. by a 301 redirect),
+  // ensure fog initializes once the page is fully loaded
+  window.addEventListener('load', function() {
+    if (!animationId && document.getElementById('fog-canvas-container')) {
+      start();
+    }
+  });
+
+  // Handle bfcache restoration (browser restores page state without re-executing scripts)
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted && !animationId) {
+      start();
+    }
+  });
 
   // Expose destroy for cleanup if needed
   window.fogEffectDestroy = destroy;

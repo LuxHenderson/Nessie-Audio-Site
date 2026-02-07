@@ -211,7 +211,8 @@ select, input[type="checkbox"], input[type="radio"] {
   /* nav bar sits flush at the top of the viewport */
   top:0;
   z-index:1100;
-  backdrop-filter: blur(-6px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   background: linear-gradient(180deg, rgba(45, 39, 93, 0.6), rgba(45, 39, 93, 0.5));
   border-bottom:1px solid rgba(192, 192, 192, 0.3);
   width: 100%;
@@ -486,7 +487,8 @@ section{padding:3rem 0}
   margin-bottom: 4rem;
   /* Box styling */
   background: var(--show-promo-box-bg);
-  backdrop-filter: blur(-6px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   padding: var(--show-promo-box-padding);
   padding-bottom: 4rem; /* Add proper bottom padding for booking form button */
   border-radius: var(--show-promo-box-radius);
@@ -902,7 +904,8 @@ section{padding:3rem 0}
 /* Footer - matches nav bar style, follows natural page flow */
 .site-footer{
   padding:1.25rem 0;
-  backdrop-filter: blur(-6px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   background: linear-gradient(180deg, rgba(45, 39, 93, 0.6), rgba(45, 39, 93, 0.5));
   border-top:1px solid rgba(192, 192, 192, 0.3);
   margin-top: auto;

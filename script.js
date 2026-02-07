@@ -130,7 +130,49 @@
     });
   }
 
-  // Booking form submits directly to Formspree (no JS intervention needed)
+  // Booking form — submit via fetch so user stays on page
+  const bookingForm = $('.booking-form');
+  if(bookingForm){
+    bookingForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const btn = bookingForm.querySelector('button[type="submit"]');
+      const origText = btn.textContent;
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      let msg = bookingForm.querySelector('.booking-msg');
+      if(!msg){
+        msg = document.createElement('span');
+        msg.className = 'booking-msg';
+        btn.parentElement.appendChild(msg);
+      }
+      msg.textContent = '';
+
+      fetch(bookingForm.action, {
+        method: 'POST',
+        body: new FormData(bookingForm),
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(res => {
+        if(res.ok){
+          msg.textContent = 'Message sent!';
+          msg.style.color = 'var(--accent, #90ee90)';
+          bookingForm.reset();
+        } else {
+          msg.textContent = 'Something went wrong. Please try again.';
+          msg.style.color = 'var(--accent, #ff6b6b)';
+        }
+      })
+      .catch(()=>{
+        msg.textContent = 'Network error. Please try again.';
+        msg.style.color = 'var(--accent, #ff6b6b)';
+      })
+      .finally(()=>{
+        btn.textContent = origText;
+        btn.disabled = false;
+      });
+    });
+  }
 
   // Auto-update copyright year
   const year = $('#year'); if(year) year.textContent = new Date().getFullYear();

@@ -40,7 +40,7 @@ func SecurityHeaders() func(http.Handler) http.Handler {
 				"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com", // Allow inline styles, Google Fonts, Font Awesome
 				"img-src 'self' data: https:",                 // Allow images from self, data URIs, and HTTPS
 				"font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com", // Allow fonts from self, data URIs, Google Fonts, Font Awesome
-				"connect-src 'self' https://api.stripe.com https://api.printful.com", // Allow API calls to self, Stripe, Printful
+				"connect-src 'self' https://api.stripe.com https://api.printful.com https://formspree.io", // Allow API calls to self, Stripe, Printful, Formspree
 				"frame-src https://js.stripe.com",             // Allow Stripe iframe for payment
 				"object-src 'none'",                           // Block Flash, Java, etc.
 				"base-uri 'self'",                             // Restrict <base> tag

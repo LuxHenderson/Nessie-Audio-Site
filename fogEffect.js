@@ -49,6 +49,9 @@
     }
 
     try {
+      // Reset start time so fade-in begins from actual render start, not script parse time
+      startTime = Date.now();
+
       // Scene setup
       scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(config.fogColor, fogDensity);

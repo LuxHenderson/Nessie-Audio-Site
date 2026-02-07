@@ -114,6 +114,80 @@ func seedProductsIfEmpty(db *sql.DB) error {
 	}
 
 	log.Println("✅ Product seeding complete!")
+
+	// Also seed variants for the newly created products
+	return seedVariantsIfEmpty(db)
+}
+
+// seedVariantsIfEmpty populates the variants table with Printful variant data
+func seedVariantsIfEmpty(db *sql.DB) error {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM variants").Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check variants count: %w", err)
+	}
+
+	if count > 0 {
+		log.Printf("Variants table already populated with %d variants", count)
+		return nil
+	}
+
+	log.Println("📦 Variants table is empty - seeding with Printful variant data...")
+
+	type variant struct {
+		id         string
+		productID  string
+		printfulID int
+		name       string
+		price      float64
+	}
+
+	variants := []variant{
+		// Eco Tote Bag (1 variant)
+		{"b06c0f89-98d2-4171-b416-8b471f1e591b", "4f92e8f5-dc35-4c67-ae47-2e41f959680f", 5117581114, "Nessie Audio Eco Tote Bag", 25.0},
+		// Notebook (1 variant)
+		{"d1e37055-22ef-4e50-82fd-712145ec0b70", "7eb5405b-ba58-4564-a395-b0d17e8d45e9", 5117580723, "Hardcover bound Nessie Audio notebook / Black", 20.0},
+		// Stickers (4 variants)
+		{"6bdaef77-07e7-4b4a-8284-d8366e21c467", "bd45da14-cd20-4840-8095-29a0547c6f6f", 5117580378, "Nessie Audio Bubble-free stickers / 3″×3″", 5.0},
+		{"ec2a30f3-f328-4322-acfb-fabd22bac612", "bd45da14-cd20-4840-8095-29a0547c6f6f", 5117580379, "Nessie Audio Bubble-free stickers / 4″×4″", 6.0},
+		{"f77df16f-b273-4768-9715-f2b011a11738", "bd45da14-cd20-4840-8095-29a0547c6f6f", 5117580380, "Nessie Audio Bubble-free stickers / 5.5″×5.5″", 7.0},
+		{"9592ae91-af5d-4435-be2d-df1694bb5b16", "bd45da14-cd20-4840-8095-29a0547c6f6f", 5117580381, "Nessie Audio Bubble-free stickers / 15″×3.75″", 8.0},
+		// Mug (2 variants)
+		{"16dc11bb-bc42-4f24-8d40-6fdd779abb6f", "331ff894-0eaa-43f9-bd8b-626eb29656fc", 5117579999, "Nessie Audio Black Glossy Mug / 11 oz", 15.0},
+		{"0f207194-b7c1-4cf5-b7aa-597e05405e01", "331ff894-0eaa-43f9-bd8b-626eb29656fc", 5117580000, "Nessie Audio Black Glossy Mug / 15 oz", 18.0},
+		// Hoodie (6 variants)
+		{"f517b811-a52f-4d49-b26e-f4ae19d247f3", "b33c14d3-dadd-41f0-b404-f055f0d406fa", 5117579650, "Nessie Audio Unisex Champion hoodie / S", 40.0},
+		{"24b3f297-0fef-4d4b-9ab2-0eb8b9458be7", "b33c14d3-dadd-41f0-b404-f055f0d406fa", 5117579651, "Nessie Audio Unisex Champion hoodie / M", 40.0},
+		{"ab240853-b5b3-46ef-8c53-54a3b6c6dfef", "b33c14d3-dadd-41f0-b404-f055f0d406fa", 5117579652, "Nessie Audio Unisex Champion hoodie / L", 45.0},
+		{"2c14ac74-f023-433e-a49b-1d189ee2ad0c", "b33c14d3-dadd-41f0-b404-f055f0d406fa", 5117579653, "Nessie Audio Unisex Champion hoodie / XL", 45.0},
+		{"0157802d-f98a-4b15-a5a8-7494b8b42e3e", "b33c14d3-dadd-41f0-b404-f055f0d406fa", 5117579654, "Nessie Audio Unisex Champion hoodie / 2XL", 50.0},
+		{"1f7762b1-0776-4d63-a5b2-25f9a120b995", "b33c14d3-dadd-41f0-b404-f055f0d406fa", 5117579655, "Nessie Audio Unisex Champion hoodie / 3XL", 50.0},
+		// T-shirt (9 variants)
+		{"ed77214c-43fc-4a3a-baa0-30dc9de85199", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578987, "Nessie Audio Unisex t-shirt / XS", 15.0},
+		{"bc8ae324-b794-4a08-bf65-5dfa55c31457", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578988, "Nessie Audio Unisex t-shirt / S", 15.0},
+		{"811ae62b-3ff3-4276-995f-6ca6803a72ee", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578989, "Nessie Audio Unisex t-shirt / M", 15.0},
+		{"e599896e-a602-4f49-95b3-fe835ac8f7f9", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578990, "Nessie Audio Unisex t-shirt / L", 20.0},
+		{"cb582a1d-9e23-4136-991e-3d64abbb52c2", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578991, "Nessie Audio Unisex t-shirt / XL", 20.0},
+		{"567a02f6-51d7-487b-af02-f7cd9f878c39", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578992, "Nessie Audio Unisex t-shirt / 2XL", 20.0},
+		{"a1e6cf12-635f-46c2-b75a-b2b31a69bbb2", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578993, "Nessie Audio Unisex t-shirt / 3XL", 25.0},
+		{"f86c585b-7725-48d7-aedb-f65a86c47201", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578994, "Nessie Audio Unisex t-shirt / 4XL", 25.0},
+		{"67dbc086-dd1c-409f-a125-bd73c1ca054f", "86ebaeb1-4889-4f79-83f3-b3ad22e8652e", 5117578995, "Nessie Audio Unisex t-shirt / 5XL", 25.0},
+	}
+
+	for _, v := range variants {
+		_, err := db.Exec(`
+			INSERT INTO variants (id, product_id, printful_variant_id, name, price, available, created_at, updated_at)
+			VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
+		`, v.id, v.productID, v.printfulID, v.name, v.price)
+
+		if err != nil {
+			log.Printf("  ⚠️  Failed to seed variant: %s - %v", v.name, err)
+		} else {
+			log.Printf("  ✓ Seeded: %s", v.name)
+		}
+	}
+
+	log.Println("✅ Variant seeding complete!")
 	return nil
 }
 
@@ -121,9 +195,9 @@ func main() {
 	// Ensure logging goes to stdout for Railway
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.LstdFlags)
-	
+
 	log.Println("🚀 Starting Nessie Audio Backend...")
-	
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -190,10 +264,14 @@ func main() {
 		}
 	}()
 
-	// Auto-seed products if database is empty (non-blocking)
+	// Auto-seed products and variants if database is empty (non-blocking)
 	go func() {
 		if err := seedProductsIfEmpty(db); err != nil {
 			log.Printf("⚠️  Failed to seed products: %v", err)
+		}
+		// Also check variants independently (products may already exist from a previous deploy)
+		if err := seedVariantsIfEmpty(db); err != nil {
+			log.Printf("⚠️  Failed to seed variants: %v", err)
 		}
 	}()
 

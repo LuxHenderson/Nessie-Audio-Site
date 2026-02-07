@@ -19,8 +19,8 @@ type Config struct {
 	DatabasePath string
 
 	// Printful
-	PrintfulAPIKey    string
-	PrintfulAPIURL    string
+	PrintfulAPIKey        string
+	PrintfulAPIURL        string
 	PrintfulWebhookSecret string
 
 	// Stripe
@@ -196,10 +196,22 @@ func Load() (*Config, error) {
 	// Load the appropriate .env file
 	_ = loadEnvFile(detectedEnv)
 
+	// Determine database path with Railway support
+	databasePath := getEnv("DATABASE_PATH", "")
+	if databasePath == "" {
+		// Check if running in Railway with a volume
+		if volumePath := os.Getenv("RAILWAY_VOLUME_MOUNT_PATH"); volumePath != "" {
+			databasePath = volumePath + "/nessie_store.db"
+			log.Printf("Using Railway volume for database: %s", databasePath)
+		} else {
+			databasePath = "./nessie_store.db"
+		}
+	}
+
 	cfg := &Config{
 		Port:                  getEnv("PORT", "8080"),
 		Env:                   detectedEnv,
-		DatabasePath:          getEnv("DATABASE_PATH", "./nessie_store.db"),
+		DatabasePath:          databasePath,
 		PrintfulAPIKey:        getEnv("PRINTFUL_API_KEY", ""),
 		PrintfulAPIURL:        getEnv("PRINTFUL_API_URL", "https://api.printful.com"),
 		PrintfulWebhookSecret: getEnv("PRINTFUL_WEBHOOK_SECRET", ""),

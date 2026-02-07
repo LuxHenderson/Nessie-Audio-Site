@@ -139,11 +139,6 @@ func main() {
 		log.Fatalf("Failed to run database migrations: %v", err)
 	}
 
-	// Auto-seed products if database is empty
-	if err := seedProductsIfEmpty(db); err != nil {
-		log.Printf("Warning: Failed to seed products: %v", err)
-	}
-
 	// Initialize services
 	printfulClient := printful.NewClient(cfg.PrintfulAPIKey, cfg.PrintfulAPIURL)
 	stripeClient := stripe.NewClient(
@@ -185,6 +180,13 @@ func main() {
 			appLogger.Warning("Failed to create startup backup", err)
 		} else {
 			log.Println("Initial backup created successfully")
+		}
+	}()
+
+	// Auto-seed products if database is empty (non-blocking)
+	go func() {
+		if err := seedProductsIfEmpty(db); err != nil {
+			log.Printf("⚠️  Failed to seed products: %v", err)
 		}
 	}()
 

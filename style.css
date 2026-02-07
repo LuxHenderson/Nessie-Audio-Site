@@ -211,7 +211,7 @@ select, input[type="checkbox"], input[type="radio"] {
   /* nav bar sits flush at the top of the viewport */
   top:0;
   z-index:1100;
-  background-color: rgba(45, 39, 93, 0.55);
+  background: linear-gradient(180deg, rgba(45, 39, 93, 0.6), rgba(45, 39, 93, 0.5));
   border-bottom:1px solid rgba(192, 192, 192, 0.3);
   width: 100%;
   box-sizing: border-box;
@@ -900,7 +900,7 @@ section{padding:3rem 0}
 /* Footer - matches nav bar style, follows natural page flow */
 .site-footer{
   padding:1.25rem 0;
-  background-color: rgba(45, 39, 93, 0.55);
+  background: linear-gradient(180deg, rgba(45, 39, 93, 0.6), rgba(45, 39, 93, 0.5));
   border-top:1px solid rgba(192, 192, 192, 0.3);
   margin-top: auto;
 }

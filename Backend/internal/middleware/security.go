@@ -82,6 +82,12 @@ func HTTPSRedirect(env string) func(http.Handler) http.Handler {
 				return
 			}
 
+			// Skip redirect for health check (Railway's internal probe uses plain HTTP)
+			if r.URL.Path == "/health" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			// Check if request is already HTTPS
 			isHTTPS := r.TLS != nil ||
 				r.Header.Get("X-Forwarded-Proto") == "https" ||

@@ -36,10 +36,10 @@ func SecurityHeaders() func(http.Handler) http.Handler {
 			// This is a balanced policy for an eCommerce site
 			csp := strings.Join([]string{
 				"default-src 'self'",                          // Only load from same origin by default
-				"script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net", // Allow scripts from self, Stripe, and Three.js CDN
-				"style-src 'self' 'unsafe-inline'",            // Allow inline styles (needed for some frameworks)
+				"script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com", // Allow scripts from self, Stripe, Three.js CDN, Cloudflare analytics
+				"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com", // Allow inline styles, Google Fonts, Font Awesome
 				"img-src 'self' data: https:",                 // Allow images from self, data URIs, and HTTPS
-				"font-src 'self' data:",                       // Allow fonts from self and data URIs
+				"font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com", // Allow fonts from self, data URIs, Google Fonts, Font Awesome
 				"connect-src 'self' https://api.stripe.com https://api.printful.com", // Allow API calls to self, Stripe, Printful
 				"frame-src https://js.stripe.com",             // Allow Stripe iframe for payment
 				"object-src 'none'",                           // Block Flash, Java, etc.

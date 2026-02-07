@@ -278,21 +278,19 @@
     const fadeProgress = Math.min(elapsed / config.fadeInDuration, 1);
     const easedProgress = easeOutCubic(fadeProgress);
 
-    // Animate fog density fade-in
-    if (fadeProgress < 1) {
-      fogDensity = config.initialFogDensity + 
-        (config.targetFogDensity - config.initialFogDensity) * easedProgress;
-      scene.fog.density = fogDensity;
+    // Set fog density, light intensity, and particle opacity based on fade progress.
+    // Always applied (not gated by fadeProgress < 1) so values are correct even if
+    // the first frame runs after the fade duration has elapsed (e.g. after a redirect).
+    fogDensity = config.initialFogDensity +
+      (config.targetFogDensity - config.initialFogDensity) * easedProgress;
+    scene.fog.density = fogDensity;
 
-      // Animate light intensity
-      lightIntensity = config.lightIntensity * easedProgress;
-      scene.userData.ambientLight.intensity = lightIntensity * 0.5;
-      scene.userData.directionalLight.intensity = lightIntensity * 0.3;
-      
-      // Fade in particle opacity
-      if (particles && particles.material.uniforms) {
-        particles.material.uniforms.baseOpacity.value = easedProgress;
-      }
+    lightIntensity = config.lightIntensity * easedProgress;
+    scene.userData.ambientLight.intensity = lightIntensity * 0.5;
+    scene.userData.directionalLight.intensity = lightIntensity * 0.3;
+
+    if (particles && particles.material.uniforms) {
+      particles.material.uniforms.baseOpacity.value = easedProgress;
     }
 
     // Animate particles - slow drift

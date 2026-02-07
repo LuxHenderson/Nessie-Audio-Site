@@ -127,6 +127,19 @@ func main() {
 
 	handler.RegisterRoutes(router)
 
+	// serveFileWithCache sets Cache-Control headers based on file type, then serves the file.
+	// HTML: no-cache (always revalidate with origin - prevents Cloudflare serving stale pages)
+	// Static assets: cached for 1 hour
+	serveFileWithCache := func(w http.ResponseWriter, r *http.Request, filePath string) {
+		ext := strings.ToLower(filepath.Ext(filePath))
+		if ext == ".html" || ext == "" {
+			w.Header().Set("Cache-Control", "no-cache")
+		} else {
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+		}
+		http.ServeFile(w, r, filePath)
+	}
+
 	// Serve frontend static files as catch-all AFTER API routes
 	// gorilla/mux matches in registration order, so API routes take priority
 	router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +147,7 @@ func main() {
 
 		// Serve homepage
 		if urlPath == "/" {
-			http.ServeFile(w, r, filepath.Join(staticDir, "home.html"))
+			serveFileWithCache(w, r, filepath.Join(staticDir, "home.html"))
 			return
 		}
 
@@ -149,7 +162,7 @@ func main() {
 
 		// Try exact file path first
 		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
-			http.ServeFile(w, r, filePath)
+			serveFileWithCache(w, r, filePath)
 			return
 		}
 
@@ -157,13 +170,13 @@ func main() {
 		if !strings.HasSuffix(urlPath, ".html") {
 			htmlPath := filePath + ".html"
 			if info, err := os.Stat(htmlPath); err == nil && !info.IsDir() {
-				http.ServeFile(w, r, htmlPath)
+				serveFileWithCache(w, r, htmlPath)
 				return
 			}
 		}
 
 		// Unknown path — serve homepage
-		http.ServeFile(w, r, filepath.Join(staticDir, "home.html"))
+		serveFileWithCache(w, r, filepath.Join(staticDir, "home.html"))
 	})
 
 	// Create HTTP server

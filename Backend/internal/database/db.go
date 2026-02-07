@@ -16,7 +16,7 @@ func InitDB(dbPath string) (*sql.DB, error) {
 	if err := os.MkdirAll(dbDir, 0755); err != nil {
 		return nil, fmt.Errorf("create database directory: %w", err)
 	}
-	
+
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)

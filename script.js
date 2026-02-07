@@ -164,11 +164,19 @@
   }
 
   function showBookingNotification(text, isError){
+    // Reuse the same notification container as product-detail.js
+    let container = document.querySelector('.notification-container');
+    if(!container){
+      container = document.createElement('div');
+      container.className = 'notification-container';
+      container.style.cssText = 'position:fixed;top:100px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:10px;';
+      document.body.appendChild(container);
+    }
+
     const notification = document.createElement('div');
     notification.setAttribute('role', 'alert');
     notification.textContent = text;
     notification.style.cssText =
-      'position:fixed;top:100px;right:20px;z-index:2000;' +
       'background:' + (isError ? 'rgba(200,100,100,0.9)' : 'rgba(100,200,100,0.9)') + ';' +
       'color:white;padding:1rem 1.5rem;border-radius:8px;' +
       'box-shadow:0 4px 12px rgba(0,0,0,0.3);font-size:0.95rem;font-weight:600;' +
@@ -181,7 +189,7 @@
       document.head.appendChild(s);
     }
 
-    document.body.appendChild(notification);
+    container.appendChild(notification);
     setTimeout(()=>{
       notification.style.animation = 'slideIn 0.3s ease reverse';
       setTimeout(()=> notification.remove(), 300);

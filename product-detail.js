@@ -207,7 +207,7 @@ function renderVariantsSection(product) {
   const sortedOptions = sortVariantsBySize(sizeOptions);
 
   const optionsHTML = sortedOptions.map(opt =>
-    `<option value="${opt.id}" data-price="${opt.price}">${opt.size} - $${parseFloat(opt.price).toFixed(2)}</option>`
+    `<option value="${opt.id}" data-price="${opt.price}">${opt.size}</option>`
   ).join('');
 
   return `

@@ -21,8 +21,8 @@ RUN go build -o /build/server ./cmd/server
 # ===== Runtime stage =====
 FROM debian:bookworm-slim
 
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y ca-certificates libc6 && rm -rf /var/lib/apt/lists/*
+# Install runtime dependencies (including sqlite3 for CGO)
+RUN apt-get update && apt-get install -y ca-certificates libc6 libsqlite3-0 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

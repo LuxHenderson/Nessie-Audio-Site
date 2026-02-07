@@ -118,6 +118,12 @@ func seedProductsIfEmpty(db *sql.DB) error {
 }
 
 func main() {
+	// Ensure logging goes to stdout for Railway
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.LstdFlags)
+	
+	log.Println("🚀 Starting Nessie Audio Backend...")
+	
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -125,6 +131,7 @@ func main() {
 	}
 
 	log.Printf("Starting Nessie Audio eCommerce Backend (env: %s)", cfg.Env)
+	log.Printf("Database path: %s", cfg.DatabasePath)
 
 	// Initialize database
 	db, err := database.InitDB(cfg.DatabasePath)
@@ -279,8 +286,9 @@ func main() {
 	})
 
 	// Create HTTP server
+	addr := "0.0.0.0:" + cfg.Port
 	server := &http.Server{
-		Addr:         ":" + cfg.Port,
+		Addr:         addr,
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -289,7 +297,7 @@ func main() {
 
 	// Start server in goroutine
 	go func() {
-		log.Printf("Server listening on port %s", cfg.Port)
+		log.Printf("Server listening on %s", addr)
 		log.Printf("API endpoints:")
 		log.Printf("  - GET  /health")
 		log.Printf("  - GET  /api/v1/products")

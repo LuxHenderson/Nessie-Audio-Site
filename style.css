@@ -220,7 +220,7 @@ select, input[type="checkbox"], input[type="radio"] {
 
 /* Announcement banner (homepage only, injected by JS) */
 .site-banner {
-  background: linear-gradient(90deg, rgba(45, 39, 93, 0.85), rgba(30, 25, 70, 0.9));
+  background: var(--accent);
   border-bottom: 1px solid rgba(192, 192, 192, 0.2);
   color: var(--text);
   text-align: center;

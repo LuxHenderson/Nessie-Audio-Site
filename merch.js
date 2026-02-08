@@ -40,7 +40,7 @@ function createProductHTML(product) {
           <img src="${resolveAssetUrl(product.image_url || product.imageUrl)}"
                alt="${altText}"
                class="merch-image"
-               loading="lazy">
+               loading="eager">
         </div>
         <div class="merch-details">
           <h3 class="merch-title">${product.name}</h3>

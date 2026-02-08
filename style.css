@@ -232,7 +232,8 @@ select, input[type="checkbox"], input[type="radio"] {
   z-index: 1099;
 }
 :root[data-theme="dark"] .site-banner {
-  background: #efefef25;
+  background: rgba(16,16,18,0.6);
+  border-bottom: 1px solid rgba(192, 192, 192, 0.2);
 }
 
 .header-inner{

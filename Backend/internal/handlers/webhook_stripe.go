@@ -124,42 +124,23 @@ func (h *Handler) handlePaymentFailed(event stripeLib.Event) {
 	amount := float64(paymentIntent.Amount) / 100.0
 	subject := fmt.Sprintf("⚠️ Payment Failed: $%.2f", amount)
 
-	body := fmt.Sprintf(`PAYMENT FAILURE ALERT
-========================
-
-A payment attempt has failed on the Nessie Audio store.
-
-Payment Details:
-  Payment Intent ID: %s
-  Amount: $%.2f %s
-  Status: %s
-
-Error:
-  %s
-
-Customer Information:
-  Email: %s
-  Name: %s
-
-Timestamp: %s
-
----
-This is an automated alert from Nessie Audio eCommerce Backend.
-`,
-		paymentIntent.ID,
-		amount,
-		paymentIntent.Currency,
-		paymentIntent.Status,
-		errorMessage,
-		customerEmail,
-		customerName,
-		time.Now().Format("2006-01-02 15:04:05 MST"),
+	contentHTML := fmt.Sprintf(`<p style="font-size:16px;">A payment attempt has failed on the Nessie Audio store.</p>%s%s%s`,
+		email.InfoBox("Payment Details",
+			email.DetailRow("Payment Intent:", paymentIntent.ID)+
+				email.DetailRow("Amount:", fmt.Sprintf("$%.2f %s", amount, paymentIntent.Currency))+
+				email.DetailRow("Status:", string(paymentIntent.Status))+
+				email.DetailRow("Timestamp:", time.Now().Format("2006-01-02 15:04:05 MST"))),
+		email.InfoBox("Customer Information",
+			email.DetailRow("Email:", customerEmail)+
+				email.DetailRow("Name:", customerName)),
+		email.NoteBox(fmt.Sprintf("<strong>Error:</strong> %s", errorMessage), true),
 	)
+	htmlBody := email.EmailLayout("Payment Failed", "&#9888;&#65039;", contentHTML, true)
 
 	// Send alert to admin
 	if h.config.AdminEmail != "" {
 		go func() {
-			if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+			if err := h.emailClient.SendHTMLEmail(h.config.AdminEmail, subject, htmlBody); err != nil {
 				log.Printf("Failed to send payment failure alert: %v", err)
 			} else {
 				log.Printf("Payment failure alert sent to %s", h.config.AdminEmail)
@@ -190,40 +171,24 @@ func (h *Handler) handlePaymentCanceled(event stripeLib.Event) {
 	amount := float64(paymentIntent.Amount) / 100.0
 	subject := fmt.Sprintf("🚫 Payment Canceled: $%.2f", amount)
 
-	body := fmt.Sprintf(`PAYMENT CANCELLATION ALERT
-==========================
-
-A payment has been canceled on the Nessie Audio store.
-
-Payment Details:
-  Payment Intent ID: %s
-  Amount: $%.2f %s
-  Status: %s
-  Cancellation Reason: %s
-
-Customer Information:
-  Email: %s
-  Name: %s
-
-Timestamp: %s
-
----
-This is an automated alert from Nessie Audio eCommerce Backend.
-`,
-		paymentIntent.ID,
-		amount,
-		paymentIntent.Currency,
-		paymentIntent.Status,
-		paymentIntent.CancellationReason,
-		customerEmail,
-		customerName,
-		time.Now().Format("2006-01-02 15:04:05 MST"),
+	contentHTML := fmt.Sprintf(`<p style="font-size:16px;">A payment has been canceled on the Nessie Audio store.</p>%s%s%s`,
+		email.InfoBox("Payment Details",
+			email.DetailRow("Payment Intent:", paymentIntent.ID)+
+				email.DetailRow("Amount:", fmt.Sprintf("$%.2f %s", amount, paymentIntent.Currency))+
+				email.DetailRow("Status:", string(paymentIntent.Status))+
+				email.DetailRow("Cancellation Reason:", string(paymentIntent.CancellationReason))+
+				email.DetailRow("Timestamp:", time.Now().Format("2006-01-02 15:04:05 MST"))),
+		email.InfoBox("Customer Information",
+			email.DetailRow("Email:", customerEmail)+
+				email.DetailRow("Name:", customerName)),
+		email.NoteBox("<strong>Action:</strong> No action required unless this is unexpected. The payment was not collected.", false),
 	)
+	htmlBody := email.EmailLayout("Payment Canceled", "&#128683;", contentHTML, true)
 
 	// Send alert to admin
 	if h.config.AdminEmail != "" {
 		go func() {
-			if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+			if err := h.emailClient.SendHTMLEmail(h.config.AdminEmail, subject, htmlBody); err != nil {
 				log.Printf("Failed to send payment cancellation alert: %v", err)
 			} else {
 				log.Printf("Payment cancellation alert sent to %s", h.config.AdminEmail)
@@ -256,43 +221,23 @@ func (h *Handler) handleCheckoutExpired(event stripeLib.Event) {
 	// Build alert email
 	subject := fmt.Sprintf("⏱️ Checkout Expired: $%.2f", totalAmount)
 
-	body := fmt.Sprintf(`CHECKOUT SESSION EXPIRED ALERT
-==============================
-
-A checkout session has expired without completion on the Nessie Audio store.
-
-Session Details:
-  Session ID: %s
-  Amount: $%.2f %s
-  Status: %s
-
-Customer Information:
-  Email: %s
-  Name: %s
-
-Possible Reasons:
-  - Customer abandoned cart
-  - Session timeout (24 hours)
-  - Customer did not complete payment
-
-Timestamp: %s
-
----
-This is an automated alert from Nessie Audio eCommerce Backend.
-`,
-		session.ID,
-		totalAmount,
-		session.Currency,
-		session.Status,
-		customerEmail,
-		customerName,
-		time.Now().Format("2006-01-02 15:04:05 MST"),
+	contentHTML := fmt.Sprintf(`<p style="font-size:16px;">A checkout session has expired without completion on the Nessie Audio store.</p>%s%s%s`,
+		email.InfoBox("Session Details",
+			email.DetailRow("Session ID:", session.ID)+
+				email.DetailRow("Amount:", fmt.Sprintf("$%.2f %s", totalAmount, session.Currency))+
+				email.DetailRow("Status:", string(session.Status))+
+				email.DetailRow("Timestamp:", time.Now().Format("2006-01-02 15:04:05 MST"))),
+		email.InfoBox("Customer Information",
+			email.DetailRow("Email:", customerEmail)+
+				email.DetailRow("Name:", customerName)),
+		email.NoteBox("<strong>Possible Reasons:</strong><br>&bull; Customer abandoned cart<br>&bull; Session timeout (24 hours)<br>&bull; Customer did not complete payment", false),
 	)
+	htmlBody := email.EmailLayout("Checkout Expired", "&#9200;", contentHTML, true)
 
 	// Send alert to admin
 	if h.config.AdminEmail != "" {
 		go func() {
-			if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+			if err := h.emailClient.SendHTMLEmail(h.config.AdminEmail, subject, htmlBody); err != nil {
 				log.Printf("Failed to send checkout expiration alert: %v", err)
 			} else {
 				log.Printf("Checkout expiration alert sent to %s", h.config.AdminEmail)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -129,103 +130,30 @@ func main() {
 func sendFailureAlert(emailClient *email.Client, cfg *config.Config, order *models.Order, attemptNumber int, errorMsg string) error {
 	subject := "🚨 Printful Order Submission Failed - Manual Intervention Required"
 
-	body := `
-URGENT: Printful Order Submission Failure
-
-An order has failed to submit to Printful after 24 hours of retries and requires manual intervention.
-
-Order Details:
-- Order ID: ` + order.ID + `
-- Customer Email: ` + order.CustomerEmail + `
-- Total Amount: $` + formatMoney(order.TotalAmount) + `
-- Created: ` + order.CreatedAt.Format(time.RFC1123) + `
-- Retry Attempts: ` + formatInt(attemptNumber) + `
-- Stripe Session: ` + order.StripeSessionID + `
-
-Shipping Information:
-- Name: ` + order.ShippingName + `
-- Address: ` + order.ShippingAddress1 + `
-` + formatAddress2(order.ShippingAddress2) + `
-- City: ` + order.ShippingCity + `
-- State: ` + order.ShippingState + `
-- Zip: ` + order.ShippingZip + `
-- Country: ` + order.ShippingCountry + `
-
-Last Error:
-` + errorMsg + `
-
-Action Required:
-1. Check Printful dashboard for any service issues
-2. Verify API key permissions
-3. Manually submit order to Printful if necessary
-4. Contact customer if further delays expected
-
-This is an automated alert from Nessie Audio Backend.
-`
-
-	return emailClient.SendRawEmail(cfg.AdminEmail, subject, body)
-}
-
-// Helper functions for email formatting
-func formatMoney(amount float64) string {
-	return formatFloat(amount, 2)
-}
-
-func formatFloat(f float64, decimals int) string {
-	switch decimals {
-	case 2:
-		return formatTwoDecimals(f)
-	default:
-		return formatTwoDecimals(f)
-	}
-}
-
-func formatTwoDecimals(f float64) string {
-	// Format float to 2 decimal places
-	whole := int(f)
-	fraction := int((f - float64(whole)) * 100)
-	return intToString(whole) + "." + padZero(fraction, 2)
-}
-
-func formatInt(i int) string {
-	return intToString(i)
-}
-
-func intToString(i int) string {
-	if i == 0 {
-		return "0"
+	shippingAddr := order.ShippingAddress1
+	if order.ShippingAddress2 != "" {
+		shippingAddr += ", " + order.ShippingAddress2
 	}
 
-	negative := i < 0
-	if negative {
-		i = -i
-	}
+	contentHTML := fmt.Sprintf(`<p style="font-size:16px;">An order has failed to submit to Printful after 24 hours of retries and requires manual intervention.</p>%s%s%s%s`,
+		email.InfoBox("Order Details",
+			email.DetailRow("Order ID:", fmt.Sprintf("#%s", order.ID))+
+				email.DetailRow("Customer Email:", order.CustomerEmail)+
+				email.DetailRow("Total Amount:", fmt.Sprintf("$%.2f", order.TotalAmount))+
+				email.DetailRow("Created:", order.CreatedAt.Format(time.RFC1123))+
+				email.DetailRow("Retry Attempts:", fmt.Sprintf("%d", attemptNumber))+
+				email.DetailRow("Stripe Session:", order.StripeSessionID)),
+		email.InfoBox("Shipping Information",
+			email.DetailRow("Name:", order.ShippingName)+
+				email.DetailRow("Address:", shippingAddr)+
+				email.DetailRow("City:", order.ShippingCity)+
+				email.DetailRow("State:", order.ShippingState)+
+				email.DetailRow("Zip:", order.ShippingZip)+
+				email.DetailRow("Country:", order.ShippingCountry)),
+		email.NoteBox(fmt.Sprintf("<strong>Last Error:</strong><br>%s", errorMsg), true),
+		email.NoteBox("<strong>Action Required:</strong><br>&bull; Check Printful dashboard for service issues<br>&bull; Verify API key permissions<br>&bull; Manually submit order if necessary<br>&bull; Contact customer if further delays expected", true),
+	)
+	htmlBody := email.EmailLayout("Printful Submission Failed", "&#128680;", contentHTML, true)
 
-	var result string
-	for i > 0 {
-		digit := i % 10
-		result = string(rune('0'+digit)) + result
-		i /= 10
-	}
-
-	if negative {
-		result = "-" + result
-	}
-
-	return result
-}
-
-func padZero(i int, width int) string {
-	s := intToString(i)
-	for len(s) < width {
-		s = "0" + s
-	}
-	return s
-}
-
-func formatAddress2(addr string) string {
-	if addr == "" {
-		return ""
-	}
-	return "- Address 2: " + addr + "\n"
+	return emailClient.SendHTMLEmail(cfg.AdminEmail, subject, htmlBody)
 }

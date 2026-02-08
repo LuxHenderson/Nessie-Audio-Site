@@ -383,8 +383,14 @@ func (c *Client) generateOrderConfirmationHTML(data OrderConfirmationData) (stri
 }
 
 // SendShippingNotification sends a shipping/tracking update email
-func (c *Client) SendShippingNotification(customerEmail, orderID, trackingNumber, trackingURL string) error {
+func (c *Client) SendShippingNotification(customerEmail, orderID, trackingNumber, trackingURL, carrier string) error {
 	subject := fmt.Sprintf("Your Nessie Audio Order Has Shipped! #%s", orderID)
+
+	// Build carrier display string
+	carrierDisplay := carrier
+	if carrierDisplay == "" {
+		carrierDisplay = "Standard Shipping"
+	}
 
 	htmlBody := fmt.Sprintf(`
 <!DOCTYPE html>
@@ -394,17 +400,104 @@ func (c *Client) SendShippingNotification(customerEmail, orderID, trackingNumber
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shipping Update</title>
     <style>
-        body { font-family: 'Inter', Arial, sans-serif; background-color: #0a0a0a; color: #e0e0e0; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
-        .header { background: linear-gradient(135deg, #1a1a1a 0%%, #2a2a2a 100%%); padding: 40px 20px; text-align: center; border-bottom: 2px solid #00ff88; }
-        .header h1 { margin: 0; font-family: 'Oswald', sans-serif; font-size: 32px; color: #00ff88; text-transform: uppercase; letter-spacing: 2px; }
-        .ship-icon { font-size: 48px; margin-bottom: 10px; }
-        .content { padding: 40px 20px; }
-        .tracking-box { background-color: #252525; border: 1px solid #333; border-radius: 6px; padding: 20px; margin: 20px 0; text-align: center; }
-        .tracking-number { font-size: 24px; font-weight: bold; color: #00ff88; margin: 15px 0; letter-spacing: 2px; }
-        .cta-button { display: inline-block; background-color: #00ff88; color: #0a0a0a; padding: 14px 32px; text-decoration: none; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0; font-size: 14px; }
-        .footer { background-color: #0a0a0a; padding: 30px 20px; text-align: center; border-top: 1px solid #333; }
-        .footer p { margin: 5px 0; font-size: 14px; color: #666; }
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background-color: #020202;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #0f0f0f;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f0f0f 0%%, #1a1a1a 100%%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        }
+        .header h1 {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 32px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+        .ship-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px 20px;
+        }
+        .tracking-box {
+            background-color: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .tracking-label {
+            margin: 0;
+            color: #999;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .tracking-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+        .carrier-name {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+            margin: 10px 0 5px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #00ff88;
+            color: #0a0a0a;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .note {
+            background-color: #252525;
+            border-left: 3px solid #00ff88;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+        .footer {
+            background-color: #0a0a0a;
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -414,22 +507,30 @@ func (c *Client) SendShippingNotification(customerEmail, orderID, trackingNumber
             <h1>Your Order Has Shipped!</h1>
         </div>
         <div class="content">
-            <p style="font-size: 18px; color: #fff;">Great news! Your Nessie Audio order is on its way.</p>
+            <p style="font-size: 18px; color: #fff;">Great news! Your Nessie Audio order <strong>#%s</strong> is on its way.</p>
+
             <div class="tracking-box">
-                <p style="margin: 0; color: #999; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Tracking Number</p>
+                <p class="tracking-label">Carrier</p>
+                <p class="carrier-name">%s</p>
+                <p class="tracking-label" style="margin-top: 15px;">Tracking Number</p>
                 <div class="tracking-number">%s</div>
                 <a href="%s" class="cta-button">Track Your Package</a>
             </div>
-            <p style="color: #ccc;">Your order <strong>#%s</strong> has been shipped and is on its way to you. Click the button above to track your package in real-time.</p>
+
+            <div class="note">
+                <strong>What's Next?</strong><br>
+                Your package is on its way! Tracking information may take up to 24 hours to update after shipment. Click the button above to follow your package in real-time.
+            </div>
         </div>
         <div class="footer">
             <p><strong>Nessie Audio</strong></p>
-            <p>Questions? Reply to this email or contact us at nessieaudio@gmail.com</p>
+            <p>Thank you for supporting independent music!</p>
+            <p style="margin-top: 20px;">Questions? Reply to this email or contact us at nessieaudio@gmail.com</p>
         </div>
     </div>
 </body>
 </html>
-`, trackingNumber, trackingURL, orderID)
+`, orderID, carrierDisplay, trackingNumber, trackingURL)
 
 	to := []string{customerEmail}
 	if err := c.sendEmail(to, subject, htmlBody); err != nil {

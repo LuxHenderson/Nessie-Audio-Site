@@ -130,6 +130,14 @@ func (h *Handler) handlePrintfulShipmentCreated(payload PrintfulWebhookPayload) 
 
 	log.Printf("Order %s tracking updated: %s", orderID, payload.Order.TrackingNumber)
 
+	// Extract carrier from Printful shipment data
+	carrier := ""
+	if shipmentData, ok := payload.Data["shipment"].(map[string]interface{}); ok {
+		if c, ok := shipmentData["carrier"].(string); ok {
+			carrier = c
+		}
+	}
+
 	// Send customer email with tracking info
 	go func() {
 		var customerEmail string
@@ -140,7 +148,7 @@ func (h *Handler) handlePrintfulShipmentCreated(payload PrintfulWebhookPayload) 
 		}
 		if err := h.emailClient.SendShippingNotification(
 			customerEmail, orderID,
-			payload.Order.TrackingNumber, payload.Order.TrackingURL,
+			payload.Order.TrackingNumber, payload.Order.TrackingURL, carrier,
 		); err != nil {
 			log.Printf("Failed to send shipping notification for order %s: %v", orderID, err)
 		}
@@ -178,16 +186,75 @@ func (h *Handler) handlePrintfulOrderFailed(payload PrintfulWebhookPayload) {
 		h.db.QueryRow(`SELECT customer_email FROM orders WHERE id = ?`, orderID).Scan(&customerEmail)
 
 		subject := fmt.Sprintf("ALERT: Printful Order Failed - #%s", orderID)
-		body := fmt.Sprintf(
-			"A Printful order has failed and may require manual intervention.\n\n"+
-				"Order ID: %s\n"+
-				"Printful Order ID: %d\n"+
-				"Customer Email: %s\n\n"+
-				"Please check the Printful dashboard and contact the customer if a refund is needed.",
-			orderID, payload.Order.ID, customerEmail,
-		)
+		htmlBody := fmt.Sprintf(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Failed Alert</title>
+    <style>
+        body { font-family: 'Montserrat', Arial, sans-serif; background-color: #020202; color: #ffffff; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #0f0f0f 0%%, #1a1a1a 100%%); padding: 40px 20px; text-align: center; border-bottom: 2px solid rgba(255, 255, 255, 0.15); }
+        .header h1 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 32px; color: #ffffff; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .alert-icon { font-size: 48px; margin-bottom: 10px; }
+        .content { padding: 40px 20px; }
+        .order-info { background-color: #252525; border: 1px solid #333; border-radius: 6px; padding: 20px; margin: 20px 0; }
+        .order-info h2 { margin: 0 0 15px 0; font-size: 16px; color: #ffffff; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .order-detail { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333; }
+        .order-detail:last-child { border-bottom: none; }
+        .order-detail strong { color: #fff; }
+        .note { background-color: #252525; border-left: 3px solid #ff4444; padding: 15px; margin: 20px 0; font-size: 14px; color: #ccc; }
+        .cta-button { display: inline-block; background-color: #00ff88; color: #0a0a0a; padding: 14px 32px; text-decoration: none; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0; font-size: 14px; }
+        .footer { background-color: #0a0a0a; padding: 30px 20px; text-align: center; border-top: 1px solid #333; }
+        .footer p { margin: 5px 0; font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="alert-icon">⚠</div>
+            <h1>Order Failed</h1>
+        </div>
+        <div class="content">
+            <p style="font-size: 18px; color: #fff;">A Printful order has failed and may require manual intervention.</p>
 
-		if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+            <div class="order-info">
+                <h2>Order Details</h2>
+                <div class="order-detail">
+                    <span>Order ID:</span>
+                    <strong>#%s</strong>
+                </div>
+                <div class="order-detail">
+                    <span>Printful Order ID:</span>
+                    <strong>%d</strong>
+                </div>
+                <div class="order-detail">
+                    <span>Customer Email:</span>
+                    <strong>%s</strong>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>Action Required</strong><br>
+                Please check the Printful dashboard and contact the customer if a refund is needed.
+            </div>
+
+            <div style="text-align: center;">
+                <a href="https://www.printful.com/dashboard/orders" class="cta-button">Open Printful Dashboard</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p><strong>Nessie Audio</strong> — Admin Alert</p>
+            <p>This is an automated notification from your store.</p>
+        </div>
+    </div>
+</body>
+</html>
+`, orderID, payload.Order.ID, customerEmail)
+
+		if err := h.emailClient.SendHTMLEmail(h.config.AdminEmail, subject, htmlBody); err != nil {
 			log.Printf("Failed to send admin alert for failed order %s: %v", orderID, err)
 		}
 	}()

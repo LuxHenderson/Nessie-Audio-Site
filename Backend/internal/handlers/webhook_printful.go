@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -129,7 +130,21 @@ func (h *Handler) handlePrintfulShipmentCreated(payload PrintfulWebhookPayload) 
 
 	log.Printf("Order %s tracking updated: %s", orderID, payload.Order.TrackingNumber)
 
-	// TODO: Send customer email notification with tracking info
+	// Send customer email with tracking info
+	go func() {
+		var customerEmail string
+		err := h.db.QueryRow(`SELECT customer_email FROM orders WHERE id = ?`, orderID).Scan(&customerEmail)
+		if err != nil || customerEmail == "" {
+			log.Printf("Could not find customer email for order %s: %v", orderID, err)
+			return
+		}
+		if err := h.emailClient.SendShippingNotification(
+			customerEmail, orderID,
+			payload.Order.TrackingNumber, payload.Order.TrackingURL,
+		); err != nil {
+			log.Printf("Failed to send shipping notification for order %s: %v", orderID, err)
+		}
+	}()
 }
 
 // handlePrintfulOrderFailed processes order failures
@@ -152,7 +167,30 @@ func (h *Handler) handlePrintfulOrderFailed(payload PrintfulWebhookPayload) {
 		log.Printf("Failed to update order status: %v", err)
 	}
 
-	// TODO: Alert admin and potentially refund customer
+	// Alert admin via email
+	go func() {
+		if h.config.AdminEmail == "" {
+			log.Printf("WARNING: No admin email configured, cannot send failure alert for order %s", orderID)
+			return
+		}
+
+		var customerEmail string
+		h.db.QueryRow(`SELECT customer_email FROM orders WHERE id = ?`, orderID).Scan(&customerEmail)
+
+		subject := fmt.Sprintf("ALERT: Printful Order Failed - #%s", orderID)
+		body := fmt.Sprintf(
+			"A Printful order has failed and may require manual intervention.\n\n"+
+				"Order ID: %s\n"+
+				"Printful Order ID: %d\n"+
+				"Customer Email: %s\n\n"+
+				"Please check the Printful dashboard and contact the customer if a refund is needed.",
+			orderID, payload.Order.ID, customerEmail,
+		)
+
+		if err := h.emailClient.SendRawEmail(h.config.AdminEmail, subject, body); err != nil {
+			log.Printf("Failed to send admin alert for failed order %s: %v", orderID, err)
+		}
+	}()
 }
 
 // logPrintfulWebhookEvent saves webhook event for audit

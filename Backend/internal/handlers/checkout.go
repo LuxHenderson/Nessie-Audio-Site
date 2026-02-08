@@ -125,23 +125,33 @@ func (h *Handler) CreateCartCheckout(w http.ResponseWriter, r *http.Request) {
 	// Build line items by querying database for each cart item
 	var lineItems []stripe.CheckoutLineItem
 	for _, cartItem := range req.Items {
+		// Validate quantity
+		if cartItem.Quantity < 1 {
+			respondError(w, http.StatusBadRequest, "Quantity must be at least 1")
+			return
+		}
+		if cartItem.Quantity > 99 {
+			respondError(w, http.StatusBadRequest, "Quantity cannot exceed 99")
+			return
+		}
+
 		// Get product name
 		var productName string
 		err := h.db.QueryRow("SELECT name FROM products WHERE id = ?", cartItem.ProductID).Scan(&productName)
 		if err != nil {
-			log.Printf("Failed to get product %d: %v", cartItem.ProductID, err)
+			log.Printf("Failed to get product %s: %v", cartItem.ProductID, err)
 			respondError(w, http.StatusBadRequest, "Invalid product")
 			return
 		}
 
-		// Get variant name and price
+		// Get variant name and price (only available variants)
 		var variantName string
 		var price float64
-		err = h.db.QueryRow("SELECT name, price FROM variants WHERE id = ? AND product_id = ?", 
+		err = h.db.QueryRow("SELECT name, price FROM variants WHERE id = ? AND product_id = ? AND available = 1",
 			cartItem.VariantID, cartItem.ProductID).Scan(&variantName, &price)
 		if err != nil {
-			log.Printf("Failed to get variant %d for product %d: %v", cartItem.VariantID, cartItem.ProductID, err)
-			respondError(w, http.StatusBadRequest, "Invalid variant")
+			log.Printf("Failed to get variant %s for product %s: %v", cartItem.VariantID, cartItem.ProductID, err)
+			respondError(w, http.StatusBadRequest, "Invalid or unavailable variant")
 			return
 		}
 
@@ -150,6 +160,8 @@ func (h *Handler) CreateCartCheckout(w http.ResponseWriter, r *http.Request) {
 			VariantName: variantName,
 			Quantity:    int64(cartItem.Quantity),
 			UnitPrice:   int64(price * 100), // Convert to cents
+			ProductID:   cartItem.ProductID,
+			VariantID:   cartItem.VariantID,
 		})
 	}
 

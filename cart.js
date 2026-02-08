@@ -134,7 +134,7 @@ class ShoppingCart {
     `;
     notification.innerHTML = `
       <p>✓ ${productName} added to cart</p>
-      <a href="cart.html">View Cart</a>
+      <a href="/cart">View Cart</a>
     `;
 
     document.body.appendChild(notification);

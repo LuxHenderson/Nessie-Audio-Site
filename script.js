@@ -228,13 +228,13 @@
   if(search){
     // Static content map enables searching pages before they're loaded
     const siteContent = [
-      { page: 'Nævermore.html', section: 'Home', keywords: 'home landing main page nessie audio' },
-      { page: 'Nævermore.html', section: 'Welcome to Nessie Audio', keywords: 'welcome about professional audio production services music recording mixing mastering' },
-      { page: 'Nævermore.html', section: 'News', keywords: 'news updates announcements latest' },
-      { page: 'Nævermore.html', section: 'Follow Us', keywords: 'follow social media instagram facebook youtube tiktok' },
-      { page: 'music.html', section: 'Portfolio', keywords: 'portfolio music audio songs tracks production work catalogue bluegrass classical cinematic contemporary country edm indie metal punk rap rock' },
-      { page: 'merch.html', section: 'Merch', keywords: 'merch merchandise store shop buy products' },
-      { page: 'nessie-digital.html', section: 'Nessie Digital', keywords: 'nessie digital services' }
+      { page: '/home', section: 'Home', keywords: 'home landing main page nessie audio' },
+      { page: '/home', section: 'Welcome to Nessie Audio', keywords: 'welcome about professional audio production services music recording mixing mastering' },
+      { page: '/home', section: 'News', keywords: 'news updates announcements latest' },
+      { page: '/home', section: 'Follow Us', keywords: 'follow social media instagram facebook youtube tiktok' },
+      { page: '/portfolio', section: 'Portfolio', keywords: 'portfolio music audio songs tracks production work catalogue bluegrass classical cinematic contemporary country edm indie metal punk rap rock' },
+      { page: '/merch', section: 'Merch', keywords: 'merch merchandise store shop buy products' },
+      { page: '/nessie-digital', section: 'Nessie Digital', keywords: 'nessie digital services' }
     ];
 
     let dropdown = document.querySelector('.search-dropdown');

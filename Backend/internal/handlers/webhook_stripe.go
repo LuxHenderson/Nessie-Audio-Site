@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -53,9 +54,17 @@ func (h *Handler) HandleStripeWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log webhook event
-	if err := h.logStripeWebhookEvent(event); err != nil {
+	// Log webhook event and check for duplicates (idempotency).
+	// stripe_webhook_events.event_id has a UNIQUE constraint — if the INSERT
+	// fails, this event was already processed and we should skip it.
+	alreadyProcessed, err := h.logStripeWebhookEvent(event)
+	if err != nil {
 		log.Printf("Failed to log webhook event: %v", err)
+	}
+	if alreadyProcessed {
+		log.Printf("Duplicate webhook event %s (type: %s), skipping", event.ID, event.Type)
+		respondJSON(w, http.StatusOK, map[string]string{"status": "already_processed"})
+		return
 	}
 
 	// Process based on event type
@@ -552,8 +561,52 @@ func (h *Handler) createOrderFromSession(session *stripeLib.CheckoutSession) (*m
 		return nil, err
 	}
 
-	// Create order items from line items
-	if session.LineItems != nil && session.LineItems.Data != nil {
+	// Parse cart item metadata (product/variant IDs stored during checkout)
+	var cartItems []stripe.CartItemMeta
+	if cartJSON, ok := session.Metadata["cart_items"]; ok && cartJSON != "" {
+		if err := json.Unmarshal([]byte(cartJSON), &cartItems); err != nil {
+			log.Printf("WARNING: Failed to parse cart_items metadata: %v", err)
+		}
+	}
+
+	// Create order items — use cart metadata for proper product/variant IDs
+	if len(cartItems) > 0 {
+		// We have cart metadata — use it to insert items with correct IDs
+		for _, ci := range cartItems {
+			// Look up product name and variant name from the database
+			var productName, variantName string
+			var price float64
+			err = h.db.QueryRow("SELECT name FROM products WHERE id = ?", ci.ProductID).Scan(&productName)
+			if err != nil {
+				log.Printf("WARNING: Could not find product %s: %v", ci.ProductID, err)
+				productName = "Unknown Product"
+			}
+			err = h.db.QueryRow("SELECT name, price FROM variants WHERE id = ?", ci.VariantID).Scan(&variantName, &price)
+			if err != nil {
+				log.Printf("WARNING: Could not find variant %s: %v", ci.VariantID, err)
+				variantName = ""
+			}
+
+			itemID := uuid.New().String()
+			totalPrice := price * float64(ci.Quantity)
+
+			_, err = h.db.Exec(`
+				INSERT INTO order_items (
+					id, order_id, product_id, variant_id,
+					product_name, variant_name,
+					quantity, unit_price, total_price, created_at
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`, itemID, orderID, ci.ProductID, ci.VariantID,
+				productName, variantName,
+				ci.Quantity, price, totalPrice, time.Now())
+
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else if session.LineItems != nil && session.LineItems.Data != nil {
+		// Fallback: no cart metadata (e.g. legacy sessions) — use Stripe line items
+		log.Printf("WARNING: No cart_items metadata for session %s, using Stripe line items (variant IDs will be missing)", session.ID)
 		for _, lineItem := range session.LineItems.Data {
 			if lineItem.Price == nil {
 				log.Printf("WARNING: Line item has nil Price, skipping")
@@ -586,14 +639,24 @@ func (h *Handler) createOrderFromSession(session *stripeLib.CheckoutSession) (*m
 	return h.orderService.GetOrder(orderID)
 }
 
-// logStripeWebhookEvent saves webhook event for audit
-func (h *Handler) logStripeWebhookEvent(event stripeLib.Event) error {
+// logStripeWebhookEvent saves webhook event for audit and returns whether
+// the event was already processed (duplicate). The event_id column has a
+// UNIQUE constraint, so a duplicate INSERT will fail.
+func (h *Handler) logStripeWebhookEvent(event stripeLib.Event) (alreadyProcessed bool, err error) {
 	payload, _ := json.Marshal(event)
 
-	_, err := h.db.Exec(`
+	_, err = h.db.Exec(`
 		INSERT INTO stripe_webhook_events (id, event_type, event_id, payload, processed, created_at)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`, uuid.New().String(), event.Type, event.ID, string(payload), true, time.Now())
 
-	return err
+	if err != nil {
+		// UNIQUE constraint violation means this event was already processed
+		if strings.Contains(err.Error(), "UNIQUE") || strings.Contains(err.Error(), "unique") {
+			return true, nil
+		}
+		return false, err
+	}
+
+	return false, nil
 }

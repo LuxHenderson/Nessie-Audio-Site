@@ -1,6 +1,7 @@
 package stripe
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,14 @@ import (
 	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/client"
 )
+
+// CartItemMeta is the compact representation stored in Stripe session metadata
+// so we can recover product/variant IDs when the webhook fires.
+type CartItemMeta struct {
+	ProductID string `json:"p"`
+	VariantID string `json:"v"`
+	Quantity  int64  `json:"q"`
+}
 
 // Client wraps Stripe operations
 type Client struct {
@@ -71,6 +80,8 @@ type CheckoutLineItem struct {
 	VariantName string
 	Quantity    int64
 	UnitPrice   int64 // In cents
+	ProductID   string // Database product UUID (for cart checkouts)
+	VariantID   string // Database variant UUID (for cart checkouts)
 }
 
 // ShippingAddress holds customer shipping details
@@ -105,6 +116,30 @@ func (c *Client) CreateCheckoutSession(req *CheckoutSessionRequest) (string, err
 			})
 		}
 
+		// Build metadata — always include order_id
+		metadata := map[string]string{
+			"order_id": req.OrderID,
+		}
+
+		// For cart checkouts, store product/variant IDs so the webhook
+		// can create order_items with the correct foreign keys.
+		var cartMetas []CartItemMeta
+		for _, item := range req.LineItems {
+			if item.ProductID != "" && item.VariantID != "" {
+				cartMetas = append(cartMetas, CartItemMeta{
+					ProductID: item.ProductID,
+					VariantID: item.VariantID,
+					Quantity:  item.Quantity,
+				})
+			}
+		}
+		if len(cartMetas) > 0 {
+			cartJSON, err := json.Marshal(cartMetas)
+			if err == nil {
+				metadata["cart_items"] = string(cartJSON)
+			}
+		}
+
 		// Create Stripe checkout session
 		params := &stripe_lib.CheckoutSessionParams{
 			Mode:       stripe_lib.String(string(stripe_lib.CheckoutSessionModePayment)),
@@ -114,15 +149,9 @@ func (c *Client) CreateCheckoutSession(req *CheckoutSessionRequest) (string, err
 			PaymentMethodTypes: stripe_lib.StringSlice([]string{
 				"card",
 			}),
-			Metadata: map[string]string{
-				"order_id": req.OrderID, // Link back to your order
-			},
+			Metadata: metadata,
 			ShippingAddressCollection: &stripe_lib.CheckoutSessionShippingAddressCollectionParams{
-				AllowedCountries: []*string{
-					stripe_lib.String("US"),
-					stripe_lib.String("CA"),
-					// TODO: Add more countries as needed
-				},
+				AllowedCountries: stripe_lib.StringSlice(worldwideCountries),
 			},
 		}
 
@@ -189,6 +218,31 @@ func ExtractShippingFromSession(sess *stripe_lib.CheckoutSession) *ShippingAddre
 		Zip:      addr.PostalCode,
 		Country:  addr.Country,
 	}
+}
+
+// worldwideCountries lists all ISO 3166-1 alpha-2 country codes supported
+// by Stripe shipping address collection. Covers every country Printful ships to.
+var worldwideCountries = []string{
+	"AC", "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AR", "AT", "AU",
+	"AW", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL",
+	"BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BW", "BY", "BZ", "CA", "CD",
+	"CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", "CR", "CV", "CW",
+	"CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC", "EE", "EG", "ER",
+	"ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB", "GD", "GE",
+	"GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GT", "GU",
+	"GW", "GY", "HK", "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN",
+	"IO", "IQ", "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI",
+	"KM", "KN", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR",
+	"LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MF", "MG", "MH",
+	"MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV",
+	"MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO",
+	"NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL",
+	"PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU",
+	"RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL",
+	"SM", "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SZ", "TC", "TD", "TF",
+	"TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW",
+	"TZ", "UA", "UG", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN",
+	"VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW",
 }
 
 // UpdateOrderFromSession updates an order with Stripe session data

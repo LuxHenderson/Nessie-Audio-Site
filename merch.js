@@ -33,7 +33,7 @@ function createProductHTML(product) {
 
   return `
     <article class="merch-item">
-      <a href="product-detail.html?id=${product.id}"
+      <a href="/product-detail?id=${product.id}"
          class="merch-item-link"
          aria-label="View details for ${product.name}, ${priceDisplay}">
         <div class="merch-image-container">

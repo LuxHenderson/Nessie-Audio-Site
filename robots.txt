@@ -6,17 +6,13 @@ User-agent: *
 Allow: /
 
 # Disallow crawling of cart-related pages (not useful for search results)
-Disallow: /cart.html
-Disallow: /cart-success.html
-Disallow: /cart-cancel.html
+Disallow: /cart
+Disallow: /cart-success
+Disallow: /cart-cancel
 
 # Disallow crawling of any admin or backend paths (if you add them in the future)
 Disallow: /admin/
 Disallow: /api/
 
 # Sitemap location
-# Update this URL when you deploy to production
-Sitemap: http://localhost:8080/sitemap.xml
-
-# For production, use:
-# Sitemap: https://nessieaudio.com/sitemap.xml
+Sitemap: https://nessieaudio.com/sitemap.xml

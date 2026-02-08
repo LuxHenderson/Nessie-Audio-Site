@@ -43,15 +43,15 @@ func (h *Handler) GetSitemap(w http.ResponseWriter, r *http.Request) {
 		changefreq string
 		priority   float64
 	}{
-		{"/Nævermore.html", "monthly", 1.0},      // Homepage - highest priority
-		{"/music.html", "weekly", 0.9},           // Music page - high priority
-		{"/merch.html", "daily", 0.9},            // Merch/shop - high priority, changes often
-		{"/tour.html", "weekly", 0.8},            // Tour dates - medium-high priority
-		{"/about.html", "monthly", 0.7},          // About page
-		{"/gallery.html", "monthly", 0.7},        // Gallery
-		{"/nessie-digital.html", "monthly", 0.7}, // Nessie Digital
-		{"/contact.html", "monthly", 0.6},        // Contact page
-		{"/cart.html", "yearly", 0.3},            // Cart - low priority, functional page
+		{"/home", "monthly", 1.0},          // Homepage - highest priority
+		{"/portfolio", "weekly", 0.9},      // Portfolio - high priority
+		{"/merch", "daily", 0.9},           // Merch/shop - high priority, changes often
+		{"/tour", "weekly", 0.8},           // Tour dates - medium-high priority
+		{"/about", "monthly", 0.7},         // About page
+		{"/gallery", "monthly", 0.7},       // Gallery
+		{"/nessie-digital", "monthly", 0.7}, // Nessie Digital
+		{"/contact", "monthly", 0.6},       // Contact page
+		{"/cart", "yearly", 0.3},           // Cart - low priority, functional page
 	}
 
 	for _, page := range staticPages {
@@ -71,7 +71,7 @@ func (h *Handler) GetSitemap(w http.ResponseWriter, r *http.Request) {
 	} else {
 		for _, productID := range products {
 			sitemap.URLs = append(sitemap.URLs, URL{
-				Loc:        fmt.Sprintf("%s/product-detail.html?id=%s", baseURL, productID),
+				Loc:        fmt.Sprintf("%s/product-detail?id=%s", baseURL, productID),
 				LastMod:    now,
 				ChangeFreq: "weekly",
 				Priority:   0.8, // Product pages are important for e-commerce

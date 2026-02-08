@@ -138,15 +138,15 @@ func getStripeSuccessURL(cfg *Config) string {
 	// Auto-detect based on environment
 	if cfg.Env == "production" {
 		if cfg.ProductionDomain != "" {
-			return fmt.Sprintf("https://%s/cart-success.html", cfg.ProductionDomain)
+			return fmt.Sprintf("https://%s/cart-success", cfg.ProductionDomain)
 		}
 		// Fallback: Will need to be configured
 		log.Println("WARNING: Production mode but PRODUCTION_DOMAIN not set. Set STRIPE_SUCCESS_URL or PRODUCTION_DOMAIN.")
-		return "https://yoursite.com/cart-success.html"
+		return "https://yoursite.com/cart-success"
 	}
 
 	// Development mode
-	return "http://localhost:5500/cart-success.html"
+	return "http://localhost:5500/cart-success"
 }
 
 // getStripeCancelURL returns the appropriate cancel URL based on environment
@@ -159,15 +159,15 @@ func getStripeCancelURL(cfg *Config) string {
 	// Auto-detect based on environment
 	if cfg.Env == "production" {
 		if cfg.ProductionDomain != "" {
-			return fmt.Sprintf("https://%s/cart-cancel.html", cfg.ProductionDomain)
+			return fmt.Sprintf("https://%s/cart-cancel", cfg.ProductionDomain)
 		}
 		// Fallback: Will need to be configured
 		log.Println("WARNING: Production mode but PRODUCTION_DOMAIN not set. Set STRIPE_CANCEL_URL or PRODUCTION_DOMAIN.")
-		return "https://yoursite.com/cart-cancel.html"
+		return "https://yoursite.com/cart-cancel"
 	}
 
 	// Development mode
-	return "http://localhost:5500/cart-cancel.html"
+	return "http://localhost:5500/cart-cancel"
 }
 
 // getAllowedOrigins returns the appropriate CORS origins based on environment

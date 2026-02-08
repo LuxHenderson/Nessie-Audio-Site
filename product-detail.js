@@ -328,7 +328,7 @@ function handleBuyNow(product) {
       quantity: quantity
     });
 
-    window.location.href = 'cart.html';
+    window.location.href = '/cart';
   } else {
     console.error('Cart not initialized');
     showNotification('Cart not available', 'error');
@@ -402,7 +402,7 @@ function showProductNotFound() {
       <div class="product-not-found">
         <h2>Product Not Found</h2>
         <p>Sorry, we couldn't find the product you're looking for.</p>
-        <a href="merch.html" class="btn">Back to Merch</a>
+        <a href="/merch" class="btn">Back to Merch</a>
       </div>
     `;
   }
@@ -445,7 +445,7 @@ async function initProductDetailPage() {
 }
 
 function updateMetaTags(product) {
-  const productUrl = `https://nessieaudio.com/product-detail.html?id=${product.id}`;
+  const productUrl = `https://nessieaudio.com/product-detail?id=${product.id}`;
   const productImage = product.image_url || product.imageUrl || 'https://nessieaudio.com/Nessie Audio 2026.jpg';
   const productDescription = product.description
     ? product.description.substring(0, 150).replace(/\n/g, ' ').trim() + '...'

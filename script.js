@@ -7,6 +7,17 @@
 
   const $ = (sel, all=false) => all ? Array.from(document.querySelectorAll(sel)) : document.querySelector(sel);
 
+  // Homepage announcement banner (only on home page)
+  if(document.body.classList.contains('page-home')){
+    const header = document.querySelector('.site-header');
+    if(header){
+      const banner = document.createElement('div');
+      banner.className = 'site-banner';
+      banner.textContent = 'Welcome to Nessie Audio! All bookings are currently closed. Please feel free to have a look around.';
+      header.insertAdjacentElement('afterend', banner);
+    }
+  }
+
   // Smooth scroll for anchor links
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a');

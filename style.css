@@ -1766,15 +1766,20 @@ section{padding:3rem 0}
   position: relative;
 }
 
+.cart-item-image {
+  overflow: hidden;
+}
+
 .cart-item-image img {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   object-fit: cover;
   border-radius: var(--radius);
 }
 
 .cart-item-details {
-  flex: 1;
+  min-width: 0;
 }
 
 .cart-item-name {

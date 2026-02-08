@@ -231,6 +231,9 @@ select, input[type="checkbox"], input[type="radio"] {
   position: relative;
   z-index: 1099;
 }
+:root[data-theme="dark"] .site-banner {
+  background: #efefef25;
+}
 
 .header-inner{
   display:flex;

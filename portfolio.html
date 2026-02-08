@@ -117,18 +117,36 @@
               </div>
             </div>
             
-            <!-- Waveform Visualization -->
-            <div id="waveform" style="width: 100%; height: 60px; margin: 2rem 0 1.5rem 0; display: none; opacity: 0; transition: opacity 0.5s ease;">
-              <svg id="waveform-svg" width="100%" height="60" style="display: block;">
-                <!-- Waveform bars will be generated here -->
-              </svg>
+            <!-- Reactive Waveform Visualizer -->
+            <div id="waveform" class="waveform-container">
+              <canvas id="waveform-canvas"></canvas>
             </div>
-            
-            <!-- Single HTML5 Audio Player -->
-            <audio id="main-player" controls controlsList="nodownload noplaybackrate" preload="none" style="width: 100%;">
+
+            <!-- Hidden audio element (custom controls below) -->
+            <audio id="main-player" preload="none">
               <source id="audio-source" src="" type="audio/mpeg">
-              Your browser does not support the audio element.
             </audio>
+
+            <!-- Custom Audio Controls -->
+            <div id="custom-controls" class="custom-controls">
+              <button id="play-btn" class="play-btn" aria-label="Play" disabled>
+                <svg id="play-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+                <svg id="pause-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:none;"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+              </button>
+              <span id="time-current" class="time-display">0:00</span>
+              <div id="progress-bar" class="progress-bar" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                <div id="progress-filled" class="progress-filled"></div>
+                <div id="progress-handle" class="progress-handle"></div>
+              </div>
+              <span id="time-duration" class="time-display">0:00</span>
+              <div class="volume-group">
+                <button id="volume-btn" class="volume-btn" aria-label="Mute">
+                  <svg id="vol-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path d="M19 12c0 2.97-1.65 5.54-4 6.71v-2.07c1.48-1.04 2.5-2.76 2.5-4.64s-1.02-3.6-2.5-4.64V5.29c2.35 1.17 4 3.74 4 6.71z"/></svg>
+                  <svg id="vol-mute-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3z"/><line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2"/><line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2"/></svg>
+                </button>
+                <input id="volume-slider" type="range" min="0" max="100" value="50" class="volume-slider" aria-label="Volume">
+              </div>
+            </div>
           </div>
 
           <!-- Track Catalogue by Genre -->
@@ -579,7 +597,7 @@
   
   <!-- Audio Portfolio Player Script -->
   <style>
-    /* Catalogue item styling - player-centric typography focus */
+    /* Catalogue item styling */
     .catalogue-item {
       padding: 0.6rem 1rem;
       margin: 0.25rem 0;
@@ -589,147 +607,517 @@
       border-left: 3px solid transparent;
       list-style: none;
     }
-    
     .catalogue-item:hover {
       background: rgba(192,192,192,0.05);
       border-left-color: rgba(192,192,192,0.3);
     }
-    
     .catalogue-item.active {
       background: rgba(192,192,192,0.1);
       border-left-color: #c0c0c0;
     }
-    
     .track-item {
       font-size: 0.95rem;
       color: #ffffff;
       transition: color 0.2s ease;
       font-weight: 400;
     }
-    
-    .catalogue-item.active .track-item {
-      font-weight: 500;
+    .catalogue-item.active .track-item { font-weight: 500; }
+    .genre-header:hover, .artist-header:hover { background: rgba(192,192,192,0.15); }
+
+    /* Waveform canvas */
+    .waveform-container {
+      width: 100%;
+      height: 80px;
+      margin: 2rem 0 1.5rem 0;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
-    
-    .genre-header:hover,
-    .artist-header:hover {
+    .waveform-container canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Custom audio controls */
+    .custom-controls {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0 0 0;
+    }
+    .custom-controls.visible { display: flex; }
+
+    .play-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(192,192,192,0.4);
+      background: rgba(192,192,192,0.08);
+      color: #c0c0c0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .play-btn:hover:not(:disabled) { background: rgba(192,192,192,0.18); color: #fff; border-color: rgba(192,192,192,0.6); }
+    .play-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .time-display {
+      font-size: 0.75rem;
+      color: #c0c0c0;
+      font-variant-numeric: tabular-nums;
+      min-width: 36px;
+      text-align: center;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
       background: rgba(192,192,192,0.15);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      min-width: 0;
+    }
+    .progress-filled {
+      height: 100%;
+      background: rgba(192,192,192,0.5);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+      transition: background 0.15s ease;
+    }
+    .progress-bar:hover .progress-filled { background: #c0c0c0; }
+    .progress-handle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #c0c0c0;
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      pointer-events: none;
+    }
+    .progress-bar:hover .progress-handle { opacity: 1; }
+
+    .volume-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .volume-btn {
+      background: none;
+      border: none;
+      color: #c0c0c0;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s ease;
+    }
+    .volume-btn:hover { color: #fff; }
+
+    .volume-slider {
+      width: 70px;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(192,192,192,0.15);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c0c0c0;
+      cursor: pointer;
+    }
+    .volume-slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c0c0c0;
+      cursor: pointer;
+      border: none;
+    }
+
+    @media (max-width: 600px) {
+      .volume-group { display: none; }
+      .custom-controls { gap: 8px; }
     }
   </style>
-  
+
   <script>
     (function() {
       'use strict';
-      
-      // Wait for DOM to be ready
+
       document.addEventListener('DOMContentLoaded', function() {
-        const player = document.getElementById('main-player');
-        const audioSource = document.getElementById('audio-source');
-        const trackTitle = document.getElementById('track-title');
-        const trackMeta = document.getElementById('track-meta');
-        const catalogueItems = document.querySelectorAll('.catalogue-item');
-        const genreHeaders = document.querySelectorAll('.genre-header');
-        const artistHeaders = document.querySelectorAll('.artist-header');
-        const waveformContainer = document.getElementById('waveform');
-        const waveformSvg = document.getElementById('waveform-svg');
-        
-        let currentTrack = null;
-        
-        // Set initial volume to 50%
-        player.volume = 0.5;
-        
-        // Generate waveform visualization
-        function generateWaveform() {
-          const bars = 80;
-          const barWidth = 100 / bars;
-          let svgContent = '';
-          
-          for (let i = 0; i < bars; i++) {
-            const height = Math.random() * 40 + 10;
-            const x = i * barWidth;
-            const y = (60 - height) / 2;
-            
-            svgContent += `<rect x="${x}%" y="${y}" width="${barWidth * 0.7}%" height="${height}" fill="rgba(192,192,192,0.3)" rx="1">
-              <animate attributeName="height" values="${height};${height * 1.2};${height}" dur="${0.5 + Math.random()}s" repeatCount="indefinite" />
-              <animate attributeName="y" values="${y};${y - (height * 0.1)};${y}" dur="${0.5 + Math.random()}s" repeatCount="indefinite" />
-            </rect>`;
-          }
-          
-          waveformSvg.innerHTML = svgContent;
+        var player = document.getElementById('main-player');
+        var audioSource = document.getElementById('audio-source');
+        var trackTitle = document.getElementById('track-title');
+        var trackMeta = document.getElementById('track-meta');
+        var catalogueItems = document.querySelectorAll('.catalogue-item');
+        var genreHeaders = document.querySelectorAll('.genre-header');
+        var artistHeaders = document.querySelectorAll('.artist-header');
+        var waveformContainer = document.getElementById('waveform');
+        var canvas = document.getElementById('waveform-canvas');
+        var ctx = canvas.getContext('2d');
+
+        // roundRect polyfill for older browsers
+        if (!ctx.roundRect) {
+          CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            if (r > w / 2) r = w / 2;
+            if (r > h / 2) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.arcTo(x + w, y, x + w, y + r, r);
+            this.lineTo(x + w, y + h - r);
+            this.arcTo(x + w, y + h, x + w - r, y + h, r);
+            this.lineTo(x + r, y + h);
+            this.arcTo(x, y + h, x, y + h - r, r);
+            this.lineTo(x, y + r);
+            this.arcTo(x, y, x + r, y, r);
+          };
         }
-        
-        // Toggle genre sections
+
+        // Custom controls
+        var controls = document.getElementById('custom-controls');
+        var playBtn = document.getElementById('play-btn');
+        var playIcon = document.getElementById('play-icon');
+        var pauseIcon = document.getElementById('pause-icon');
+        var timeCurrent = document.getElementById('time-current');
+        var timeDuration = document.getElementById('time-duration');
+        var progressBar = document.getElementById('progress-bar');
+        var progressFilled = document.getElementById('progress-filled');
+        var progressHandle = document.getElementById('progress-handle');
+        var volumeBtn = document.getElementById('volume-btn');
+        var volIcon = document.getElementById('vol-icon');
+        var volMuteIcon = document.getElementById('vol-mute-icon');
+        var volumeSlider = document.getElementById('volume-slider');
+
+        var currentTrack = null;
+        var audioCtx = null;
+        var analyser = null;
+        var sourceNode = null;
+        var frequencyData = null;
+        var animFrameId = null;
+        var isPlaying = false;
+        var isSeeking = false;
+
+        player.volume = 0.5;
+
+        // --- Web Audio API setup (lazy, on first user gesture) ---
+        function initAudioContext() {
+          if (audioCtx) return;
+          var AC = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AC();
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.8;
+          frequencyData = new Uint8Array(analyser.frequencyBinCount);
+          sourceNode = audioCtx.createMediaElementSource(player);
+          sourceNode.connect(analyser);
+          analyser.connect(audioCtx.destination);
+        }
+
+        // --- Canvas drawing ---
+        function resizeCanvas() {
+          var rect = canvas.getBoundingClientRect();
+          canvas.width = rect.width * (window.devicePixelRatio || 1);
+          canvas.height = rect.height * (window.devicePixelRatio || 1);
+        }
+
+        function drawWaveform() {
+          animFrameId = requestAnimationFrame(drawWaveform);
+          if (!analyser) return;
+
+          analyser.getByteFrequencyData(frequencyData);
+
+          var w = canvas.width;
+          var h = canvas.height;
+          ctx.clearRect(0, 0, w, h);
+
+          var barCount = Math.min(frequencyData.length, 80);
+          var totalGap = barCount - 1;
+          var gapWidth = 2 * (window.devicePixelRatio || 1);
+          var barWidth = (w - totalGap * gapWidth) / barCount;
+          var maxBarHeight = h * 0.9;
+
+          for (var i = 0; i < barCount; i++) {
+            var value = frequencyData[i] / 255;
+            var barHeight = Math.max(2, value * maxBarHeight);
+            var x = i * (barWidth + gapWidth);
+            var y = (h - barHeight) / 2;
+
+            // Gradient: silver at base, brighter at peaks
+            var alpha = 0.25 + value * 0.55;
+            var brightness = Math.round(180 + value * 60);
+            ctx.fillStyle = 'rgba(' + brightness + ',' + brightness + ',' + (brightness + 10) + ',' + alpha + ')';
+            ctx.beginPath();
+            ctx.roundRect(x, y, barWidth, barHeight, 1.5);
+            ctx.fill();
+          }
+        }
+
+        function startVisualization() {
+          if (animFrameId) cancelAnimationFrame(animFrameId);
+          resizeCanvas();
+          drawWaveform();
+        }
+
+        function stopVisualization() {
+          if (animFrameId) {
+            cancelAnimationFrame(animFrameId);
+            animFrameId = null;
+          }
+        }
+
+        // Draw idle state (low static bars) when paused
+        function drawIdleBars() {
+          resizeCanvas();
+          var w = canvas.width;
+          var h = canvas.height;
+          ctx.clearRect(0, 0, w, h);
+          var barCount = 80;
+          var gapWidth = 2 * (window.devicePixelRatio || 1);
+          var barWidth = (w - (barCount - 1) * gapWidth) / barCount;
+          for (var i = 0; i < barCount; i++) {
+            var barHeight = 2 + Math.random() * 6;
+            var x = i * (barWidth + gapWidth);
+            var y = (h - barHeight) / 2;
+            ctx.fillStyle = 'rgba(192,192,192,0.2)';
+            ctx.beginPath();
+            ctx.roundRect(x, y, barWidth, barHeight, 1);
+            ctx.fill();
+          }
+        }
+
+        // --- Time formatting ---
+        function formatTime(seconds) {
+          if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+          var m = Math.floor(seconds / 60);
+          var s = Math.floor(seconds % 60);
+          return m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        // --- Play/Pause ---
+        function updatePlayState() {
+          if (player.paused) {
+            playIcon.style.display = '';
+            pauseIcon.style.display = 'none';
+            playBtn.setAttribute('aria-label', 'Play');
+            isPlaying = false;
+            stopVisualization();
+            drawIdleBars();
+          } else {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = '';
+            playBtn.setAttribute('aria-label', 'Pause');
+            isPlaying = true;
+            startVisualization();
+          }
+        }
+
+        playBtn.addEventListener('click', function() {
+          if (!audioSource.src || audioSource.src === window.location.href) return;
+          initAudioContext();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          if (player.paused) {
+            player.play().catch(function(e) { console.error('Play failed:', e); });
+          } else {
+            player.pause();
+          }
+        });
+
+        player.addEventListener('play', updatePlayState);
+        player.addEventListener('pause', updatePlayState);
+
+        // --- Progress bar ---
+        player.addEventListener('timeupdate', function() {
+          if (isSeeking) return;
+          var pct = player.duration ? (player.currentTime / player.duration) * 100 : 0;
+          progressFilled.style.width = pct + '%';
+          progressHandle.style.left = pct + '%';
+          progressBar.setAttribute('aria-valuenow', Math.round(pct));
+          timeCurrent.textContent = formatTime(player.currentTime);
+        });
+
+        player.addEventListener('loadedmetadata', function() {
+          timeDuration.textContent = formatTime(player.duration);
+        });
+
+        player.addEventListener('durationchange', function() {
+          timeDuration.textContent = formatTime(player.duration);
+        });
+
+        // Seek on click/drag
+        function seekFromEvent(e) {
+          var rect = progressBar.getBoundingClientRect();
+          var x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+          var pct = Math.max(0, Math.min(1, x / rect.width));
+          if (player.duration) {
+            player.currentTime = pct * player.duration;
+          }
+          progressFilled.style.width = (pct * 100) + '%';
+          progressHandle.style.left = (pct * 100) + '%';
+        }
+
+        progressBar.addEventListener('mousedown', function(e) {
+          isSeeking = true;
+          seekFromEvent(e);
+          function onMove(ev) { seekFromEvent(ev); }
+          function onUp() {
+            isSeeking = false;
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+          }
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+
+        progressBar.addEventListener('touchstart', function(e) {
+          isSeeking = true;
+          seekFromEvent(e);
+          function onMove(ev) { ev.preventDefault(); seekFromEvent(ev); }
+          function onUp() {
+            isSeeking = false;
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onUp);
+          }
+          document.addEventListener('touchmove', onMove, { passive: false });
+          document.addEventListener('touchend', onUp);
+        }, { passive: false });
+
+        // Keyboard seek (left/right arrows)
+        progressBar.addEventListener('keydown', function(e) {
+          if (!player.duration) return;
+          if (e.key === 'ArrowRight') { player.currentTime = Math.min(player.duration, player.currentTime + 5); }
+          if (e.key === 'ArrowLeft') { player.currentTime = Math.max(0, player.currentTime - 5); }
+        });
+
+        // --- Volume ---
+        volumeSlider.addEventListener('input', function() {
+          player.volume = this.value / 100;
+          player.muted = false;
+          updateVolumeIcon();
+        });
+
+        volumeBtn.addEventListener('click', function() {
+          player.muted = !player.muted;
+          updateVolumeIcon();
+        });
+
+        function updateVolumeIcon() {
+          if (player.muted || player.volume === 0) {
+            volIcon.style.display = 'none';
+            volMuteIcon.style.display = '';
+          } else {
+            volIcon.style.display = '';
+            volMuteIcon.style.display = 'none';
+          }
+        }
+
+        // --- Track ended ---
+        player.addEventListener('ended', function() {
+          updatePlayState();
+          progressFilled.style.width = '0%';
+          progressHandle.style.left = '0%';
+          timeCurrent.textContent = '0:00';
+        });
+
+        player.addEventListener('error', function() {
+          trackMeta.textContent = 'Unable to load audio file';
+          updatePlayState();
+        });
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', function() {
+          if (waveformContainer.style.display !== 'none') {
+            if (isPlaying) { resizeCanvas(); }
+            else { drawIdleBars(); }
+          }
+        });
+
+        // --- Genre/artist toggles (unchanged) ---
         genreHeaders.forEach(function(header) {
           header.addEventListener('click', function() {
-            const content = this.nextElementSibling;
-            const isOpen = content.style.display === 'block';
-            
-            // Get current text, removing any arrows and variation selectors
-            let text = this.textContent.trim();
-            // Remove all arrow characters and variation selectors from the beginning
-            while (text.startsWith('▶') || text.startsWith('▼') || text.startsWith('\uFE0E')) {
+            var content = this.nextElementSibling;
+            var isOpen = content.style.display === 'block';
+            var text = this.textContent.trim();
+            while (text.startsWith('\u25B6') || text.startsWith('\u25BC') || text.startsWith('\uFE0E')) {
               text = text.substring(1).trim();
             }
-
             if (isOpen) {
               content.style.display = 'none';
-              this.textContent = '▶\uFE0E ' + text;
+              this.textContent = '\u25B6\uFE0E ' + text;
             } else {
               content.style.display = 'block';
-              this.textContent = '▼\uFE0E ' + text;
+              this.textContent = '\u25BC\uFE0E ' + text;
             }
           });
         });
-        
-        // Toggle artist sections
+
         artistHeaders.forEach(function(header) {
           header.addEventListener('click', function() {
-            const trackList = this.nextElementSibling;
-            const isOpen = trackList.style.display === 'block';
-            
-            // Get current text, removing any arrows and variation selectors
-            let text = this.textContent.trim();
-            // Remove all arrow characters and variation selectors from the beginning
-            while (text.startsWith('▶') || text.startsWith('▼') || text.startsWith('\uFE0E')) {
+            var trackList = this.nextElementSibling;
+            var isOpen = trackList.style.display === 'block';
+            var text = this.textContent.trim();
+            while (text.startsWith('\u25B6') || text.startsWith('\u25BC') || text.startsWith('\uFE0E')) {
               text = text.substring(1).trim();
             }
-
             if (isOpen) {
               trackList.style.display = 'none';
-              this.textContent = '▶\uFE0E ' + text;
+              this.textContent = '\u25B6\uFE0E ' + text;
             } else {
               trackList.style.display = 'block';
-              this.textContent = '▼\uFE0E ' + text;
+              this.textContent = '\u25BC\uFE0E ' + text;
             }
           });
         });
-        
-        // Handle track selection
+
+        // --- Track selection ---
         function loadTrack(item) {
-          const src = item.getAttribute('data-src');
-          const title = item.getAttribute('data-title');
-          const role = item.getAttribute('data-role');
-          
-          // Fade out current info if there is any
+          var src = item.getAttribute('data-src');
+          var title = item.getAttribute('data-title');
+          var role = item.getAttribute('data-role');
+
           if (trackTitle.textContent) {
             trackTitle.style.opacity = '0.3';
             trackMeta.style.opacity = '0.3';
           }
-          
+
+          // Init audio context on first track load (user gesture)
+          initAudioContext();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
           setTimeout(function() {
-            // Update audio source
             audioSource.src = src;
             player.load();
-            
-            // Update now playing display
+
             trackTitle.textContent = title;
             trackMeta.textContent = role;
-            
-            // Fade in new info
             trackTitle.style.opacity = '1';
             trackMeta.style.opacity = '1';
-            
-            // Auto-play once loaded
+
+            // Reset progress
+            progressFilled.style.width = '0%';
+            progressHandle.style.left = '0%';
+            timeCurrent.textContent = '0:00';
+            timeDuration.textContent = '0:00';
+            playBtn.disabled = false;
+
             player.addEventListener('canplay', function autoPlay() {
               player.play().catch(function(error) {
                 console.error('Playback failed:', error);
@@ -738,51 +1126,31 @@
               player.removeEventListener('canplay', autoPlay);
             }, { once: true });
           }, trackTitle.textContent ? 150 : 0);
-          
-          // Update visual state for catalogue items
-          if (currentTrack) {
-            currentTrack.classList.remove('active');
-          }
-          
+
+          if (currentTrack) currentTrack.classList.remove('active');
           item.classList.add('active');
           currentTrack = item;
-          
-          // Show and animate waveform
+
+          // Show controls and waveform
+          controls.classList.add('visible');
           waveformContainer.style.display = 'block';
           setTimeout(function() {
             waveformContainer.style.opacity = '1';
-            generateWaveform();
+            drawIdleBars();
           }, 100);
         }
-        
-        // Add click handlers to catalogue items
+
         catalogueItems.forEach(function(item) {
-          item.addEventListener('click', function() {
-            loadTrack(item);
-          });
-          
-          // Keyboard accessibility
+          item.addEventListener('click', function() { loadTrack(item); });
           item.setAttribute('tabindex', '0');
           item.setAttribute('role', 'button');
           item.setAttribute('aria-label', 'Play ' + item.getAttribute('data-title'));
-          
           item.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               loadTrack(item);
             }
           });
-        });
-        
-        // Handle audio end
-        player.addEventListener('ended', function() {
-          console.log('Track ended');
-        });
-        
-        // Error handling
-        player.addEventListener('error', function(e) {
-          console.error('Audio error:', e);
-          trackMeta.textContent = 'Unable to load audio file';
         });
       });
     })();

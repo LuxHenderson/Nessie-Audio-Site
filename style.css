@@ -161,7 +161,7 @@ body::before {
   background-image: url('Nessie Audio 2026.jpg');
   background-color: var(--page-backdrop, #000);
   background-size: contain;
-  background-position: 48.5% center;
+  background-position: 47% center;
   background-repeat: no-repeat;
   /* background-attachment: fixed; REMOVED - causes Chrome bug */
   will-change: auto; /* Tell browser to keep this element rendered */

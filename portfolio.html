@@ -110,7 +110,7 @@
           <!-- Audio Player Section -->
           <div class="audio-player-section" style="margin: 3rem 0 4rem 0; padding: 3rem 2rem; background: rgba(0,0,0,0.4); border-radius: 16px; border: 1px solid #2d275d;">
             <div class="now-playing" style="margin-bottom: 2rem;">
-              <div style="font-size: 0.75rem; color: #5d4f9e; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.5rem; font-weight: 400;">Now Playing</div>
+              <div id="now-playing-label" style="font-size: 0.75rem; color: #5d4f9e; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.5rem; font-weight: 400; display: none;">Now Playing</div>
               <div id="track-info" style="color: #ffffff;">
                 <h2 id="track-title" style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; line-height: 1.1; margin: 0 0 0.75rem 0; letter-spacing: -0.02em; transition: opacity 0.3s ease;"></h2>
                 <div id="track-meta" style="font-size: clamp(1rem, 2.5vw, 1.25rem); color: #c0c0c0; font-weight: 300; letter-spacing: 0.02em; transition: opacity 0.3s ease;"></div>
@@ -771,6 +771,7 @@
         var audioSource = document.getElementById('audio-source');
         var trackTitle = document.getElementById('track-title');
         var trackMeta = document.getElementById('track-meta');
+        var nowPlayingLabel = document.getElementById('now-playing-label');
         var catalogueItems = document.querySelectorAll('.catalogue-item');
         var genreHeaders = document.querySelectorAll('.genre-header');
         var artistHeaders = document.querySelectorAll('.artist-header');
@@ -1163,6 +1164,7 @@
             trackMeta.textContent = role;
             trackTitle.style.opacity = '1';
             trackMeta.style.opacity = '1';
+            nowPlayingLabel.style.display = '';
 
             // Reset progress
             progressFilled.style.width = '0%';

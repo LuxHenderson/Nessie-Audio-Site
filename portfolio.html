@@ -813,14 +813,17 @@
         var currentTrack = null;
         var audioCtx = null;
         var analyser = null;
+        var gainNode = null;
         var sourceNode = null;
         var frequencyData = null;
         var animFrameId = null;
         var isPlaying = false;
         var isSeeking = false;
+        var currentVolume = 0.5;
         var savedVolume = 0.5;
 
-        player.volume = 0.5;
+        // Keep element volume at max; GainNode handles actual volume (Safari ignores element.volume)
+        player.volume = 1.0;
 
         // --- Web Audio API setup (lazy, on first user gesture) ---
         function initAudioContext() {
@@ -831,9 +834,18 @@
           analyser.fftSize = 256;
           analyser.smoothingTimeConstant = 0.8;
           frequencyData = new Uint8Array(analyser.frequencyBinCount);
+          gainNode = audioCtx.createGain();
+          gainNode.gain.value = currentVolume;
           sourceNode = audioCtx.createMediaElementSource(player);
+          // source → analyser → gain → output (waveform stays full-strength)
           sourceNode.connect(analyser);
-          analyser.connect(audioCtx.destination);
+          analyser.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+        }
+
+        function setVolume(val) {
+          currentVolume = val;
+          if (gainNode) gainNode.gain.value = val;
         }
 
         // --- Canvas drawing ---
@@ -1041,9 +1053,9 @@
           if (e.key === 'ArrowLeft') { player.currentTime = Math.max(0, player.currentTime - 5); }
         });
 
-        // --- Volume control ---
+        // --- Volume control (uses GainNode for Safari compatibility) ---
         function updateVolumeIcon() {
-          if (player.volume === 0) {
+          if (currentVolume === 0) {
             volIconOn.style.display = 'none';
             volIconOff.style.display = '';
           } else {
@@ -1053,17 +1065,17 @@
         }
 
         volumeSlider.addEventListener('input', function() {
-          player.volume = parseFloat(this.value);
+          setVolume(parseFloat(this.value));
           updateVolumeIcon();
         });
 
         volumeBtn.addEventListener('click', function() {
-          if (player.volume > 0) {
-            savedVolume = player.volume;
-            player.volume = 0;
+          if (currentVolume > 0) {
+            savedVolume = currentVolume;
+            setVolume(0);
             volumeSlider.value = 0;
           } else {
-            player.volume = savedVolume;
+            setVolume(savedVolume);
             volumeSlider.value = savedVolume;
           }
           updateVolumeIcon();

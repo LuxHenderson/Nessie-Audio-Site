@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Nessie Audio is a full-stack website I designed and built to serve as the central business hub for a small audio production operation. The site consolidates a music portfolio, merchandise storefront, booking system, and contact pipeline into a single owned platform. It replaces a prior workflow that depended on third-party freelance marketplaces and fragmented communication channels.
+Nessie Audio is a full-stack website I designed and built to serve as the central business hub for my small audio production operation. The site consolidates a music portfolio, merchandise storefront, booking system, and contact pipeline into a single owned platform. It replaces a prior workflow that depended on third-party freelance marketplaces and fragmented communication channels.
 
 ## Problem Statement
 
@@ -14,7 +14,7 @@ The site needed to support several core functions: displaying a music portfolio,
 
 ## Design Decisions
 
-I structured the site around a persistent navigation header with a fixed atmospheric background and a Three.js particle fog effect to establish visual identity without relying on heavy imagery. Information architecture follows a flat hierarchy: portfolio, merch, gallery, tour dates, about, and contact are all one click from any page. I implemented a dark mode toggle with localStorage persistence and chose a mobile-first responsive layout using CSS Grid and Flexbox, with breakpoints at 600px and 900px. Accessibility was a priority from the start, so I used semantic HTML, ARIA landmarks, skip-to-content links, screen reader announcements for cart updates, and keyboard-navigable lightbox and menu components.
+I structured the site around a persistent navigation header with a fixed atmospheric background and a Three.js particle fog effect to establish visual identity without relying on heavy imagery. Information architecture follows a flat hierarchy: portfolio, merch, and contact are all one click from any page. I implemented a dark mode toggle with localStorage persistence and chose a mobile-first responsive layout using CSS Grid and Flexbox, with breakpoints at 600px and 900px. Accessibility was a priority from the start, so I used semantic HTML, ARIA landmarks, skip-to-content links, screen reader announcements for cart updates, and keyboard-navigable lightbox and menu components.
 
 ## Technical Stack & Implementation
 

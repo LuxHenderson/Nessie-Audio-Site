@@ -13,7 +13,7 @@
     if(header){
       const banner = document.createElement('div');
       banner.className = 'site-banner';
-      banner.textContent = 'Welcome to Nessie Audio! All bookings are currently closed. Please feel free to have a look around.';
+      banner.textContent = 'Welcome to Nessie Audio! Bookings are now open! Please feel free to have a look around.';
       header.insertAdjacentElement('afterend', banner);
     }
   }
